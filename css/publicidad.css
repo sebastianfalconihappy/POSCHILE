@@ -1,0 +1,331 @@
+.publicidad-page {
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(188, 238, 0, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(0, 96, 200, 0.25), transparent 38%),
+    #050b12;
+  color: white;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  font-family: "Outfit", sans-serif;
+  transition: opacity 0.35s ease;
+}
+
+.publicidad-bg-glow {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: flotar 6s ease-in-out infinite alternate;
+}
+
+.glow-uno {
+  background: #bdee00;
+  top: 10%;
+  left: -120px;
+}
+
+.glow-dos {
+  background: #006ee6;
+  bottom: 8%;
+  right: -100px;
+  animation-delay: 1.5s;
+}
+
+.publicidad-top {
+  height: 72px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+}
+
+.publicidad-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.publicidad-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.publicidad-brand h1 {
+  margin: 0;
+  color: #c7f000;
+  font-size: 30px;
+  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 0 20px rgba(199, 240, 0, 0.35);
+}
+
+.publicidad-brand span {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #8ea0b8;
+  font-weight: 700;
+}
+
+.publicidad-skip {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(17, 31, 51, 0.8);
+  color: #dce7f8;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.publicidad-skip:hover {
+  transform: translateY(-2px);
+  background: rgba(199, 240, 0, 0.16);
+  color: #c7f000;
+}
+
+.publicidad-main {
+  min-height: calc(100vh - 72px);
+  width: min(1180px, 92%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.45fr 0.8fr;
+  gap: 34px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.publicidad-card {
+  height: 590px;
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background: rgba(14, 25, 41, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: entradaCard 0.8s ease;
+}
+
+.publicidad-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -140%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+  transform: skewX(-18deg);
+  animation: brillo 4.2s infinite;
+  pointer-events: none;
+}
+
+.publicidad-tag {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 4;
+  background: rgba(5, 11, 18, 0.72);
+  backdrop-filter: blur(10px);
+  color: #c7f000;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  border: 1px solid rgba(199, 240, 0, 0.25);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+#pubMediaBox {
+  width: 100%;
+  height: 100%;
+}
+
+.publicidad-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: zoomSuave 5s ease-in-out;
+}
+
+.publicidad-info {
+  background: rgba(15, 29, 48, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 34px;
+  border-radius: 30px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(16px);
+  animation: entradaInfo 0.9s ease;
+}
+
+.publicidad-info h2 {
+  margin: 0 0 14px;
+  color: #ffffff;
+  font-size: 38px;
+  line-height: 1.05;
+  font-weight: 900;
+}
+
+.publicidad-info p {
+  margin: 0;
+  color: #aebbd0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.publicidad-progress {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0;
+}
+
+.publicidad-progress span {
+  width: 28px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: 0.3s ease;
+}
+
+.publicidad-progress span.activo {
+  width: 54px;
+  background: linear-gradient(90deg, #0e63bd, #c7f000);
+  box-shadow: 0 0 18px rgba(199, 240, 0, 0.45);
+}
+
+.publicidad-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-principal,
+.btn-secundario {
+  border: none;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.btn-principal {
+  background: linear-gradient(90deg, #0d62b8, #c7f000);
+  color: white;
+  box-shadow: 0 14px 35px rgba(0, 110, 230, 0.28);
+}
+
+.btn-secundario {
+  background: rgba(255, 255, 255, 0.08);
+  color: #dce7f8;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.btn-principal:hover,
+.btn-secundario:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.publicidad-tiempo {
+  margin-top: 18px !important;
+  font-size: 13px !important;
+  color: #c7f000 !important;
+  font-weight: 700;
+}
+
+@keyframes entradaCard {
+  from {
+    opacity: 0;
+    transform: translateX(-35px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes entradaInfo {
+  from {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomSuave {
+  from {
+    transform: scale(1.05);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes brillo {
+  0% {
+    left: -140%;
+  }
+
+  45% {
+    left: 140%;
+  }
+
+  100% {
+    left: 140%;
+  }
+}
+
+@keyframes flotar {
+  from {
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    transform: translateY(28px) scale(1.1);
+  }
+}
+
+@media (max-width: 900px) {
+  .publicidad-page {
+    overflow-y: auto;
+  }
+
+  .publicidad-main {
+    grid-template-columns: 1fr;
+    padding: 24px 0 40px;
+  }
+
+  .publicidad-card {
+    height: 420px;
+  }
+
+  .publicidad-info {
+    padding: 26px;
+  }
+
+  .publicidad-info h2 {
+    font-size: 30px;
+  }
+}
