@@ -958,7 +958,8 @@ const PRODUCT_IMAGE_MAP = {
   "Xiaomi Redmi 13C": "assets/ads/Xiaomi Redmi 13C.jpg",
   "Xiaomi Redmi Note 13": "assets/ads/Xiaomi Redmi Note 13.png",
   "Xiaomi Redmi Note 13 Pro": "assets/ads/Xiaomi Redmi Note 13 Pro.png",
-  "Xiaomi Redmi Note 13 Pro Plus": "assets/ads/Xiaomi Redmi Note 13 Pro Plus.jpg",
+  "Xiaomi Redmi Note 13 Pro Plus":
+    "assets/ads/Xiaomi Redmi Note 13 Pro Plus.jpg",
   "Xiaomi Redmi Note 14": "assets/ads/Xiaomi Redmi Note 14.jpg",
   "Xiaomi Poco X6 Pro": "assets/ads/Xiaomi Poco X6 Pro.jpg",
   "Xiaomi Poco F6": "assets/ads/Xiaomi Poco F6.jpg",
@@ -976,9 +977,9 @@ const PRODUCT_IMAGE_MAP = {
   "Parlante BT": "assets/ads/Parlante BT.jpg",
   "Parrilla electrica": "assets/ads/Parrilla electrica.jpg",
   "Proyector ENV": "assets/ads/Proyector ENV.jpg",
-  "Tomatodo": "assets/ads/Tomatodo.jpg",
+  Tomatodo: "assets/ads/Tomatodo.jpg",
   "Llaveros Happy": "assets/ads/Llaveros Happy.jpg",
-  "Smartwatch": "assets/ads/Smartwatch.png",
+  Smartwatch: "assets/ads/Smartwatch.png",
   "Gamepad de mano": "assets/ads/Gamepad de mano.jpg",
 };
 
@@ -1015,11 +1016,23 @@ function productProfiles(p) {
   if (p.cat !== "celular") {
     if (name.includes("aud") || name.includes("parlante"))
       return ["deportista", "estudiante", "trabajo"];
-    if (name.includes("gamepad") || name.includes("drone") || name.includes("proyector"))
+    if (
+      name.includes("gamepad") ||
+      name.includes("drone") ||
+      name.includes("proyector")
+    )
       return ["gamer", "creador", "estudiante"];
-    if (name.includes("mochila") || name.includes("tomatodo") || name.includes("hielera"))
+    if (
+      name.includes("mochila") ||
+      name.includes("tomatodo") ||
+      name.includes("hielera")
+    )
       return ["trabajo", "deportista", "creador"];
-    if (name.includes("aspiradora") || name.includes("exprimidor") || name.includes("parrilla"))
+    if (
+      name.includes("aspiradora") ||
+      name.includes("exprimidor") ||
+      name.includes("parrilla")
+    )
       return ["trabajo", "hogar"];
     return ["estudiante", "trabajo"];
   }
@@ -1591,13 +1604,13 @@ const SIDEBAR_CATEGORY_NAV = {
 
 function syncCatalogTabs(f) {
   document.querySelectorAll(".ftab").forEach((t) => t.classList.remove("on"));
-  document
-    .querySelector(`.ftab[data-filter="${f}"]`)
-    ?.classList.add("on");
+  document.querySelector(`.ftab[data-filter="${f}"]`)?.classList.add("on");
 }
 
 function syncSidebarCategory(f) {
-  document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("on"));
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach((b) => b.classList.remove("on"));
   const navId = SIDEBAR_CATEGORY_NAV[f];
   if (navId) document.getElementById(navId)?.classList.add("on");
 }
@@ -1732,38 +1745,43 @@ function renderCatalog() {
     renderCompareSelectionBar() +
     renderPromoShowcase(list) +
     pageItems
-    .map((p, idx) => {
-      const avail = (p.units || []).filter((u) => u.st === "disponible");
-      const nextImei = avail[0]?.imei;
-      const inCart = S.cart.find((x) => x.id === p.id);
-      const eligible = p.cat === "celular";
-      const selectedForCompare = productosComparados.some(
-        (x) => String(x.id) === String(p.id),
-      );
-      const tagText = (p.perfiles || [])
-        .slice(0, 2)
-        .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
-        .join(" / ");
-      const catLabel =
-        p.cat === "celular"
-          ? "Celular - Elegible leasing"
-          : p.cat === "combo"
-            ? "Combo comercial"
-            : p.cat === "promo"
-              ? "Promocion especial"
-              : p.cat === "regalo"
-                ? "Regalo para cierre"
-                : "Accesorio";
-      const pvpShow = eligible
-        ? `<div class="prod-pvp">Ref. USD ${clp(p.pvp)}</div>`
-        : p.oldPrice
-          ? `<div class="prod-pvp prod-old">Antes ${clp(p.oldPrice)}</div>`
-          : "";
-      const promoCard = p.cat === "promo";
-      const comboCard = p.cat === "combo";
-      const comboIncludes = comboCard ? comboIncludedItems(p) : [];
-      const comboSave = comboCard ? Math.max(20, Math.round(p.price * 0.07)) : 0;
-      return `<div class="prod-card ${promoCard ? "promo-card" : ""} ${comboCard ? "combo-card" : ""} ${modoComparacion && eligible ? "compare-mode" : ""} ${selectedForCompare ? "is-compare-selected" : ""}" style="--enter-delay:${idx * 45}ms" ${modoComparacion && eligible ? `onclick="seleccionarParaComparar(${p.id})"` : ""}>
+      .map((p, idx) => {
+        const avail = (p.units || []).filter((u) => u.st === "disponible");
+        const nextImei = avail[0]?.imei;
+        const inCart = S.cart.find((x) => x.id === p.id);
+        const eligible = p.cat === "celular";
+        const selectedForCompare = productosComparados.some(
+          (x) => String(x.id) === String(p.id),
+        );
+        const tagText = (p.perfiles || [])
+          .slice(0, 2)
+          .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
+          .join(" / ");
+        const catLabel =
+          p.cat === "celular"
+            ? "Celular - Elegible leasing"
+            : p.cat === "combo"
+              ? "Combo comercial"
+              : p.cat === "promo"
+                ? "Promocion especial"
+                : p.cat === "regalo"
+                  ? "Regalo para cierre"
+                  : "Accesorio";
+        const pvpShow = eligible
+          ? `<div class="prod-pvp">Ref. USD ${clp(p.pvp)}</div>`
+          : p.oldPrice
+            ? `<div class="prod-pvp prod-old">Antes ${clp(p.oldPrice)}</div>`
+            : "";
+        const promoCard = p.cat === "promo";
+        const comboCard = p.cat === "combo";
+        const comboIncludes = comboCard ? comboIncludedItems(p) : [];
+        const comboSave = comboCard
+          ? Math.max(20, Math.round(p.price * 0.07))
+          : 0;
+        const cupo = currentLeasingCupo();
+        const cupoInsuficiente =
+          S.payMethod === "leasing" && Number(p.price) > cupo;
+        return `<div class="prod-card ${promoCard ? "promo-card" : ""} ${comboCard ? "combo-card" : ""} ${cupoInsuficiente ? "cupo-insuficiente" : ""} ${modoComparacion && eligible ? "compare-mode" : ""} ${selectedForCompare ? "is-compare-selected" : ""}" style="--enter-delay:${idx * 45}ms" ${modoComparacion && eligible ? `onclick="seleccionarParaComparar(${p.id})"` : ""}>
       ${promoCard ? `<div class="prod-offer-badge">${p.discount || "Oferta"}</div>` : ""}
       ${comboCard ? `<div class="combo-save-pill">Ahorra ${clp(comboSave)}</div>` : ""}
       <div class="prod-visual">${productImageMarkup(p)}</div>
@@ -1779,10 +1797,16 @@ function renderCatalog() {
       ${modoComparacion && eligible ? `<button class="prod-add prod-compare-pick" type="button" onclick="event.stopPropagation(); seleccionarParaComparar(${p.id})">${selectedForCompare ? "Seleccionado" : "Comparar"}</button>` : ""}
       ${eligible && nextImei ? `<div class="prod-imei-tag" title="IMEI auto-asignado">🔑 ${nextImei}</div>` : ""}
       <div style="margin-bottom:6px">${avail.length > 0 || !eligible ? `<span class="badge b-lime">Stock: ${eligible ? avail.length : p.stock || "✓"}</span>` : `<span class="badge b-red">Sin stock</span>`}</div>
-      <button class="prod-add" onclick="addCart(${p.id})" ${eligible && avail.length === 0 ? "disabled" : ""}>${inCart ? `✓ ${inCart.qty} en carrito` : comboCard ? "+ Agregar combo" : " + Agregar"}</button>
-    </div>`;
-    })
-    .join("") + renderCatalogPager(list.length, S.catalogPage, pageSize);
+<button 
+  class="prod-add ${cupoInsuficiente ? "prod-add-blocked" : ""}" 
+  onclick="${cupoInsuficiente ? "return false" : `addCart(${p.id})`}" 
+  ${cupoInsuficiente || (eligible && avail.length === 0) ? "disabled" : ""}
+>
+  ${cupoInsuficiente ? "✕ CUPO INSUFICIENTE" : inCart ? `✓ ${inCart.qty} en carrito` : comboCard ? "+ Agregar combo" : " + Agregar"}
+</button>    </div>`;
+      })
+      .join("") +
+    renderCatalogPager(list.length, S.catalogPage, pageSize);
 }
 
 function renderPromoShowcase(list) {
@@ -1806,11 +1830,15 @@ function renderPromoShowcase(list) {
 function comboIncludedItems(combo) {
   const name = `${combo.name || ""} ${combo.modelo || ""}`.toLowerCase();
   const base = combo.modelo || combo.marca || "Equipo principal";
-  if (name.includes("gamepad")) return [base, "Gamepad de mano", "Proyector de luces LED"];
-  if (name.includes("mochila")) return [base, "Mochila Happy", "Micas protectoras"];
-  if (name.includes("parlante")) return [base, "Parlante BT", "Audifonos BT TWS"];
+  if (name.includes("gamepad"))
+    return [base, "Gamepad de mano", "Proyector de luces LED"];
+  if (name.includes("mochila"))
+    return [base, "Mochila Happy", "Micas protectoras"];
+  if (name.includes("parlante"))
+    return [base, "Parlante BT", "Audifonos BT TWS"];
   if (name.includes("audifonos")) return [base, "Audifonos BT", "Tomatodo"];
-  if (name.includes("proyector")) return [base, "Proyector ENV", "Micas protectoras"];
+  if (name.includes("proyector"))
+    return [base, "Proyector ENV", "Micas protectoras"];
   if (name.includes("mica")) return [base, "Micas protectoras", "Tomatodo"];
   if (name.includes("drone")) return [base, "Drone mini camara", "Smartwatch"];
   if (name.includes("smartwatch")) return [base, "Smartwatch", "Mochila Happy"];
@@ -2246,7 +2274,10 @@ function addCart(id, opts = {}) {
       qty: 1,
       autoImei,
       extraImeis: [],
-      color: p.cat === "celular" ? S.pendingPhoneColor || PHONE_COLORS[0].name : null,
+      color:
+        p.cat === "celular"
+          ? S.pendingPhoneColor || PHONE_COLORS[0].name
+          : null,
     });
   }
   OP.carrito = true;
@@ -2254,7 +2285,9 @@ function addCart(id, opts = {}) {
   renderCatalog();
   document.getElementById("tbImei").style.display = S.autoImei ? "" : "none";
   if (!opts.quiet) {
-    toast(`${p.name} agregado${p.cat === "celular" ? " · IMEI reservado" : ""}`);
+    toast(
+      `${p.name} agregado${p.cat === "celular" ? " · IMEI reservado" : ""}`,
+    );
   }
 }
 function removeCart(id) {
@@ -2359,14 +2392,20 @@ function cartSumm() {
 
 function currentLeasingCupo() {
   if (!S.precalificacion) S.precalificacion = getDemoPrecalificacion();
-  return Number(S.precalificacion?.cupoDisponible || S.precalificacion?.cupo || 300);
+  return Number(
+    S.precalificacion?.cupoDisponible || S.precalificacion?.cupo || 300,
+  );
 }
 
 function cupoSuggestions(restante) {
-  const preferred = [610, 616, 606, 615, 612, 609, 603, 608, 611, 601, 604, 607, 613, 614];
+  const preferred = [
+    610, 616, 606, 615, 612, 609, 603, 608, 611, 601, 604, 607, 613, 614,
+  ];
   return preferred
     .map((id) => PRODUCTS.find((p) => p.id === id))
-    .filter((p) => p && p.price <= restante && !S.cart.some((x) => x.id === p.id))
+    .filter(
+      (p) => p && p.price <= restante && !S.cart.some((x) => x.id === p.id),
+    )
     .slice(0, 3);
 }
 
@@ -2539,7 +2578,10 @@ function hasLeasingProductSelected() {
 
 function continueLeasingFromCatalog() {
   if (!hasLeasingProductSelected()) {
-    toast("Para continuar leasing selecciona un celular con IMEI reservado", "warn");
+    toast(
+      "Para continuar leasing selecciona un celular con IMEI reservado",
+      "warn",
+    );
     return;
   }
   OP.pago = true;
@@ -2977,7 +3019,9 @@ function initOffer() {
 function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
   const pre = S.precalificacion || getDemoPrecalificacion();
   const box = document.getElementById("lp3PrequalCard");
-  document.getElementById("lp3OfferGrid")?.classList.toggle("lp3-preproduct", !productSelected);
+  document
+    .getElementById("lp3OfferGrid")
+    ?.classList.toggle("lp3-preproduct", !productSelected);
   if (box) {
     box.style.display = productSelected ? "none" : "";
     box.innerHTML = `
@@ -3217,12 +3261,15 @@ function initLp2() {
   const financeOrder = document.getElementById("lp2FinanceOrderCard");
   if (financeOrder)
     financeOrder.style.display = S.payMethod === "leasing" ? "none" : "";
-  document.getElementById("lp2Grid")?.classList.toggle("lp2-compact", S.payMethod === "leasing");
+  document
+    .getElementById("lp2Grid")
+    ?.classList.toggle("lp2-compact", S.payMethod === "leasing");
   const laboral = document.getElementById("lp2PerfilLaboralCard");
   const capacidad = document.getElementById("lp2CapacidadPagoCard");
   const sideCol = document.getElementById("lp2SideCol");
   if (laboral) laboral.style.display = S.payMethod === "leasing" ? "none" : "";
-  if (capacidad) capacidad.style.display = S.payMethod === "leasing" ? "none" : "";
+  if (capacidad)
+    capacidad.style.display = S.payMethod === "leasing" ? "none" : "";
   if (sideCol) sideCol.style.display = S.payMethod === "leasing" ? "none" : "";
   if (S.ingresos > 0) document.getElementById("lp2_ing").value = S.ingresos;
 }
@@ -3275,9 +3322,7 @@ function validateLp2Form() {
     S.payMethod === "leasing"
       ? ["dir", "comuna", "region"]
       : ["dir", "comuna", "region", "ocup", "act", "ing", "gast"];
-  const results = requiredFields.map(
-    (field) => validateLp2Field(field),
-  );
+  const results = requiredFields.map((field) => validateLp2Field(field));
   return results.every(Boolean);
 }
 function calcCapacidadPago() {

@@ -11,7 +11,11 @@
   --lime3: #edf9b0;
   --page-bg:
     radial-gradient(circle at 8% 0%, rgba(201, 232, 0, 0.2), transparent 310px),
-    radial-gradient(circle at 95% 6%, rgba(37, 75, 150, 0.18), transparent 340px),
+    radial-gradient(
+      circle at 95% 6%,
+      rgba(37, 75, 150, 0.18),
+      transparent 340px
+    ),
     linear-gradient(180deg, #f7fbff 0%, #eef5fb 52%, #f8fafc 100%);
   --glass: rgba(255, 255, 255, 0.84);
   --glass-border: rgba(148, 163, 184, 0.24);
@@ -61,7 +65,11 @@ body {
 .sidebar {
   width: var(--sidebar);
   background:
-    radial-gradient(circle at 50% 0%, rgba(201, 232, 0, 0.22), transparent 120px),
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(201, 232, 0, 0.22),
+      transparent 120px
+    ),
     linear-gradient(180deg, var(--navy3), var(--navy));
   display: flex;
   flex-direction: column;
@@ -948,7 +956,9 @@ body {
 }
 .prod-card.is-compare-selected {
   border-color: var(--lime);
-  box-shadow: 0 0 0 3px rgba(201, 232, 0, 0.28), var(--shadow2);
+  box-shadow:
+    0 0 0 3px rgba(201, 232, 0, 0.28),
+    var(--shadow2);
 }
 .prod-card.compare-mode > .prod-add:not(.prod-compare-pick) {
   display: none;
@@ -1012,7 +1022,7 @@ body {
   color: #fff;
   font-size: 9px;
   font-weight: 900;
-  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.28);
+  box-shadow: 0 8px 18px rgba(68, 19, 19, 0.28);
   animation: promoBadgePulse 1.7s ease-in-out infinite;
 }
 .prod-card.promo-card {
@@ -1025,7 +1035,8 @@ body {
   animation:
     productCardIn 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both,
     promoFloat 4.5s ease-in-out infinite;
-  animation-delay: var(--enter-delay, 0ms), calc(var(--enter-delay, 0ms) + 0.45s);
+  animation-delay:
+    var(--enter-delay, 0ms), calc(var(--enter-delay, 0ms) + 0.45s);
 }
 .prod-card.promo-card:hover {
   animation: none;
@@ -1053,7 +1064,11 @@ body {
   color: #ffffff;
   border-color: rgba(201, 232, 0, 0.58);
   background:
-    radial-gradient(circle at 16% 6%, rgba(201, 232, 0, 0.18), transparent 118px),
+    radial-gradient(
+      circle at 16% 6%,
+      rgba(201, 232, 0, 0.18),
+      transparent 118px
+    ),
     linear-gradient(145deg, #101b15 0%, #182413 56%, #0c1411 100%);
   box-shadow:
     0 18px 38px rgba(15, 23, 42, 0.2),
@@ -1066,8 +1081,11 @@ body {
   width: 58px;
   height: 58px;
   border-radius: 22px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(237, 249, 176, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(237, 249, 176, 0.9)
+  );
   opacity: 0.12;
   transform: rotate(12deg);
 }
@@ -1080,8 +1098,11 @@ body {
 .prod-card.combo-card .prod-visual {
   height: 78px;
   border-radius: 16px;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.74));
+  background: radial-gradient(
+    circle at 50% 18%,
+    rgba(255, 255, 255, 0.92),
+    rgba(255, 255, 255, 0.74)
+  );
   border: 1px solid rgba(201, 232, 0, 0.26);
 }
 .prod-card.combo-card .prod-ico {
@@ -1169,7 +1190,11 @@ body {
   border-radius: var(--r);
   border: 1px solid rgba(201, 232, 0, 0.36);
   background:
-    radial-gradient(circle at 10% 10%, rgba(201, 232, 0, 0.28), transparent 34%),
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(201, 232, 0, 0.28),
+      transparent 34%
+    ),
     linear-gradient(135deg, var(--navy), var(--navy2));
   box-shadow: var(--shadow2);
   color: #fff;
@@ -1235,6 +1260,14 @@ body {
 .prod-add:disabled {
   background: var(--slate3);
   cursor: not-allowed;
+}
+.prod-add-blocked,
+.prod-add-blocked:disabled {
+  background: #be123c !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  font-weight: 900;
 }
 .catalog-pager {
   grid-column: 1 / -1;
@@ -1305,8 +1338,16 @@ body {
   justify-content: center;
   padding: 22px;
   background:
-    radial-gradient(circle at 20% 12%, rgba(201, 232, 0, 0.22), transparent 280px),
-    radial-gradient(circle at 84% 8%, rgba(37, 75, 150, 0.28), transparent 320px),
+    radial-gradient(
+      circle at 20% 12%,
+      rgba(201, 232, 0, 0.22),
+      transparent 280px
+    ),
+    radial-gradient(
+      circle at 84% 8%,
+      rgba(37, 75, 150, 0.28),
+      transparent 320px
+    ),
     rgba(10, 14, 20, 0.76);
   backdrop-filter: blur(12px);
   animation: upsellFadeIn 0.18s ease both;
@@ -1316,7 +1357,11 @@ body {
   max-height: 90vh;
   overflow: auto;
   background:
-    radial-gradient(circle at 12% 0%, rgba(201, 232, 0, 0.18), transparent 280px),
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(201, 232, 0, 0.18),
+      transparent 280px
+    ),
     linear-gradient(145deg, rgba(12, 22, 24, 0.97), rgba(13, 28, 49, 0.97));
   border: 1px solid rgba(201, 232, 0, 0.24);
   border-radius: 22px;
@@ -1364,8 +1409,11 @@ body {
   gap: 12px;
   padding: 12px;
   border-radius: 14px;
-  background:
-    linear-gradient(135deg, rgba(25, 55, 95, 0.96), rgba(37, 75, 150, 0.86));
+  background: linear-gradient(
+    135deg,
+    rgba(25, 55, 95, 0.96),
+    rgba(37, 75, 150, 0.86)
+  );
   color: #fff;
   margin-bottom: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1468,7 +1516,11 @@ body {
 }
 .combo-upsell-product {
   background:
-    radial-gradient(circle at 12% 0%, rgba(201, 232, 0, 0.22), transparent 220px),
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(201, 232, 0, 0.22),
+      transparent 220px
+    ),
     linear-gradient(135deg, rgba(18, 35, 24, 0.96), rgba(25, 55, 95, 0.86));
 }
 .combo-upsell-product .prod-ico {
@@ -1540,7 +1592,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 20% 0%, rgba(201, 232, 0, 0.12), transparent 120px),
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(201, 232, 0, 0.12),
+      transparent 120px
+    ),
     rgba(255, 255, 255, 0.08);
   padding: 14px;
   text-align: left;
@@ -3094,8 +3150,16 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 14% 18%, rgba(201, 232, 0, 0.32), transparent 260px),
-    radial-gradient(circle at 85% 16%, rgba(37, 75, 150, 0.22), transparent 320px);
+    radial-gradient(
+      circle at 14% 18%,
+      rgba(201, 232, 0, 0.32),
+      transparent 260px
+    ),
+    radial-gradient(
+      circle at 85% 16%,
+      rgba(37, 75, 150, 0.22),
+      transparent 320px
+    );
   pointer-events: none;
 }
 #loginOverlay::after {
@@ -3137,7 +3201,11 @@ body {
 }
 .login-header {
   background:
-    radial-gradient(circle at 85% 0%, rgba(201, 232, 0, 0.25), transparent 120px),
+    radial-gradient(
+      circle at 85% 0%,
+      rgba(201, 232, 0, 0.25),
+      transparent 120px
+    ),
     linear-gradient(135deg, var(--navy3), var(--navy2));
   padding: 32px 28px 28px;
   text-align: center;
@@ -3357,8 +3425,16 @@ body {
 /* Unified blue presentation theme */
 :root {
   --page-bg:
-    radial-gradient(circle at 8% 0%, rgba(201, 232, 0, 0.18), transparent 300px),
-    radial-gradient(circle at 88% 8%, rgba(0, 166, 214, 0.18), transparent 340px),
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(201, 232, 0, 0.18),
+      transparent 300px
+    ),
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(0, 166, 214, 0.18),
+      transparent 340px
+    ),
     linear-gradient(135deg, #05070a 0%, #0a0e14 48%, #182231 100%);
   --glass: rgba(13, 32, 64, 0.72);
   --glass-border: rgba(255, 255, 255, 0.13);
@@ -3615,7 +3691,11 @@ body,
 #screen-lp1 .ldpd-hero,
 #screen-lp3oferta .card-hero {
   background:
-    radial-gradient(circle at 92% 0%, rgba(201, 232, 0, 0.18), transparent 130px),
+    radial-gradient(
+      circle at 92% 0%,
+      rgba(201, 232, 0, 0.18),
+      transparent 130px
+    ),
     linear-gradient(135deg, var(--navy), var(--navy2)) !important;
   color: #ffffff !important;
 }
@@ -3633,9 +3713,21 @@ body,
   --lime2: #e5ff36;
   --lime3: #ecff9a;
   --page-bg:
-    radial-gradient(circle at 10% 0%, rgba(201, 240, 0, 0.22), transparent 300px),
-    radial-gradient(circle at 88% 12%, rgba(0, 212, 255, 0.22), transparent 330px),
-    radial-gradient(circle at 55% 105%, rgba(128, 80, 255, 0.18), transparent 360px),
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(201, 240, 0, 0.22),
+      transparent 300px
+    ),
+    radial-gradient(
+      circle at 88% 12%,
+      rgba(0, 212, 255, 0.22),
+      transparent 330px
+    ),
+    radial-gradient(
+      circle at 55% 105%,
+      rgba(128, 80, 255, 0.18),
+      transparent 360px
+    ),
     linear-gradient(135deg, #05070a 0%, #0a0e14 56%, #151b24 100%);
 }
 
@@ -3643,7 +3735,11 @@ body,
 .progress-strip,
 .sidebar {
   background:
-    radial-gradient(circle at 0% 0%, rgba(201, 240, 0, 0.12), transparent 160px),
+    radial-gradient(
+      circle at 0% 0%,
+      rgba(201, 240, 0, 0.12),
+      transparent 160px
+    ),
     linear-gradient(180deg, rgba(10, 14, 20, 0.94), rgba(18, 24, 33, 0.9));
 }
 
@@ -3956,7 +4052,6 @@ body,
   font-weight: 700;
 }
 
-
 /* Estilos de publicidad en cataolgo */
 
 .ads-selfservice-card {
@@ -4047,8 +4142,16 @@ body,
   justify-content: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 18% 12%, rgba(201, 232, 0, 0.24), transparent 260px),
-    radial-gradient(circle at 86% 8%, rgba(37, 75, 150, 0.28), transparent 300px),
+    radial-gradient(
+      circle at 18% 12%,
+      rgba(201, 232, 0, 0.24),
+      transparent 260px
+    ),
+    radial-gradient(
+      circle at 86% 8%,
+      rgba(37, 75, 150, 0.28),
+      transparent 300px
+    ),
     rgba(10, 14, 20, 0.78);
   backdrop-filter: blur(12px);
 }
@@ -4119,8 +4222,16 @@ body,
   border: 1px solid rgba(201, 232, 0, 0.18);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(201, 232, 0, 0.16), transparent 170px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.045));
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(201, 232, 0, 0.16),
+      transparent 170px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.045)
+    );
   padding: 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: compareCardIn 0.38s ease both;
@@ -4140,7 +4251,11 @@ body,
   place-items: center;
   margin-bottom: 14px;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.03)
+  );
 }
 .compare-device-img .prod-img {
   max-height: 138px;
@@ -4204,6 +4319,19 @@ body,
   position: relative;
   overflow: hidden;
 }
+.prod-card.cupo-insuficiente {
+  opacity: 0.68;
+  filter: grayscale(0.75);
+  border-color: rgba(220, 38, 38, 0.35);
+  background: linear-gradient(180deg, #f8fafc 0%, #e5e7eb 100%);
+}
+
+.prod-card.cupo-insuficiente:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+  cursor: not-allowed;
+}
+
 .prod-card:not(.promo-card)::after {
   content: "";
   position: absolute;
@@ -4225,13 +4353,21 @@ body,
 .prod-card.combo-card {
   border: 2px solid rgba(130, 170, 0, 0.72) !important;
   background:
-    radial-gradient(circle at 16% 0%, rgba(201, 232, 0, 0.18), transparent 120px),
+    radial-gradient(
+      circle at 16% 0%,
+      rgba(201, 232, 0, 0.18),
+      transparent 120px
+    ),
     linear-gradient(180deg, #ffffff 0%, #f8fff1 100%) !important;
   color: var(--navy) !important;
 }
 .prod-card.combo-card .prod-visual {
   background:
-    radial-gradient(circle at 50% 18%, rgba(201, 232, 0, 0.18), transparent 64%),
+    radial-gradient(
+      circle at 50% 18%,
+      rgba(201, 232, 0, 0.18),
+      transparent 64%
+    ),
     #ffffff !important;
 }
 .prod-card.combo-card .prod-name {
@@ -4308,7 +4444,11 @@ body,
   border-radius: 16px;
   border: 1px solid rgba(25, 55, 95, 0.18);
   background:
-    radial-gradient(circle at 82% 8%, rgba(201, 232, 0, 0.18), transparent 80px),
+    radial-gradient(
+      circle at 82% 8%,
+      rgba(201, 232, 0, 0.18),
+      transparent 80px
+    ),
     linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
 }
@@ -4396,7 +4536,11 @@ body,
   border-radius: 14px;
   border: 1px solid rgba(239, 68, 68, 0.38);
   background:
-    radial-gradient(circle at 12% 0%, rgba(254, 226, 226, 0.8), transparent 130px),
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(254, 226, 226, 0.8),
+      transparent 130px
+    ),
     linear-gradient(135deg, #ffffff, #fff5f5);
   box-shadow: 0 18px 34px rgba(185, 28, 28, 0.14);
   animation: directCreditPulse 1.45s ease-in-out infinite;
@@ -4432,7 +4576,11 @@ body,
 .upsell-product,
 .combo-upsell-product {
   background:
-    radial-gradient(circle at 9% 0%, rgba(201, 232, 0, 0.18), transparent 120px),
+    radial-gradient(
+      circle at 9% 0%,
+      rgba(201, 232, 0, 0.18),
+      transparent 120px
+    ),
     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
   color: var(--navy) !important;
   border: 1px solid rgba(203, 213, 225, 0.92) !important;
@@ -4469,3 +4617,117 @@ body,
   }
 }
 
+/* ══════════════════════════════════════
+   OVERRIDE: UPSELL / MAXIMIZACIÓN EN FORMATO BLANCO
+══════════════════════════════════════ */
+
+.upsell-box {
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+}
+
+.upsell-head {
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  border-bottom: 1px solid var(--slate2) !important;
+}
+
+.upsell-head span {
+  color: #6b8200 !important;
+}
+
+.upsell-head h2 {
+  color: var(--navy) !important;
+}
+
+.upsell-head button {
+  background: var(--slate1) !important;
+  color: var(--navy) !important;
+  border: 1px solid var(--slate2) !important;
+}
+
+.upsell-product,
+.combo-upsell-product {
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  border: 1px solid var(--slate2) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.upsell-product strong,
+.upsell-product b,
+.combo-upsell-product strong,
+.combo-upsell-product b {
+  color: var(--navy) !important;
+}
+
+.upsell-product span,
+.combo-upsell-product span {
+  color: var(--slate4) !important;
+}
+
+.upsell-phone-icon,
+.upsell-option-icon,
+.combo-upsell-product .prod-ico {
+  background: var(--slate1) !important;
+  color: var(--navy) !important;
+}
+
+.upsell-colors,
+.upsell-deal-strip {
+  background: #ffffff !important;
+  border: 1px solid var(--slate2) !important;
+  color: var(--navy) !important;
+}
+
+.upsell-colors > span,
+.upsell-deal-strip strong {
+  color: var(--navy) !important;
+}
+
+.upsell-deal-strip span {
+  color: var(--slate4) !important;
+}
+
+.upsell-option {
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  border: 1px solid var(--slate2) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.upsell-option:hover {
+  border-color: var(--lime) !important;
+  box-shadow: var(--shadow2) !important;
+}
+
+.upsell-option h3,
+.upsell-option strong,
+.upsell-option b {
+  color: var(--navy) !important;
+}
+
+.upsell-option p,
+.upsell-option span {
+  color: var(--slate4) !important;
+}
+
+.upsell-pack-item {
+  background: #f8fafc !important;
+  border: 1px solid var(--slate2) !important;
+}
+
+.upsell-pack-item b {
+  color: var(--navy) !important;
+}
+
+.upsell-price,
+.upsell-option-price {
+  color: var(--navy) !important;
+}
+
+.upsell-save,
+.upsell-saving {
+  color: #6b8200 !important;
+}
