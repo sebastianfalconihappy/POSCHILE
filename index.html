@@ -196,13 +196,32 @@
             padding: 0 8px;
           "
         >
-          <button
-            class="nav-btn"
-            id="navCombos"
-            onclick="setSidebarCategory('combo', this)"
-          >
-            <span class="ni">&#129513;</span><span class="nl">Combos</span>
+          <div class="pos-menu-wrap">
+          <button class="nav-btn" id="navPos" onclick="openPosCatalog()">
+            <span class="ni">&#128722;</span><span class="nl">POS</span>
           </button>
+          <div class="pos-subnav" id="posSubnav">
+            <button id="navPhones" onclick="setSidebarCategory('celular', this)">
+              <span><img src="assets/ads/celularsimbolo.jpg" alt="" /></span>
+              Celulares
+            </button>
+            <button id="navCombos" onclick="setSidebarCategory('combo', this)">
+              <span><img src="assets/ads/combosimbolo.jpg" alt="" /></span>
+              Combos
+            </button>
+            <button
+              id="navAccessories"
+              onclick="setSidebarCategory('accesorio', this)"
+            >
+              <span><img src="assets/ads/accesoriossimbolo.jpg" alt="" /></span>
+              Accesorios
+            </button>
+            <button id="navPromos" onclick="setSidebarCategory('promo', this)">
+              <span><img src="assets/ads/promosimbolo.jpg" alt="" /></span>
+              Promos
+            </button>
+          </div>
+          </div>
 
           <button
             class="nav-btn"
@@ -212,28 +231,6 @@
           >
             <span class="ni">⚡</span><span class="nl">Leasing</span>
           </button>
-          <button
-            class="nav-btn"
-            id="navPhones"
-            onclick="setSidebarCategory('celular', this)"
-          >
-            <span class="ni">&#128241;</span><span class="nl">Celulares</span>
-          </button>
-          <button
-            class="nav-btn"
-            id="navAccessories"
-            onclick="setSidebarCategory('accesorio', this)"
-          >
-            <span class="ni">&#127911;</span><span class="nl">Accesorios</span>
-          </button>
-          <button
-            class="nav-btn"
-            id="navPromos"
-            onclick="setSidebarCategory('promo', this)"
-          >
-            <span class="ni">&#128293;</span><span class="nl">Promos</span>
-          </button>
-
           <div class="sb-divider"></div>
 
           <button class="nav-btn nav-tool" id="navStock" onclick="navGo('inv')">
@@ -531,6 +528,11 @@
                     </div>
                     <div id="upsellBody"></div>
                   </div>
+                  <div
+                    class="upsell-side-panel"
+                    id="upsellSidePanel"
+                    style="display: none"
+                  ></div>
                 </div>
               </div>
               <!-- Carrito -->
@@ -1569,6 +1571,80 @@
                   >
                     Ir a inventario
                   </button>
+                </div>
+
+                <!-- CAPACIDAD + PERFIL -->
+                <div class="card mb10" id="lp3PayAddressCard">
+                  <div class="card-title">Capacidad de pago y perfil laboral</div>
+                  <div class="card-sub">
+                    Confirma ingresos, gastos y actividad antes de validar
+                    referencias
+                  </div>
+                  <div class="pay-address-grid">
+                    <div class="pay-address-panel">
+                      <div class="pay-address-kicker">Capacidad de pago</div>
+                      <div class="g2col">
+                        <div class="fg">
+                          <label class="fl"
+                            >Ingresos mensuales (USD)
+                            <span class="req">*</span></label
+                          >
+                          <input
+                            class="fi mono"
+                            id="lp3_ing"
+                            type="number"
+                            min="0"
+                            placeholder="850"
+                            oninput="calcLp3Capacity()"
+                          />
+                        </div>
+                        <div class="fg">
+                          <label class="fl"
+                            >Gastos mensuales (USD)
+                            <span class="req">*</span></label
+                          >
+                          <input
+                            class="fi mono"
+                            id="lp3_gast"
+                            type="number"
+                            min="0"
+                            placeholder="350"
+                            oninput="calcLp3Capacity()"
+                          />
+                        </div>
+                      </div>
+                      <div id="lp3CapMsg" class="cap-msg" style="display:none"></div>
+                    </div>
+                    <div class="pay-address-panel">
+                      <div class="pay-address-kicker">Perfil laboral</div>
+                      <div class="g2col">
+                        <div class="fg">
+                          <label class="fl"
+                            >Ocupacion <span class="req">*</span></label
+                          >
+                          <select class="fs" id="lp3_ocup">
+                            <option value="">-- Selecciona --</option>
+                            <option>Dependiente</option>
+                            <option>Independiente</option>
+                            <option>Comerciante</option>
+                            <option>Estudiante</option>
+                          </select>
+                        </div>
+                        <div class="fg">
+                          <label class="fl">Actividad economica</label>
+                          <select class="fs" id="lp3_act">
+                            <option value="">-- Selecciona --</option>
+                            <option>Comercio</option>
+                            <option>Servicios</option>
+                            <option>Tecnologia</option>
+                            <option>Salud</option>
+                            <option>Educacion</option>
+                            <option>Transporte</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- REFERENCIAS -->

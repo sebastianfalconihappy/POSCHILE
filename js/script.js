@@ -514,163 +514,172 @@ const PRODUCTS = [
   },
   {
     id: 801,
-    name: "Promo Galaxy A16 + Audifonos TWS",
+    name: "Promo Samsung Galaxy A16",
     cat: "promo",
     ico: "HOT",
     marca: "Samsung",
-    modelo: "Galaxy A16 Promo",
+    modelo: "Galaxy A16",
     ram: "4GB",
     rom: "128GB",
-    costo: 185,
-    oldPrice: 210,
-    discount: "-US$25",
-    promoTag: "Oferta del dia",
-    desc: "Celular + manos libres con precio especial.",
+    costo: 170,
+    oldPrice: 199,
+    discount: "-15%",
+    promoTag: "Solo celular",
+    desc: "Descuento especial aplicado solo al equipo.",
     img: "assets/ads/Samsung Galaxy A16.jpg",
     units: [],
   },
   {
     id: 802,
-    name: "Promo Redmi Note 13 + Parlante BT",
+    name: "Promo Xiaomi Redmi Note 13",
     cat: "promo",
     ico: "HOT",
     marca: "Xiaomi",
-    modelo: "Redmi Note 13 Audio",
+    modelo: "Redmi Note 13",
     ram: "8GB",
     rom: "256GB",
-    costo: 205,
-    oldPrice: 240,
-    discount: "-US$35",
+    costo: 230,
+    oldPrice: 273,
+    discount: "-16%",
     promoTag: "Mas vendido",
-    desc: "Pack ideal con audio Bluetooth para subir ticket.",
+    desc: "Precio promocional exclusivo para el celular.",
     img: "assets/ads/Xiaomi Redmi Note 13.png",
     units: [],
   },
   {
     id: 803,
-    name: "Promo Honor X7c + Micas + Mochila",
+    name: "Promo Honor X7c",
     cat: "promo",
     ico: "HOT",
     marca: "Honor",
-    modelo: "X7c Diario",
+    modelo: "X7c",
     ram: "6GB",
     rom: "128GB",
-    costo: 165,
-    oldPrice: 190,
-    discount: "-13%",
-    promoTag: "Kit diario",
-    desc: "Equipo listo para entregar con micas y mochila.",
+    costo: 205,
+    oldPrice: 243,
+    discount: "-16%",
+    promoTag: "Precio bajo",
+    desc: "Equipo en descuento para cierre rapido.",
     img: "assets/ads/Honor X7c.jpg",
     units: [],
   },
   {
     id: 804,
-    name: "Promo Infinix Note 40 + Smartwatch",
+    name: "Promo Infinix Note 40",
     cat: "promo",
     ico: "HOT",
     marca: "Infinix",
-    modelo: "Note 40 Smart Pack",
+    modelo: "Note 40",
     ram: "8GB",
     rom: "256GB",
-    costo: 229,
-    oldPrice: 270,
-    discount: "-US$41",
-    promoTag: "Combo joven",
-    desc: "Telefono + reloj para cliente activo.",
+    costo: 249,
+    oldPrice: 299,
+    discount: "-17%",
+    promoTag: "Oferta joven",
+    desc: "Promocion aplicada al equipo sin accesorios.",
     img: "assets/ads/Infinix Note 40.jpg",
     units: [],
   },
   {
     id: 805,
-    name: "Promo Tecno Pova 6 Gamer Kit",
+    name: "Promo Tecno Pova 6",
     cat: "promo",
     ico: "HOT",
     marca: "Tecno",
-    modelo: "Pova 6 Gamer Kit",
+    modelo: "Pova 6",
     ram: "8GB",
     rom: "256GB",
-    costo: 245,
+    costo: 238,
     oldPrice: 289,
-    discount: "-15%",
+    discount: "-18%",
     promoTag: "Gamer",
-    desc: "Celular + gamepad de mano + proyector de luces.",
+    desc: "Celular gamer con descuento directo.",
     img: "assets/ads/Tecno Pova 6.jpg",
     units: [],
   },
   {
     id: 806,
-    name: "Promo Galaxy A36 5G Audio Pack",
+    name: "Promo Samsung Galaxy A36 5G",
     cat: "promo",
     ico: "HOT",
     marca: "Samsung",
-    modelo: "A36 5G Audio Pack",
+    modelo: "A36 5G",
     ram: "8GB",
     rom: "256GB",
-    costo: 430,
-    oldPrice: 470,
-    discount: "-US$40",
-    promoTag: "5G + audio",
-    desc: "A36 5G con parlante BT y audifonos deportivos.",
+    costo: 400,
+    oldPrice: 459,
+    discount: "-13%",
+    promoTag: "5G",
+    desc: "Descuento directo sobre el celular 5G.",
     img: "assets/ads/Samsung Galaxy A36 5G.jpg",
     units: [],
   },
   {
     id: 807,
-    name: "Promo Hogar Express",
+    name: "Promo Samsung Galaxy A56 5G",
     cat: "promo",
-    ico: "HOM",
-    marca: "Happy",
-    modelo: "Hogar",
-    costo: 72,
-    oldPrice: 96,
-    discount: "-25%",
-    promoTag: "Hogar",
-    desc: "Aspiradora portatil + exprimidor blanco.",
+    ico: "HOT",
+    marca: "Samsung",
+    modelo: "A56 5G",
+    ram: "8GB",
+    rom: "256GB",
+    costo: 550,
+    oldPrice: 629,
+    discount: "-13%",
+    promoTag: "Premium",
+    desc: "Equipo premium con descuento por campana.",
+    img: "assets/ads/Samsung Galaxy A56 5G.jpg",
     units: [],
   },
   {
     id: 808,
-    name: "Promo Audio Duo Bluetooth",
+    name: "Promo Honor X8c",
     cat: "promo",
-    ico: "SPK",
-    marca: "Happy",
-    modelo: "Audio Duo",
-    costo: 49,
-    oldPrice: 69,
-    discount: "-US$20",
-    promoTag: "Audio",
-    desc: "Parlante BT + audifonos BT TWS.",
+    ico: "HOT",
+    marca: "Honor",
+    modelo: "X8c",
+    ram: "8GB",
+    rom: "256GB",
+    costo: 285,
+    oldPrice: 329,
+    discount: "-13%",
+    promoTag: "Elegante",
+    desc: "Promocion exclusiva del equipo.",
+    img: "assets/ads/Honor X8c.jpg",
     units: [],
   },
   {
     id: 809,
-    name: "Promo Regalo Cierre Feliz",
+    name: "Promo Xiaomi 14T",
     cat: "promo",
-    ico: "KIT",
-    marca: "Happy",
-    modelo: "Regalos",
-    costo: 21,
-    oldPrice: 32,
-    discount: "-34%",
-    promoTag: "Imperdible",
-    desc: "Tomatodo + llaveros + micas para cierre de venta.",
+    ico: "HOT",
+    marca: "Xiaomi",
+    modelo: "14T",
+    ram: "12GB",
+    rom: "512GB",
+    costo: 568,
+    oldPrice: 699,
+    discount: "-19%",
+    promoTag: "Creador",
+    desc: "Celular de alto rendimiento con descuento.",
+    img: "assets/ads/Xiaomi 14T.jpg",
     units: [],
   },
   {
     id: 810,
-    name: "Promo Creador Xiaomi 14T + Proyector ENV",
+    name: "Promo Samsung Galaxy S24 FE",
     cat: "promo",
     ico: "HOT",
-    marca: "Xiaomi",
-    modelo: "14T Creator",
-    ram: "12GB",
-    rom: "512GB",
-    costo: 585,
-    oldPrice: 640,
-    discount: "-US$55",
-    promoTag: "Creador",
-    desc: "Equipo de alto rendimiento con proyector ENV.",
-    img: "assets/ads/Xiaomi 14T.jpg",
+    marca: "Samsung",
+    modelo: "S24 FE",
+    ram: "8GB",
+    rom: "256GB",
+    costo: 710,
+    oldPrice: 829,
+    discount: "-14%",
+    promoTag: "Flagship",
+    desc: "Descuento directo sobre equipo flagship.",
+    img: "assets/ads/Samsung Galaxy S24 FE.jpg",
     units: [],
   },
 ];
@@ -1287,6 +1296,7 @@ let S = {
 };
 let modoComparacion = false;
 let productosComparados = [];
+let refsState = { 1: { estado: "pendiente" }, 2: { estado: "pendiente" } };
 
 /* ═══════════════════════════════════════════════════
    FORMATTERS
@@ -1545,11 +1555,11 @@ function goScreen(id) {
     .querySelectorAll(".nav-btn")
     .forEach((b) => b.classList.remove("on"));
   const navMap = {
-    catalog: "navCombos",
-    pago: "navCombos",
-    normal: "navCombos",
-    nfact: "navCombos",
-    ndone: "navCombos",
+    catalog: "navPos",
+    pago: "navPos",
+    normal: "navPos",
+    nfact: "navPos",
+    ndone: "navPos",
     lp1: "navLeas",
     lp2: "navLeas",
     lp3eval: "navLeas",
@@ -1611,8 +1621,22 @@ function syncSidebarCategory(f) {
   document
     .querySelectorAll(".nav-btn")
     .forEach((b) => b.classList.remove("on"));
+  document
+    .querySelectorAll(".pos-subnav button")
+    .forEach((b) => b.classList.remove("on"));
+  document.getElementById("navPos")?.classList.add("on");
   const navId = SIDEBAR_CATEGORY_NAV[f];
   if (navId) document.getElementById(navId)?.classList.add("on");
+}
+
+function openPosCatalog() {
+  goScreen("catalog");
+  S.catFilter = "";
+  S.catalogPage = 1;
+  S.catalogFilterKey = "";
+  document.querySelectorAll(".ftab").forEach((t) => t.classList.remove("on"));
+  syncSidebarCategory("");
+  renderCatalog();
 }
 
 function setFilter(f, el) {
@@ -1631,6 +1655,11 @@ function setSidebarCategory(f) {
   syncSidebarCategory(f);
   syncCatalogTabs(f);
   renderCatalog();
+  const subnav = document.getElementById("posSubnav");
+  if (subnav) {
+    subnav.classList.add("picked");
+    setTimeout(() => subnav.classList.remove("picked"), 220);
+  }
 }
 function setCatalogPage(page) {
   S.catalogPage = page;
@@ -1671,6 +1700,52 @@ function clearCatalogFilters() {
   syncSidebarCategory("");
   renderCatalog();
 }
+
+function renderCatalogCategoryHub() {
+  const cards = [
+    {
+      filter: "celular",
+      img: "assets/ads/celularsimbolo.jpg",
+      title: "Celulares",
+      text: "Smartphones elegibles para venta y leasing",
+      badge: "Equipos",
+    },
+    {
+      filter: "combo",
+      img: "assets/ads/combosimbolo.jpg",
+      title: "Combos",
+      text: "Paquetes listos para maximizar el ticket",
+      badge: "Packs",
+    },
+    {
+      filter: "accesorio",
+      img: "assets/ads/accesoriossimbolo.jpg",
+      title: "Accesorios",
+      text: "Extras para completar la compra",
+      badge: "Add-ons",
+    },
+    {
+      filter: "promo",
+      img: "assets/ads/promosimbolo.jpg",
+      title: "Promociones",
+      text: "Ofertas activas con descuento",
+      badge: "Ofertas",
+    },
+  ];
+  return `<div class="catalog-category-hub">
+    ${cards
+      .map(
+        (c, idx) => `<button class="catalog-category-card" style="--enter-delay:${idx * 70}ms" onclick="setSidebarCategory('${c.filter}')">
+          <span class="category-card-icon"><img src="${c.img}" alt="${c.title}" /></span>
+          <strong>${c.title}</strong>
+          <em>${c.text}</em>
+          <i>${c.badge}</i>
+        </button>`,
+      )
+      .join("")}
+  </div>`;
+}
+
 function renderCatalog() {
   updateDirectCreditCta();
   const q = (document.getElementById("searchQ")?.value || "")
@@ -1685,7 +1760,7 @@ function renderCatalog() {
   const grid = document.getElementById("prodGrid");
   if (!S.catFilter) {
     grid.classList.remove("promo-grid");
-    grid.innerHTML = "";
+    grid.innerHTML = renderCatalogCategoryHub();
     return;
   }
   const filterKey = [
@@ -2092,6 +2167,11 @@ function showUpsell(id) {
   const phone = PRODUCTS.find((p) => p.id === id);
   if (!phone) return;
   const options = makeUpsellOptions(phone);
+  const sidePanel = document.getElementById("upsellSidePanel");
+  if (sidePanel) {
+    sidePanel.style.display = "none";
+    sidePanel.innerHTML = "";
+  }
   document.getElementById("upsellBody").innerHTML = `
     <div class="upsell-product">
       <div class="upsell-phone-visual">${productImageMarkup(phone)}</div>
@@ -2099,6 +2179,7 @@ function showUpsell(id) {
         <strong>${phone.name}</strong>
         <span>${phone.marca || ""} ${phone.modelo || ""} - ${phone.ram || ""} ${phone.rom || ""}</span>
       </div>
+      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${phone.id})">Personalizar</button>
       <b>${clp(phone.price)}</b>
     </div>
     <div class="upsell-toolbar">
@@ -2139,8 +2220,57 @@ function showUpsell(id) {
   document.getElementById("upsellModal").style.display = "flex";
 }
 
+function upsellAccessorySuggestions() {
+  return [607, 610, 604, 601, 613, 616, 615, 606]
+    .map((id) => PRODUCTS.find((p) => p.id === id))
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
+function toggleUpsellAccessories(phoneId) {
+  const panel = document.getElementById("upsellSidePanel");
+  if (!panel) return;
+  const isOpen = panel.style.display !== "none";
+  if (isOpen) {
+    panel.style.display = "none";
+    panel.innerHTML = "";
+    return;
+  }
+  panel.style.display = "";
+  panel.innerHTML = `
+    <div class="upsell-custom-head">
+      <div>
+        <strong>Accesorios para agregar</strong>
+        <span>Selecciona extras individuales para subir el ticket.</span>
+      </div>
+    </div>
+    <div class="upsell-custom-grid">
+      ${upsellAccessorySuggestions(phoneId)
+        .map(
+          (p) => `<button type="button" class="upsell-custom-item" onclick="addUpsellAccessory(${p.id})">
+            <span>${productImageMarkup(p)}</span>
+            <strong>${p.name}</strong>
+            <em>${clp(p.price)}</em>
+            <small>Agregar</small>
+          </button>`,
+        )
+        .join("")}
+    </div>`;
+}
+
+function addUpsellAccessory(id) {
+  addCart(id, { skipUpsell: true, quiet: true });
+  const item = PRODUCTS.find((p) => p.id === id);
+  toast(`${item?.name || "Accesorio"} agregado`);
+}
+
 function closeUpsell() {
   document.getElementById("upsellModal").style.display = "none";
+  const sidePanel = document.getElementById("upsellSidePanel");
+  if (sidePanel) {
+    sidePanel.style.display = "none";
+    sidePanel.innerHTML = "";
+  }
 }
 
 function addPromoPackToCart(pack) {
@@ -2228,6 +2358,45 @@ function selectComboUpsellOption(comboId, optionIndex) {
   toast(`${option.title} agregado al carrito`);
 }
 
+function showPromoPersonalize(id) {
+  const promo = PRODUCTS.find((p) => p.id === id);
+  if (!promo) return;
+  const sidePanel = document.getElementById("upsellSidePanel");
+  if (sidePanel) {
+    sidePanel.style.display = "none";
+    sidePanel.innerHTML = "";
+  }
+  document.getElementById("upsellBody").innerHTML = `
+    <div class="upsell-product promo-upsell-product">
+      <div class="upsell-phone-visual">${productImageMarkup(promo)}</div>
+      <div>
+        <strong>${promo.name}</strong>
+        <span>${promo.marca || ""} ${promo.modelo || ""} - Precio promocional aplicado</span>
+      </div>
+      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${promo.id})">Personalizar</button>
+      <b>${clp(promo.price)}</b>
+    </div>
+    <div class="promo-only-upsell">
+      <div>
+        <strong>Promo activa</strong>
+        <span>Este equipo ya tiene descuento. Agrega accesorios solo si el cliente quiere completar su compra.</span>
+      </div>
+      <button type="button" onclick="selectPromoBase(${promo.id})">Agregar promo</button>
+    </div>`;
+  document.getElementById("upsellModal").style.display = "flex";
+}
+
+function selectPromoBase(id) {
+  const promo = PRODUCTS.find((p) => p.id === id);
+  if (!promo) return;
+  closeUpsell();
+  addCart(id, { skipUpsell: true, quiet: true });
+  OP.carrito = true;
+  renderCart();
+  renderCatalog();
+  toast(`${promo.name} agregado al carrito`);
+}
+
 function addCart(id, opts = {}) {
   const p = PRODUCTS.find((x) => x.id === id);
   if (p?.cat === "celular" && !opts.skipUpsell) {
@@ -2236,6 +2405,10 @@ function addCart(id, opts = {}) {
   }
   if (p?.cat === "combo" && !opts.skipUpsell) {
     showComboUpsell(id);
+    return;
+  }
+  if (p?.cat === "promo" && !opts.skipUpsell) {
+    showPromoPersonalize(id);
     return;
   }
   const avail = (p.units || []).filter((u) => u.st === "disponible");
@@ -2424,6 +2597,16 @@ function renderCupoUsage() {
   }
   const cupo = currentLeasingCupo();
   const usado = cartTotal();
+  const pre = S.precalificacion || getDemoPrecalificacion();
+  const plazos = S.plazosDisponibles?.length
+    ? S.plazosDisponibles
+    : plazosFromPrecal(pre);
+  if (!S.selectedPlazo && plazos.length) S.selectedPlazo = plazos[0];
+  const entrada = entradaFromPrecal(usado, pre);
+  const saldo = Math.max(0, usado - entrada);
+  const cuotaPreview = S.selectedPlazo
+    ? Math.ceil((saldo * (1 + S.selectedPlazo.factor)) / S.selectedPlazo.sem)
+    : 0;
   const restante = Math.max(0, cupo - usado);
   const exceso = Math.max(0, usado - cupo);
   const pct = Math.min(100, Math.round((usado / Math.max(cupo, 1)) * 100));
@@ -2437,6 +2620,22 @@ function renderCupoUsage() {
           <p>Aprovecha el cupo disponible al maximo</p>
         </div>
         <span>${S.precalificacion?.perfil || "Demo"} - ${clp(cupo)}</span>
+      </div>
+      <div class="cupo-terms">
+        <div><small>Cupo aprobado</small><strong>${clp(cupo)}</strong></div>
+        <div><small>Entrada ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}</small><strong>${clp(entrada)}</strong></div>
+        <div><small>Plazo elegido</small><strong>${S.selectedPlazo?.sem || "-"} sem.</strong></div>
+        <div><small>Cuota estimada</small><strong>${clp(cuotaPreview)}</strong></div>
+      </div>
+      <div class="cupo-plazo-picks">
+        ${plazos
+          .map(
+            (p, i) => `<button type="button" class="${S.selectedPlazo?.sem === p.sem ? "on" : ""}" onclick="selectPlazo(${i})">
+              <span>${p.sem} sem.</span>
+              <strong>${clp(Math.ceil((saldo * (1 + p.factor)) / p.sem))}</strong>
+            </button>`,
+          )
+          .join("")}
       </div>
       <div class="cupo-numbers">
         <div><small>Cupo usado</small><strong>${clp(usado)}</strong></div>
@@ -2573,7 +2772,7 @@ function applyDirectCredit() {
 }
 
 function hasLeasingProductSelected() {
-  return S.cart.some((x) => x.cat === "celular" && x.autoImei);
+  return S.cart.some((x) => x.cat === "celular" && (x.autoImei || S.autoImei));
 }
 
 function continueLeasingFromCatalog() {
@@ -2589,9 +2788,16 @@ function continueLeasingFromCatalog() {
   document.getElementById("navLeas").style.display = "";
   document.getElementById("btnCancel").style.display = "";
   setProgress(3);
-  setTitle("Leasing — Oferta + Referencias");
-  initOffer();
+  setTitle("Leasing - Oferta + Referencias");
   goScreen("lp3oferta");
+  initOffer();
+  setTimeout(() => {
+    const nextCard =
+      document.getElementById("lp3PayAddressCard") ||
+      document.getElementById("lp3RefsCard");
+    if (nextCard) nextCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 90);
+  toast("Producto seleccionado. Continua con referencias");
 }
 
 function selPay(m, el) {
@@ -2974,11 +3180,13 @@ function initOffer() {
   const entryCard = document.getElementById("lp3EntryTermCard");
   const entryInputWrap = document.getElementById("lp3EntryInputWrap");
   const refsCard = document.getElementById("lp3RefsCard");
+  const payAddressCard = document.getElementById("lp3PayAddressCard");
   const productSelected = hasLeasingProductSelected();
   if (entryCard) entryCard.style.display = "";
   if (entryInputWrap)
     entryInputWrap.style.display = S.payMethod === "leasing" ? "none" : "";
   if (refsCard) refsCard.style.display = "";
+  if (payAddressCard) payAddressCard.style.display = productSelected ? "" : "none";
   if (!S.precalificacion) S.precalificacion = getDemoPrecalificacion();
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
   renderPrequalCard(productSelected);
@@ -2987,6 +3195,7 @@ function initOffer() {
   const entMin = entradaFromPrecal(tot, S.precalificacion);
   document.getElementById("lp3_ent").value = entMin;
   document.getElementById("lp3_entMin").textContent = clp(entMin);
+  hydratePayAddressCard(entMin);
   document.getElementById("lp3ofNom").textContent = S.nombre;
   document.getElementById("lp3ofRut").textContent = "RUT: " + S.rut;
   // Mostrar breakdown de precios
@@ -3016,6 +3225,35 @@ function initOffer() {
   calcOffer();
 }
 
+function hydratePayAddressCard() {
+  const ingEl = document.getElementById("lp3_ing");
+  const gastEl = document.getElementById("lp3_gast");
+  const ocupEl = document.getElementById("lp3_ocup");
+  const actEl = document.getElementById("lp3_act");
+
+  if (ingEl && !ingEl.value) ingEl.value = S.ingresos || 850;
+  if (gastEl && !gastEl.value) gastEl.value = S.gastos || 350;
+  if (ocupEl && !ocupEl.value) ocupEl.value = document.getElementById("lp2_ocup")?.value || "";
+  if (actEl && !actEl.value) actEl.value = document.getElementById("lp2_act")?.value || "";
+  calcLp3Capacity();
+}
+
+function calcLp3Capacity() {
+  const ing = parseMoneyInput(document.getElementById("lp3_ing")?.value);
+  const gast = parseMoneyInput(document.getElementById("lp3_gast")?.value);
+  const msg = document.getElementById("lp3CapMsg");
+  if (!msg) return;
+  if (!ing && !gast) {
+    msg.style.display = "none";
+    return;
+  }
+  const cap = Math.max(0, ing - gast);
+  const ratio = ing > 0 ? gast / ing : 1;
+  msg.style.display = "";
+  msg.className = "cap-msg " + (ratio <= 0.55 && cap > 0 ? "ok" : "warn");
+  msg.innerHTML = `<strong>Capacidad disponible: ${clp(cap)}/mes</strong><span>Ratio gastos/ingresos: ${Math.round(ratio * 100)}%</span>`;
+}
+
 function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
   const pre = S.precalificacion || getDemoPrecalificacion();
   const box = document.getElementById("lp3PrequalCard");
@@ -3023,7 +3261,7 @@ function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
     .getElementById("lp3OfferGrid")
     ?.classList.toggle("lp3-preproduct", !productSelected);
   if (box) {
-    box.style.display = productSelected ? "none" : "";
+    box.style.display = "";
     box.innerHTML = `
       <div class="prequal-main">
         <div class="prequal-tile">
@@ -3051,8 +3289,8 @@ function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
         <div><small>Verificacion</small><strong>${(pre.verificacion || "OTP WHATSAPP").split(",")[0]}</strong></div>
         <div><small>Nacionalidad</small><strong>${pre.nacionalidad || "ECUATORIANA"}</strong></div>
       </div>
-      <div class="prequal-note">Selecciona un producto en inventario para calcular entrada real, cuotas y desglose del contrato.</div>
-      <button class="btn btn-lg btn-full inventory-cta prequal-inventory-btn" onclick="goInventoryFromOffer()">Ir a inventario</button>`;
+      <div class="prequal-note">${productSelected ? "Producto seleccionado. Se calculan entrada, cuotas y desglose del contrato." : "Selecciona un producto en inventario para calcular entrada real, cuotas y desglose del contrato."}</div>
+      ${productSelected ? "" : `<button class="btn btn-lg btn-full inventory-cta prequal-inventory-btn" onclick="goInventoryFromOffer()">Ir a inventario</button>`}`;
   }
   const plazoLabel = document.getElementById("lp3PlazoLabel");
   const plazoGrid = document.getElementById("plazoGrid");
@@ -3079,11 +3317,13 @@ function calcOffer() {
   const ent = parseInt(document.getElementById("lp3_ent")?.value) || 0;
   const errEl = document.getElementById("entErr");
   const entMin_ = entradaFromPrecal(tot, S.precalificacion);
+  renderPrequalCard(true);
   if (S.payMethod === "leasing") {
     if (errEl) errEl.style.display = "none";
     const montoAuto = Math.max(0, tot - entMin_);
     S.entrada = entMin_;
     S.monto = montoAuto;
+    hydratePayAddressCard(entMin_);
     renderPlazos();
     if (!S.selectedPlazo) return;
     const pagareAuto = montoAuto * (1 + S.selectedPlazo.factor);
@@ -3115,6 +3355,7 @@ function calcOffer() {
   const monto = Math.max(0, tot - ent);
   S.entrada = ent;
   S.monto = monto;
+  hydratePayAddressCard(ent);
   renderPlazos();
   if (!S.selectedPlazo) return;
   // MODELO SOBREPRECIO:
@@ -3182,7 +3423,11 @@ function renderOfferSummary(ent, monto, cuota, tc) {
 function renderPlazos() {
   const monto = S.monto;
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
-  document.getElementById("plazoGrid").innerHTML = plazos
+  if (!S.selectedPlazo && plazos.length) S.selectedPlazo = plazos[0];
+  const grid = document.getElementById("plazoGrid");
+  if (!grid) return;
+  grid.style.display = "";
+  grid.innerHTML = plazos
     .map((p, i) => {
       // Pagaré = Monto × (1 + Factor) | Cuota = ceil(Pagaré / Semanas)
       const pagare = monto * (1 + p.factor);
@@ -3200,6 +3445,7 @@ function selectPlazo(i) {
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
   S.selectedPlazo = plazos[i];
   calcOffer();
+  renderCart();
 }
 function goInventoryFromOffer() {
   setTitle("Catálogo de Productos");
@@ -3210,6 +3456,15 @@ function continueLp3() {
     toast("Acepta las condiciones del leasing", "warn");
     return;
   }
+  const lp3Ing = parseMoneyInput(document.getElementById("lp3_ing")?.value);
+  const lp3Gast = parseMoneyInput(document.getElementById("lp3_gast")?.value);
+  if (hasLeasingProductSelected() && (!lp3Ing || !lp3Gast)) {
+    toast("Ingresa ingresos y gastos mensuales", "warn");
+    document.getElementById(!lp3Ing ? "lp3_ing" : "lp3_gast")?.focus();
+    return;
+  }
+  S.ingresos = lp3Ing || S.ingresos;
+  S.gastos = lp3Gast || S.gastos;
   const tot3 = offerTotal();
   const ent = parseInt(document.getElementById("lp3_ent")?.value) || 0;
   const entMin3 = entradaFromPrecal(tot3, S.precalificacion);
@@ -3407,6 +3662,7 @@ function continueLp2() {
 }
 
 function validarRef(n) {
+  refsState[n] = refsState[n] || { estado: "pendiente" };
   if (S.payMethod === "leasing" && !hasLeasingProductSelected()) {
     toast("Referencias bloqueadas hasta escoger producto", "warn");
     return;
