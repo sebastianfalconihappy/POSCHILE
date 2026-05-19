@@ -26,10 +26,8 @@
             alt="Happy"
             class="publicidad-logo"
           />
-          <div>
-            <h1>HAPPY</h1>
-            <span>POS CHILE</span>
-          </div>
+          <span class="publicidad-separator"></span>
+          <strong class="publicidad-title">POS - Publicidad</strong>
         </div>
       </div>
 
@@ -68,6 +66,15 @@
 
     <!-- ════════════════ MÉTODO DE PAGO ════════════════ -->
     <div id="metodoPagoScreen" class="metodo-pago">
+      <header class="metodo-pago__top">
+        <img
+          src="assets/ads/logo-happy.png"
+          alt="Happy"
+          class="metodo-pago__logo"
+        />
+        <span class="metodo-pago__separator"></span>
+        <strong>POS - Método de pago</strong>
+      </header>
       <main class="metodo-pago__main">
         <section class="metodo-pago__content">
           <h1 class="metodo-pago__title">Seleccione el método de pago</h1>
@@ -191,7 +198,7 @@
         >
           <button
             class="nav-btn"
-            id="navPOS"
+            id="navCombos"
             onclick="setSidebarCategory('combo', this)"
           >
             <span class="ni">&#129513;</span><span class="nl">Combos</span>
@@ -207,31 +214,40 @@
           </button>
           <button
             class="nav-btn"
-            id="navInv"
+            id="navPhones"
             onclick="setSidebarCategory('celular', this)"
           >
             <span class="ni">&#128241;</span><span class="nl">Celulares</span>
           </button>
           <button
             class="nav-btn"
-            id="navLogs"
+            id="navAccessories"
             onclick="setSidebarCategory('accesorio', this)"
           >
             <span class="ni">&#127911;</span><span class="nl">Accesorios</span>
           </button>
           <button
             class="nav-btn"
-            id="navCartola"
-            onclick="setSidebarCategory('regalo', this)"
-          >
-            <span class="ni">&#127873;</span><span class="nl">Regalos</span>
-          </button>
-          <button
-            class="nav-btn"
             id="navPromos"
-            onclick="setSidebarCategory('recomendado', this)"
+            onclick="setSidebarCategory('promo', this)"
           >
             <span class="ni">&#128293;</span><span class="nl">Promos</span>
+          </button>
+
+          <div class="sb-divider"></div>
+
+          <button class="nav-btn nav-tool" id="navStock" onclick="navGo('inv')">
+            <span class="ni">&#128230;</span><span class="nl">Stock</span>
+          </button>
+          <button class="nav-btn nav-tool" id="navLogs" onclick="navGo('logs')">
+            <span class="ni">&#128196;</span><span class="nl">Logs</span>
+          </button>
+          <button
+            class="nav-btn nav-tool"
+            id="navCartola"
+            onclick="navGo('cartola')"
+          >
+            <span class="ni">&#128202;</span><span class="nl">Cartola</span>
           </button>
         </nav>
         <div class="sb-foot">
@@ -311,6 +327,19 @@
                     oninput="renderCatalog()"
                   />
                 </div>
+                <div
+                  class="direct-credit-cta"
+                  id="directCreditCta"
+                  style="display: none"
+                >
+                  <div>
+                    <strong>Aplicar a credito directo</strong>
+                    <span>Convierte esta venta a leasing con LDPD + OTP</span>
+                  </div>
+                  <button type="button" onclick="applyDirectCredit()">
+                    Aplicar ahora
+                  </button>
+                </div>
                 <div class="filter-bar old-catalog-tabs">
                   <div
                     class="ftab"
@@ -346,10 +375,10 @@
 
                   <div
                     class="ftab"
-                    data-filter="recomendado"
-                    onclick="setFilter('recomendado', this)"
+                    data-filter="promo"
+                    onclick="setFilter('promo', this)"
                   >
-                    Recomendados
+                    Promos
                   </div>
                 </div>
                 <div class="catalog-filter-panel">
@@ -367,7 +396,7 @@
                         class="btn btn-ghost btn-sm"
                         onclick="activarComparacion()"
                       >
-                        Comparar
+                        Comparar Telefonos
                       </button>
 
                       <button
@@ -527,6 +556,7 @@
                         Carrito vacío
                       </div>
                     </div>
+                    <div id="cupoUsageBox"></div>
                     <div id="cartFoot" style="display: none">
                       <div class="sum-div"></div>
                       <div class="sum-row">
@@ -540,8 +570,10 @@
                         id="cImeiInfo"
                         style="display: none; margin-top: 8px"
                       ></div>
+                      <div id="cartFlowNote" style="display: none"></div>
                       <button
                         class="btn btn-navy btn-lg btn-full"
+                        id="cartContinueBtn"
                         style="margin-top: 12px"
                         onclick="goPago()"
                       >
@@ -558,7 +590,7 @@
                   </div>
                   <div class="ads-selfservice-card">
                     <div class="ads-header">
-                      <span>🔥 Ofertas del mes</span>
+                      <span>🔥 Ofertas Happy</span>
                       <small>Happy Chile</small>
                     </div>
 
@@ -1124,9 +1156,9 @@
           <!-- LEASING P2: DATOS CLIENTE + CAPACIDAD DE PAGO -->
           <div class="screen" id="screen-lp2">
             <div id="lp2hdr" style="margin-bottom: 13px"></div>
-            <div class="g5050">
+            <div class="g5050" id="lp2Grid">
               <div>
-                <div class="card mb10">
+                <div class="card mb10" id="lp2DatosClienteCard">
                   <div class="card-title">👤 Datos del Cliente</div>
                   <div class="card-sub">
                     Autollenado desde registro · Completa los campos faltantes
@@ -1278,7 +1310,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="card">
+                <div class="card" id="lp2PerfilLaboralCard">
                   <div class="card-title">💼 Perfil Laboral</div>
                   <div class="g2col">
                     <div class="fg">
@@ -1311,8 +1343,8 @@
                   </div>
                 </div>
               </div>
-              <div>
-                <div class="card mb10">
+              <div id="lp2SideCol">
+                <div class="card mb10" id="lp2CapacidadPagoCard">
                   <div class="card-title">Capacidad de Pago</div>
                   <div class="card-sub">Ingresos y gastos - mismo bloque</div>
                   <div class="fg">
@@ -1413,12 +1445,13 @@
           <div class="screen" id="screen-lp3oferta">
             <div id="lp3hdr" style="margin-bottom: 13px"></div>
             <!-- LAYOUT: LEFT=Entrada+Plazos+Oferta+Refs | RIGHT=Desglose precio+Resumen -->
-            <div class="g6040">
+            <div class="g6040" id="lp3OfferGrid">
               <!-- COLUMNA IZQUIERDA -->
               <div>
                 <!-- Entrada + Plazos -->
                 <div class="card mb10" id="lp3EntryTermCard">
                   <div class="card-title">Plazo y Entrada</div>
+                  <div id="lp3PrequalCard" class="prequal-card"></div>
                   <div
                     class="fg"
                     id="lp3EntryInputWrap"
@@ -1458,6 +1491,7 @@
                   </div>
                   <div id="entErr" class="val-err" style="display: none"></div>
                   <div
+                    id="lp3PlazoLabel"
                     style="
                       font-size: 11px;
                       font-weight: 700;
@@ -1475,7 +1509,7 @@
                 </div>
 
                 <!-- Aceptación oferta -->
-                <div class="card mb10">
+                <div class="card mb10" id="lp3OfferAcceptCard">
                   <div class="offer-hero">
                     <div
                       style="
@@ -1694,7 +1728,7 @@
 
               <!-- COLUMNA DERECHA: Desglose de precio + Resumen financiero -->
               <div>
-                <div class="card mb10 sticky">
+                <div class="card mb10 sticky" id="lp3PriceSummaryCard">
                   <div class="card-title">💰 Desglose de Precio</div>
                   <div class="price-breakdown" id="priceBreakdown"></div>
                   <div
