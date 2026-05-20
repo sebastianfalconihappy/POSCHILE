@@ -682,6 +682,40 @@ const PRODUCTS = [
     img: "assets/ads/Samsung Galaxy S24 FE.jpg",
     units: [],
   },
+  {
+    id: 811,
+    name: "Oferta Nubia V80 Pro",
+    cat: "promo",
+    ico: "HOT",
+    marca: "Nubia",
+    modelo: "V80 Pro",
+    ram: "8GB",
+    rom: "256GB",
+    costo: 249,
+    oldPrice: 299,
+    discount: "-17%",
+    promoTag: "Camara 108 MP",
+    desc: "Oferta destacada desde la publicidad Happy.",
+    img: "assets/ads/imagen1.jpg",
+    units: [],
+  },
+  {
+    id: 812,
+    name: "Oferta Infinix Note 60 Pro",
+    cat: "promo",
+    ico: "HOT",
+    marca: "Infinix",
+    modelo: "Note 60 Pro",
+    ram: "8GB",
+    rom: "256GB",
+    costo: 279,
+    oldPrice: 329,
+    discount: "-15%",
+    promoTag: "5G + 6000 mAh",
+    desc: "Equipo promocionado en campaña Happy.",
+    img: "assets/ads/imagen2.png",
+    units: [],
+  },
 ];
 /*
   // Celulares — precio = costo (pre markup)
@@ -2280,10 +2314,10 @@ function showUpsell(id) {
         <strong>${phone.name}</strong>
         <span>${phone.marca || ""} ${phone.modelo || ""} - ${phone.ram || ""} ${phone.rom || ""}</span>
       </div>
-      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${phone.id})">Personalizar</button>
+      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${phone.id})">Personaliza tu equipo</button>
       <b>${clp(phone.price)}</b>
     </div>
-    ${renderUpsellCupoPreview(phone.price)}
+    ${renderUpsellCupoPreview(phone.price, phone.id)}
     <div class="upsell-toolbar">
       <div class="upsell-colors">
         <span>Color del equipo</span>
@@ -2374,7 +2408,29 @@ function toggleUpsellAccessories(phoneId) {
 function addUpsellAccessory(id) {
   addCart(id, { skipUpsell: true, quiet: true });
   const item = PRODUCTS.find((p) => p.id === id);
+  renderCart();
+  renderCatalog();
+  refreshUpsellCupoPreview();
+  const basePrice = Number(
+    document.getElementById("upsellCupoBasePrice")?.value || 0,
+  );
+  const exceso = leasingCupoExcess(cartTotal() + basePrice);
+  if (exceso > 0) {
+    toast(`Excediste tu cupo por ${clp(exceso)}. Retira un extra o cambia de equipo.`, "warn");
+    return;
+  }
   toast(`${item?.name || "Accesorio"} agregado`);
+}
+
+function refreshUpsellCupoPreview() {
+  const current = document.querySelector(".upsell-cupo-preview");
+  if (!current) return;
+  const basePrice = Number(
+    document.getElementById("upsellCupoBasePrice")?.value || 0,
+  );
+  const baseProductId = document.getElementById("upsellCupoBaseProduct")?.value || "";
+  const html = renderUpsellCupoPreview(basePrice, baseProductId);
+  if (html) current.outerHTML = html;
 }
 
 function closeUpsell() {
@@ -2429,7 +2485,7 @@ function showComboUpsell(id) {
       </div>
       <b>${clp(combo.price)}</b>
     </div>
-    ${renderUpsellCupoPreview(combo.price)}
+    ${renderUpsellCupoPreview(combo.price, combo.id)}
     <div class="upsell-toolbar combo-upsell-toolbar">
       <div class="upsell-deal-strip">
         <strong>Completa este combo</strong>
@@ -2487,7 +2543,7 @@ function showAccessoryUpsell(id) {
         </div>
         <b>${clp(accessory.price)}</b>
       </div>
-      ${renderUpsellCupoPreview(accessory.price)}
+      ${renderUpsellCupoPreview(accessory.price, accessory.id)}
       <div class="accessory-upsell-options">
         ${options
           .map((op, idx) => {
@@ -2541,10 +2597,10 @@ function showPromoPersonalize(id) {
         <strong>${promo.name}</strong>
         <span>${promo.marca || ""} ${promo.modelo || ""} - Precio promocional aplicado</span>
       </div>
-      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${promo.id})">Personalizar</button>
+      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${promo.id})">Personaliza tu equipo</button>
       <b>${clp(promo.price)}</b>
     </div>
-    ${renderUpsellCupoPreview(promo.price)}
+    ${renderUpsellCupoPreview(promo.price, promo.id)}
     <div class="promo-only-upsell">
       <div>
         <strong>Promo activa</strong>
@@ -2751,7 +2807,7 @@ function applyHappyBrandLogos() {
   });
 }
 
-function renderUpsellCupoPreview(basePrice = 0) {
+function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
   if (S.payMethod !== "leasing") return "";
   const cupo = currentLeasingCupo();
   const pre = S.precalificacion || getDemoPrecalificacion();
@@ -2771,6 +2827,8 @@ function renderUpsellCupoPreview(basePrice = 0) {
     : 0;
   return `
     <div class="upsell-cupo-preview ${exceso ? "over" : ""}" style="--cupo-pct:${pct}%">
+      <input type="hidden" id="upsellCupoBasePrice" value="${Number(basePrice || 0)}" />
+      <input type="hidden" id="upsellCupoBaseProduct" value="${baseProductId}" />
       <div class="upsell-cupo-preview-head">
         <div>
           <strong>Barra de cupo leasing</strong>
@@ -2986,6 +3044,26 @@ function updateDirectCreditCta() {
 function applyDirectCredit() {
   S.payMethod = "leasing";
   S.isSigma = true;
+  S.nombre = "";
+  S.rut = "";
+  S.tel = "";
+  S.email = "";
+  S.ingresos = 0;
+  S.gastos = 0;
+  S.precalificacion = null;
+  S.plazosDisponibles = [];
+  S.selectedPlazo = null;
+  S.entrada = 0;
+  S.monto = 0;
+  S.cuota = 0;
+  S.totalContrato = 0;
+  evalRes = {};
+  actRes = {};
+  Object.keys(OP).forEach((k) => {
+    if (k !== "carrito") OP[k] = false;
+  });
+  OP.carrito = S.cart.length > 0;
+  resetLeasingFormDom();
   prepareLeasingDemoPrecalificacion();
   OP.pago = true;
   updateDirectCreditCta();
@@ -3006,9 +3084,26 @@ function hasLeasingCartValue() {
   return S.cart.length > 0 && cartTotal() > 0;
 }
 
+function leasingCupoExcess(total = cartTotal()) {
+  if (S.payMethod !== "leasing") return 0;
+  return Math.max(0, Number(total || 0) - currentLeasingCupo());
+}
+
 function continueLeasingFromCatalog() {
   if (!hasLeasingCartValue()) {
     toast("Para continuar leasing selecciona al menos un producto", "warn");
+    return;
+  }
+  const exceso = leasingCupoExcess();
+  if (exceso > 0) {
+    toast(
+      `No puedes continuar con leasing: excediste tu cupo disponible por ${clp(exceso)}.`,
+      "err",
+    );
+    document.getElementById("cupoUsageBox")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
     return;
   }
   OP.pago = true;
@@ -3421,7 +3516,10 @@ function initOffer() {
   if (recoveredEntryChk) recoveredEntryChk.checked = false;
   if (entryInputWrap)
     entryInputWrap.style.display = S.payMethod === "leasing" ? "none" : "";
-  if (refsCard) refsCard.style.display = "";
+  if (refsCard) {
+    refsCard.style.display =
+      S.payMethod === "leasing" && !productSelected ? "none" : "";
+  }
   if (payAddressCard) payAddressCard.style.display = productSelected ? "" : "none";
   if (!S.precalificacion) S.precalificacion = getDemoPrecalificacion();
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
@@ -3476,6 +3574,14 @@ function toggleRecoveredEntry() {
   if (input) input.min = entMin;
   calcOffer();
   if (active) input?.focus();
+}
+
+function updateFinanceFormula(total, entrada, saldo, warn = false) {
+  const el = document.getElementById("lp3FinanceFormula");
+  if (!el) return;
+  el.style.display = "";
+  el.className = "finance-formula" + (warn ? " is-warn" : "");
+  el.innerHTML = `Total productos <strong>${clp(total)}</strong> - entrada cliente <strong>${clp(entrada)}</strong> = saldo a financiar <strong>${clp(saldo)}</strong>`;
 }
 
 function hydratePayAddressCard() {
@@ -3589,6 +3695,7 @@ function calcOffer() {
       S.monto = Math.max(0, tot - entMin_);
       S.cuota = 0;
       S.totalContrato = S.entrada;
+      updateFinanceFormula(tot, S.entrada, S.monto, true);
       renderPlazos();
       renderOfferSummary(S.entrada, S.monto, 0, S.entrada);
       return;
@@ -3606,6 +3713,7 @@ function calcOffer() {
     const montoAuto = Math.max(0, tot - entryValue);
     S.entrada = entryValue;
     S.monto = montoAuto;
+    updateFinanceFormula(tot, entryValue, montoAuto);
     hydratePayAddressCard(entryValue);
     renderPlazos();
     if (!S.selectedPlazo) return;
@@ -3624,6 +3732,7 @@ function calcOffer() {
     // Still render plazos with entMin so user sees preview
     S.entrada = entMin_;
     S.monto = Math.max(0, tot - entMin_);
+    updateFinanceFormula(tot, S.entrada, S.monto, true);
     renderPlazos();
     return;
   }
@@ -3638,6 +3747,7 @@ function calcOffer() {
   const monto = Math.max(0, tot - ent);
   S.entrada = ent;
   S.monto = monto;
+  updateFinanceFormula(tot, ent, monto);
   hydratePayAddressCard(ent);
   renderPlazos();
   if (!S.selectedPlazo) return;
@@ -3684,7 +3794,8 @@ function renderOfferSummary(ent, monto, cuota, tc) {
   updatePriceBreakdown(ent, monto);
   document.getElementById("lp3ofDet").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado </span><span>${clp(pre?.cupo || 0)}</span></div>
-    <div class="sum-row"><span class="sum-lbl">Entrada</span><span>${clp(ent)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Total productos</span><span>${clp(tot)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Entrada cliente</span><span>${clp(ent)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Saldo a financiar</span><span>${clp(monto)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} semanas</span></div>
     <div class="sum-row" style="color:var(--lime)"><span class="sum-lbl" style="color:#5a7200">Cuota semanal</span><span style="font-weight:800;font-family:'JetBrains Mono',monospace">${clp(cuota)}</span></div>
@@ -3694,7 +3805,7 @@ function renderOfferSummary(ent, monto, cuota, tc) {
   document.getElementById("finSumm").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado API</span><span>${clp(pre?.cupo || 0)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Valor equipo / cupo usado</span><span>${clp(tot)}</span></div>
-    <div class="sum-row"><span class="sum-lbl">Entrada API</span><span>${clp(ent)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Entrada cliente</span><span>${clp(ent)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Saldo a financiar</span><span>${clp(monto)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} sem.</span></div>
     <div style="background:var(--lime3);border-radius:var(--rs);padding:10px 12px;margin:8px 0">
@@ -3720,8 +3831,8 @@ function updatePriceBreakdown(ent, monto) {
     pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito<br><span class="pb-formula">${items.length} item(s) seleccionados</span></span><span>${clp(tot)}</span></div>`;
   }
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Cupo aprobado<br><span class="pb-formula">Perfil ${pre.perfil} - Ticket ${pre.ticket}</span></span><span>${clp(pre.cupo || 0)}</span></div>`;
-  pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada aplicada<br><span class="pb-formula">${isRecoveredEntryActive() ? "Entrada recuperada/manual" : `API ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}`}</span></span><span>${clp(ent)}</span></div>`;
-  pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(ent)} / Plazos: ${pre.plazo}</span></span><span>${clp(monto)}</span></div>`;
+  pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada cliente<br><span class="pb-formula">${isRecoveredEntryActive() ? "Valor ingresado por vendedor" : `Minima API ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}`}</span></span><span>${clp(ent)}</span></div>`;
+  pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(ent)} = ${clp(monto)}</span></span><span>${clp(monto)}</span></div>`;
   el.innerHTML = pbHTML;
 }
 function renderPlazos() {
@@ -4101,6 +4212,79 @@ function resetRefs() {
 ═══════════════════════════════════════════════════ */
 
 /* ── Contratos ─────────────────────────────────── */
+function resetLeasingFormDom() {
+  const inputIds = [
+    "lp1_rut",
+    "lp1_nom",
+    "lp1_tel",
+    "lp1_email",
+    "lp1_birth",
+    "lp2_nom",
+    "lp2_rut",
+    "lp2_tel",
+    "lp2_email",
+    "lp2_dir",
+    "lp2_ing",
+    "lp2_gast",
+    "lp3_ing",
+    "lp3_gast",
+    "lp3_ent",
+    "lp3_payref",
+  ];
+  inputIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = "";
+    el.classList.remove("ok", "err", "is-invalid");
+    const ferr = el.parentElement?.querySelector(".ferr");
+    if (ferr) {
+      ferr.textContent = "";
+      ferr.style.display = "none";
+    }
+  });
+  ["lp2_comuna", "lp2_region", "lp2_ocup", "lp2_act", "lp3_ocup", "lp3_act"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.selectedIndex = 0;
+    el.classList.remove("ok", "err");
+    const ferr = el.parentElement?.querySelector(".ferr");
+    if (ferr) {
+      ferr.textContent = "";
+      ferr.style.display = "none";
+    }
+  });
+  ["o1", "o2", "o3", "o4", "o5", "o6"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = "";
+    el.classList.remove("ok", "err");
+  });
+  const chkLdpd = document.getElementById("chkLdpd");
+  if (chkLdpd) chkLdpd.checked = false;
+  document.getElementById("ldpdCheck")?.classList.remove("on");
+  const ldpdErr = document.getElementById("ldpdErr");
+  if (ldpdErr) ldpdErr.style.display = "none";
+  const otpMsg = document.getElementById("otpMsg");
+  if (otpMsg) otpMsg.innerHTML = "";
+  const lp1A = document.getElementById("lp1A");
+  const lp1B = document.getElementById("lp1B");
+  if (lp1A) lp1A.style.display = "";
+  if (lp1B) lp1B.style.display = "none";
+  const cap = document.getElementById("lp2_capResult");
+  if (cap) cap.style.display = "none";
+  const entErr = document.getElementById("entErr");
+  if (entErr) entErr.style.display = "none";
+  const recovered = document.getElementById("lp3RecoveredEntryChk");
+  if (recovered) recovered.checked = false;
+  const formula = document.getElementById("lp3FinanceFormula");
+  if (formula) formula.style.display = "none";
+  ["lp2hdr", "lp3hdr", "lp5hdr", "lp6hdr"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = "";
+  });
+  resetRefs();
+}
+
 function generarContratos() {
   document.getElementById("btnGenDocs").disabled = true;
   [1, 2, 3, 4].forEach((d, i) =>
@@ -4639,6 +4823,7 @@ function resetAll() {
     .querySelectorAll(".pay-opt")
     .forEach((e) => e.classList.remove("on"));
   document.getElementById("btnPayCont").disabled = true;
+  resetLeasingFormDom();
   // LDPD/OTP reset
   document.getElementById("chkLdpd").checked = false;
   document.getElementById("ldpdCheck").classList.remove("on");
@@ -5369,11 +5554,36 @@ function volverListaCartola() {
 
 // Publicidad debajo de carrito en catalogo
 const adsImages = [
-  "assets/ads/imagen1.png",
-  "assets/ads/imagen2.png",
-  "assets/ads/imagen3.png",
-  "assets/ads/imagen4.png",
-  "assets/ads/imagen1.jpg",
+  {
+    src: "assets/ads/imagen1.png",
+    productId: 812,
+    title: "Ver equipo recomendado",
+    text: "Abrir Infinix Note 60 Pro",
+  },
+  {
+    src: "assets/ads/imagen2.png",
+    productId: 812,
+    title: "Comprar oferta Infinix",
+    text: "Note 60 Pro con promo activa",
+  },
+  {
+    src: "assets/ads/imagen3.png",
+    productId: 811,
+    title: "Ver equipo sugerido",
+    text: "Abrir Nubia V80 Pro",
+  },
+  {
+    src: "assets/ads/imagen4.png",
+    productId: 811,
+    title: "Simular compra",
+    text: "Cargar oferta desde publicidad",
+  },
+  {
+    src: "assets/ads/imagen1.jpg",
+    productId: 811,
+    title: "Comprar oferta Nubia",
+    text: "V80 Pro con descuento",
+  },
 ];
 
 let adsIndex = 0;
@@ -5389,17 +5599,38 @@ function pintarDotsAds() {
     .join("");
 }
 
-function cambiarPublicidadCarrito() {
+function pintarPublicidadActual() {
   const img = document.getElementById("adsImage");
-  if (!img) return;
-
-  adsIndex = (adsIndex + 1) % adsImages.length;
-  img.src = adsImages[adsIndex];
-
+  const title = document.getElementById("adsCtaTitle");
+  const text = document.getElementById("adsCtaText");
+  const current = adsImages[adsIndex];
+  if (!img || !current) return;
+  img.src = current.src;
+  img.alt = current.text || "Oferta Happy";
+  if (title) title.textContent = current.title || "Ver oferta";
+  if (text) text.textContent = current.text || "Toca para abrir la promocion";
   pintarDotsAds();
 }
 
-pintarDotsAds();
+function cambiarPublicidadCarrito() {
+  adsIndex = (adsIndex + 1) % adsImages.length;
+  pintarPublicidadActual();
+}
+
+function openCurrentAdOffer() {
+  const current = adsImages[adsIndex];
+  const product = PRODUCTS.find((p) => p.id === current?.productId);
+  if (!product) {
+    toast("Oferta no disponible", "err");
+    return;
+  }
+  if (product.cat === "promo") showPromoPersonalize(product.id);
+  else if (product.cat === "celular") showUpsell(product.id);
+  else addCart(product.id);
+  toast(`Oferta abierta: ${product.name}`);
+}
+
+pintarPublicidadActual();
 setInterval(cambiarPublicidadCarrito, 4000);
 
 // Boton de comparar telefonos

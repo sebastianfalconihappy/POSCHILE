@@ -98,12 +98,6 @@
             Elige cómo el cliente desea continuar con la compra.
           </p>
 
-          <div class="metodo-pago__quickbar">
-            <span>Cliente identificado</span>
-            <span>Inventario con cupo</span>
-            <span>Venta asistida</span>
-          </div>
-
           <div class="metodo-pago__options">
             <button
               class="metodo-pago__card"
@@ -638,12 +632,22 @@
                       <small>Happy Chile</small>
                     </div>
 
-                    <div class="ads-screen">
+                    <div
+                      class="ads-screen"
+                      role="button"
+                      tabindex="0"
+                      onclick="openCurrentAdOffer()"
+                      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCurrentAdOffer();}"
+                    >
                       <img
                         id="adsImage"
                         src="assets/ads/imagen1.png"
                         alt="Publicidad Happy"
                       />
+                      <div class="ads-cta">
+                        <strong id="adsCtaTitle">Ver oferta</strong>
+                        <span id="adsCtaText">Toca para abrir la promocion</span>
+                      </div>
                     </div>
 
                     <div class="ads-dots" id="adsDots"></div>
@@ -1552,6 +1556,11 @@
                     </div>
                   </div>
                   <div id="entErr" class="val-err" style="display: none"></div>
+                  <div
+                    id="lp3FinanceFormula"
+                    class="finance-formula"
+                    style="display: none"
+                  ></div>
                   <div
                     id="lp3PlazoLabel"
                     style="
