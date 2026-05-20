@@ -18,6 +18,9 @@ function seleccionarMetodoPago(metodo) {
   if (metodo === "Leasing") {
     S.payMethod = "leasing";
     S.isSigma = true;
+    if (typeof prepareLeasingDemoPrecalificacion === "function") {
+      prepareLeasingDemoPrecalificacion();
+    }
     OP.pago = true;
 
     document.getElementById("navLeas").style.display = "";

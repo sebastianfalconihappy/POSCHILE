@@ -45,6 +45,21 @@
             fácil de usar.
           </p>
 
+          <div class="publicidad-metrics">
+            <div>
+              <strong>6</strong>
+              <span>campanas activas</span>
+            </div>
+            <div>
+              <strong>OTP</strong>
+              <span>flujo seguro</span>
+            </div>
+            <div>
+              <strong>POS</strong>
+              <span>venta guiada</span>
+            </div>
+          </div>
+
           <div class="publicidad-progress" id="pubProgress"></div>
 
           <div class="publicidad-actions">
@@ -83,14 +98,26 @@
             Elige cómo el cliente desea continuar con la compra.
           </p>
 
+          <div class="metodo-pago__quickbar">
+            <span>Cliente identificado</span>
+            <span>Inventario con cupo</span>
+            <span>Venta asistida</span>
+          </div>
+
           <div class="metodo-pago__options">
             <button
               class="metodo-pago__card"
               onclick="seleccionarMetodoPago('Leasing')"
             >
               <span class="metodo-pago__icon">▣</span>
+              <span class="metodo-pago__badge">Credito directo</span>
               <h2>Leasing</h2>
               <p>Compra financiada bajo modalidad leasing.</p>
+              <div class="metodo-pago__route">
+                <span>LDPD + OTP</span>
+                <span>Cupo</span>
+                <span>Inventario</span>
+              </div>
             </button>
 
             <button
@@ -99,8 +126,23 @@
             >
               <span class="metodo-pago__icon">◉</span>
               <h2>Otro método</h2>
+              <span class="metodo-pago__badge">Venta regular</span>
               <p>Continuar con otra forma de pago disponible.</p>
+              <div class="metodo-pago__route">
+                <span>Catalogo</span>
+                <span>Carrito</span>
+                <span>Pago</span>
+              </div>
             </button>
+          </div>
+
+          <div class="metodo-pago__assistant">
+            <strong>Recomendacion de venta</strong>
+            <span>
+              Si el cliente tiene cupo, inicia por Leasing. Si ya llega con un
+              pago definido, continua por otro metodo y mantiene el catalogo
+              disponible.
+            </span>
           </div>
         </section>
       </main>
@@ -1454,6 +1496,24 @@
                 <div class="card mb10" id="lp3EntryTermCard">
                   <div class="card-title">Plazo y Entrada</div>
                   <div id="lp3PrequalCard" class="prequal-card"></div>
+                  <label
+                    class="recovered-entry-toggle"
+                    id="lp3RecoveredEntryControl"
+                    style="display: none"
+                  >
+                    <input
+                      type="checkbox"
+                      id="lp3RecoveredEntryChk"
+                      onchange="toggleRecoveredEntry()"
+                    />
+                    <span>
+                      <strong>Usar entrada recuperada</strong>
+                      <small
+                        >Activa un valor manual. Debe ser igual o mayor a la
+                        entrada mínima.</small
+                      >
+                    </span>
+                  </label>
                   <div
                     class="fg"
                     id="lp3EntryInputWrap"

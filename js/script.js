@@ -1134,15 +1134,15 @@ const PRECALIFICACIONES_DEMO = [
   },
   {
     identificacion: "444444444",
-    nombre: "CLIENTE DEMO F1 PLUS",
+    nombre: "CLIENTE DEMO F1 600",
     idPerfil: 21,
     perfil: "F1",
     producto: "CELULAR",
-    cupo: 700,
+    cupo: 600,
     entrada: 20,
     tipoEntrada: "PORCENTAJE",
     plazo: "13-18-26-33",
-    cupoDisponible: 700,
+    cupoDisponible: 600,
     ticket: 20260417122570,
     promocionEntrada: "",
     verificacion: "DFL",
@@ -1164,6 +1164,25 @@ const PRECALIFICACIONES_DEMO = [
   },
 ];
 let DEMO_PRECAL_TURN = 0;
+function nextLeasingDemoPrecalificacion() {
+  const demos = [
+    PRECALIFICACIONES_DEMO.find((p) => p.cupo === 300),
+    PRECALIFICACIONES_DEMO.find((p) => p.cupo === 600),
+  ].filter(Boolean);
+  const demo = demos[DEMO_PRECAL_TURN % demos.length] || PRECALIFICACIONES_DEMO[0];
+  DEMO_PRECAL_TURN++;
+  return {
+    ...demo,
+    ticket: Number(new Date().toISOString().replace(/\D/g, "").slice(0, 14)),
+  };
+}
+function prepareLeasingDemoPrecalificacion() {
+  const demo = nextLeasingDemoPrecalificacion();
+  S.demoPrecalificacion = { ...demo };
+  S.precalificacion = { ...demo };
+  S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
+  S.selectedPlazo = S.plazosDisponibles[0] || null;
+}
 
 /* ═══════════════════════════════════════════════════
    AUDIT LOG
@@ -1178,6 +1197,8 @@ function addLog(ev, det, res = "—") {
   });
   LOGS.push({ ts, ev, det, res });
   renderLogs();
+  updateDirectCreditCta();
+  applyHappyBrandLogos();
 }
 function renderLogs() {
   const el = document.getElementById("logsContent");
@@ -1293,6 +1314,7 @@ let S = {
   pendingPhoneColor: null,
   opId: null,
   folio: null,
+  demoPrecalificacion: null,
 };
 let modoComparacion = false;
 let productosComparados = [];
@@ -1314,6 +1336,13 @@ function rutDigits(value) {
 }
 function getDemoPrecalificacion() {
   const rut = rutDigits(S.rut);
+  if (S.demoPrecalificacion) {
+    return {
+      ...S.demoPrecalificacion,
+      identificacion: rut || S.demoPrecalificacion.identificacion,
+      nombre: S.nombre || S.demoPrecalificacion.nombre,
+    };
+  }
   const found = PRECALIFICACIONES_DEMO.find((p) => p.identificacion === rut);
   if (found) return { ...found };
   const ing = Number(S.ingresos || 0);
@@ -1322,7 +1351,7 @@ function getDemoPrecalificacion() {
   if (disponibleBase === 300) {
     const rotating = [
       PRECALIFICACIONES_DEMO[0],
-      PRECALIFICACIONES_DEMO.find((p) => p.cupo === 700),
+      PRECALIFICACIONES_DEMO.find((p) => p.cupo === 600),
     ].filter(Boolean);
     const demo = rotating[DEMO_PRECAL_TURN % rotating.length];
     DEMO_PRECAL_TURN++;
@@ -1893,7 +1922,7 @@ function renderPromoShowcase(list) {
   return `<div class="promo-showcase">
     <div>
       <strong>Promos activas</strong>
-      <span>${list.length} oportunidades para cerrar venta y subir ticket</span>
+      <span>${list.length} oportunidades para ofrecer una mejor opcion al cliente</span>
     </div>
     <div class="promo-marquee" aria-hidden="true">
       <span>Descuentos del prototipo - Packs listos - Audio - Proteccion - Accesorios - Ahorro referencial ${clp(savings)}</span>
@@ -2015,7 +2044,7 @@ function makeUpsellOptions(phone) {
       title: "Equipo + audio",
       badge: "Recomendado",
       offer: "Oferta",
-      desc: "Celular con parlante BT y audifonos para subir el ticket.",
+      desc: "Ideal para clientes que escuchan musica, clases o llamadas.",
       icon: "SPK",
       pack: {
         id: 910000 + phone.id,
@@ -2031,10 +2060,10 @@ function makeUpsellOptions(phone) {
       kind: "combo",
     },
     {
-      title: "Combo listo para salir",
+      title: "Proteccion diaria",
       badge: "Mejor valor",
-      offer: "Combo -10",
-      desc: "Celular con micas, mochila y tomatodo para uso diario.",
+      offer: "Ahorro US$10",
+      desc: "Celular protegido desde el primer dia con extras practicos.",
       icon: "MAX",
       pack: {
         id: 920000 + phone.id,
@@ -2050,10 +2079,10 @@ function makeUpsellOptions(phone) {
       kind: "max",
     },
     {
-      title: "Descuento gamer",
-      badge: "Sube ticket",
-      offer: "Flash",
-      desc: "Celular con gamepad y proyector de luces para enganchar mejor.",
+      title: "Entretenimiento",
+      badge: "Para juegos",
+      offer: "Ahorro US$6",
+      desc: "Opcion para clientes que juegan o buscan una experiencia mas divertida.",
       icon: "PAD",
       pack: {
         id: 930000 + phone.id,
@@ -2149,6 +2178,78 @@ function makeComboUpsellOptions(combo) {
   ];
 }
 
+function makeAccessoryUpsellOptions(accessory) {
+  const micas = upsellAccessory(607);
+  const tws = upsellAccessory(604);
+  const keychain = upsellAccessory(614);
+  const bottle = upsellAccessory(613);
+  const speaker = upsellAccessory(610);
+  const gamepad = upsellAccessory(616);
+  const isAudio = /parlante|audifono|audio|tws/i.test(accessory.name || "");
+  const primary = isAudio ? tws : micas;
+  const secondary = isAudio ? speaker : bottle;
+  return [
+    {
+      title: "Solo accesorio",
+      badge: "Compra rapida",
+      desc: "Continuar solo con el accesorio elegido.",
+      pack: null,
+      total: accessory.price,
+    },
+    {
+      title: "Kit util",
+      badge: "Recomendado",
+      offer: "Pack",
+      desc: "Agrega un complemento practico para subir el ticket.",
+      pack: {
+        id: 990000 + accessory.id,
+        name: `Kit util ${accessory.name}`,
+        cat: "accesorio",
+        ico: "KIT",
+        price: primary.price - 2,
+        pvp: primary.price,
+        qty: 1,
+        promoItems: [primary.name],
+      },
+      total: accessory.price + primary.price - 2,
+    },
+    {
+      title: "Doble cierre",
+      badge: "Mas valor",
+      offer: "Ahorro",
+      desc: "Combina dos accesorios para entregar una compra mas completa.",
+      pack: {
+        id: 991000 + accessory.id,
+        name: `Doble cierre ${accessory.name}`,
+        cat: "accesorio",
+        ico: "MAX",
+        price: primary.price + secondary.price - 5,
+        pvp: primary.price + secondary.price,
+        qty: 1,
+        promoItems: [primary.name, secondary.name],
+      },
+      total: accessory.price + primary.price + secondary.price - 5,
+    },
+    {
+      title: "Ticket alto",
+      badge: "Oferta",
+      offer: "Top",
+      desc: "Suma un articulo llamativo para aumentar la venta.",
+      pack: {
+        id: 992000 + accessory.id,
+        name: `Ticket alto ${accessory.name}`,
+        cat: "accesorio",
+        ico: "TOP",
+        price: gamepad.price + keychain.price - 4,
+        pvp: gamepad.price + keychain.price,
+        qty: 1,
+        promoItems: [gamepad.name, keychain.name],
+      },
+      total: accessory.price + gamepad.price + keychain.price - 4,
+    },
+  ];
+}
+
 function setUpsellColor(btn) {
   document
     .querySelectorAll(".upsell-color")
@@ -2182,6 +2283,7 @@ function showUpsell(id) {
       <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${phone.id})">Personalizar</button>
       <b>${clp(phone.price)}</b>
     </div>
+    ${renderUpsellCupoPreview(phone.price)}
     <div class="upsell-toolbar">
       <div class="upsell-colors">
         <span>Color del equipo</span>
@@ -2193,8 +2295,8 @@ function showUpsell(id) {
         </div>
       </div>
       <div class="upsell-deal-strip">
-        <strong>Maximiza la venta</strong>
-        <span>Combos con audio, proteccion y accesorios para subir ticket.</span>
+        <strong>Opciones para ofrecer</strong>
+        <span>Presenta alternativas claras segun uso: audio, proteccion o entretenimiento.</span>
       </div>
     </div>
     <div class="upsell-options">
@@ -2220,10 +2322,21 @@ function showUpsell(id) {
   document.getElementById("upsellModal").style.display = "flex";
 }
 
-function upsellAccessorySuggestions() {
-  return [607, 610, 604, 601, 613, 616, 615, 606]
+function upsellAccessorySuggestions(productId) {
+  const base = PRODUCTS.find((p) => String(p.id) === String(productId));
+  const byType = {
+    promo: [607, 601, 613, 614, 604, 610, 615, 606],
+    celular: [610, 604, 607, 601, 613, 616, 615, 606],
+    combo: [607, 613, 614, 604, 610, 612, 615, 606],
+    accesorio: [604, 610, 607, 613, 614, 615, 616, 606],
+  };
+  const preferred = byType[base?.cat] || byType.celular;
+  const offset = Math.abs(Number(productId) || 0) % preferred.length;
+  return preferred
+    .slice(offset)
+    .concat(preferred.slice(0, offset))
     .map((id) => PRODUCTS.find((p) => p.id === id))
-    .filter(Boolean)
+    .filter((p) => p && String(p.id) !== String(productId))
     .slice(0, 8);
 }
 
@@ -2316,6 +2429,7 @@ function showComboUpsell(id) {
       </div>
       <b>${clp(combo.price)}</b>
     </div>
+    ${renderUpsellCupoPreview(combo.price)}
     <div class="upsell-toolbar combo-upsell-toolbar">
       <div class="upsell-deal-strip">
         <strong>Completa este combo</strong>
@@ -2358,6 +2472,60 @@ function selectComboUpsellOption(comboId, optionIndex) {
   toast(`${option.title} agregado al carrito`);
 }
 
+function showAccessoryUpsell(id) {
+  const accessory = PRODUCTS.find((p) => p.id === id);
+  if (!accessory) return;
+  const options = makeAccessoryUpsellOptions(accessory);
+  document.getElementById("upsellBody").innerHTML = `
+    <div class="accessory-upsell-wrap">
+      <div class="accessory-upsell-main">
+        <div class="accessory-upsell-visual">${productImageMarkup(accessory)}</div>
+        <div>
+          <span>Maximiza accesorio</span>
+          <strong>${accessory.name}</strong>
+          <p>Cliente vino por un accesorio. Ofrece una salida rapida o un kit de mayor valor.</p>
+        </div>
+        <b>${clp(accessory.price)}</b>
+      </div>
+      ${renderUpsellCupoPreview(accessory.price)}
+      <div class="accessory-upsell-options">
+        ${options
+          .map((op, idx) => {
+            const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
+            return `<button class="accessory-upsell-option ${idx === 1 ? "featured" : ""}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx})">
+              ${op.offer ? `<i>${op.offer}</i>` : ""}
+              <span>${op.badge}</span>
+              <h3>${op.title}</h3>
+              <p>${op.desc}</p>
+              ${upsellPackVisual(op.pack)}
+              ${op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
+              <div><strong>${clp(op.total)}</strong>${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}</div>
+            </button>`;
+          })
+          .join("")}
+      </div>
+    </div>`;
+  const sidePanel = document.getElementById("upsellSidePanel");
+  if (sidePanel) {
+    sidePanel.style.display = "none";
+    sidePanel.innerHTML = "";
+  }
+  document.getElementById("upsellModal").style.display = "flex";
+}
+
+function selectAccessoryUpsellOption(accessoryId, optionIndex) {
+  const accessory = PRODUCTS.find((p) => p.id === accessoryId);
+  if (!accessory) return;
+  const option = makeAccessoryUpsellOptions(accessory)[optionIndex];
+  closeUpsell();
+  addCart(accessoryId, { skipUpsell: true, quiet: true });
+  addPromoPackToCart(option.pack);
+  OP.carrito = true;
+  renderCart();
+  renderCatalog();
+  toast(`${option.title} agregado al carrito`);
+}
+
 function showPromoPersonalize(id) {
   const promo = PRODUCTS.find((p) => p.id === id);
   if (!promo) return;
@@ -2376,6 +2544,7 @@ function showPromoPersonalize(id) {
       <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${promo.id})">Personalizar</button>
       <b>${clp(promo.price)}</b>
     </div>
+    ${renderUpsellCupoPreview(promo.price)}
     <div class="promo-only-upsell">
       <div>
         <strong>Promo activa</strong>
@@ -2405,6 +2574,10 @@ function addCart(id, opts = {}) {
   }
   if (p?.cat === "combo" && !opts.skipUpsell) {
     showComboUpsell(id);
+    return;
+  }
+  if (p?.cat === "accesorio" && !opts.skipUpsell) {
+    showAccessoryUpsell(id);
     return;
   }
   if (p?.cat === "promo" && !opts.skipUpsell) {
@@ -2570,6 +2743,58 @@ function currentLeasingCupo() {
   );
 }
 
+function applyHappyBrandLogos() {
+  const src = "assets/ads/logo-happy.png";
+  ["sbLogo", "tbLogo"].forEach((id) => {
+    const img = document.getElementById(id);
+    if (img && img.getAttribute("src") !== src) img.src = src;
+  });
+}
+
+function renderUpsellCupoPreview(basePrice = 0) {
+  if (S.payMethod !== "leasing") return "";
+  const cupo = currentLeasingCupo();
+  const pre = S.precalificacion || getDemoPrecalificacion();
+  const previewTotal = cartTotal() + Number(basePrice || 0);
+  const usado = Math.min(previewTotal, cupo);
+  const restante = Math.max(0, cupo - previewTotal);
+  const exceso = Math.max(0, previewTotal - cupo);
+  const pct = Math.min(100, Math.round((previewTotal / Math.max(cupo, 1)) * 100));
+  const entrada = entradaFromPrecal(previewTotal, pre);
+  const plazos = S.plazosDisponibles?.length
+    ? S.plazosDisponibles
+    : plazosFromPrecal(pre);
+  const plazo = S.selectedPlazo || plazos[0];
+  const saldo = Math.max(0, previewTotal - entrada);
+  const cuota = plazo
+    ? Math.ceil((saldo * (1 + plazo.factor)) / plazo.sem)
+    : 0;
+  return `
+    <div class="upsell-cupo-preview ${exceso ? "over" : ""}" style="--cupo-pct:${pct}%">
+      <div class="upsell-cupo-preview-head">
+        <div>
+          <strong>Barra de cupo leasing</strong>
+          <span>${S.payMethod === "leasing" ? "Leasing activo" : "Simulacion para credito directo"}</span>
+        </div>
+        <b>${S.precalificacion?.perfil || pre.perfil || "F2"} - ${clp(cupo)}</b>
+      </div>
+      <div class="upsell-cupo-preview-metrics">
+        <div><small>Cupo</small><strong>${clp(cupo)}</strong></div>
+        <div><small>Entrada min.</small><strong>${clp(entrada)}</strong></div>
+        <div><small>Plazo</small><strong>${plazo ? `${plazo.sem} sem.` : "-"}</strong></div>
+        <div><small>Cuota aprox.</small><strong>${clp(cuota)}</strong></div>
+      </div>
+      <div class="upsell-cupo-preview-track">
+        <i></i>
+        <span>${pct}% utilizado</span>
+      </div>
+      <div class="upsell-cupo-preview-foot">
+        <span>Uso con esta opcion: ${clp(previewTotal)}</span>
+        <strong>${exceso ? `Excede por ${clp(exceso)}` : `Disponible ${clp(restante)}`}</strong>
+      </div>
+    </div>`;
+}
+
 function cupoSuggestions(restante) {
   const preferred = [
     610, 616, 606, 615, 612, 609, 603, 608, 611, 601, 604, 607, 613, 614,
@@ -2658,9 +2883,10 @@ function renderCupoUsage() {
           ? `<div class="cupo-suggestions">${suggestions
               .map(
                 (p) => `<button onclick="addSuggestedAccessory(${p.id})">
-                  <span>${p.ico}</span>
+                  <span>${productImageMarkup(p)}</span>
                   <strong>${p.name}</strong>
                   <em>${clp(p.price)}</em>
+                  <small>Agregar</small>
                 </button>`,
               )
               .join("")}</div>`
@@ -2760,6 +2986,7 @@ function updateDirectCreditCta() {
 function applyDirectCredit() {
   S.payMethod = "leasing";
   S.isSigma = true;
+  prepareLeasingDemoPrecalificacion();
   OP.pago = true;
   updateDirectCreditCta();
   document.getElementById("navLeas").style.display = "";
@@ -2775,12 +3002,13 @@ function hasLeasingProductSelected() {
   return S.cart.some((x) => x.cat === "celular" && (x.autoImei || S.autoImei));
 }
 
+function hasLeasingCartValue() {
+  return S.cart.length > 0 && cartTotal() > 0;
+}
+
 function continueLeasingFromCatalog() {
-  if (!hasLeasingProductSelected()) {
-    toast(
-      "Para continuar leasing selecciona un celular con IMEI reservado",
-      "warn",
-    );
+  if (!hasLeasingCartValue()) {
+    toast("Para continuar leasing selecciona al menos un producto", "warn");
     return;
   }
   OP.pago = true;
@@ -2843,6 +3071,7 @@ function continuePayment() {
   OP.pago = true;
   S.isSigma = S.payMethod === "leasing";
   if (S.isSigma) {
+    if (!S.demoPrecalificacion) prepareLeasingDemoPrecalificacion();
     document.getElementById("navLeas").style.display = "";
     document.getElementById("btnCancel").style.display = "";
     startTimer();
@@ -3179,10 +3408,17 @@ function initOffer() {
   document.getElementById("lp3hdr").innerHTML = clientMiniCard();
   const entryCard = document.getElementById("lp3EntryTermCard");
   const entryInputWrap = document.getElementById("lp3EntryInputWrap");
+  const recoveredEntryControl = document.getElementById("lp3RecoveredEntryControl");
+  const recoveredEntryChk = document.getElementById("lp3RecoveredEntryChk");
   const refsCard = document.getElementById("lp3RefsCard");
   const payAddressCard = document.getElementById("lp3PayAddressCard");
-  const productSelected = hasLeasingProductSelected();
+  const productSelected = hasLeasingCartValue();
   if (entryCard) entryCard.style.display = "";
+  if (recoveredEntryControl) {
+    recoveredEntryControl.style.display =
+      S.payMethod === "leasing" && productSelected ? "flex" : "none";
+  }
+  if (recoveredEntryChk) recoveredEntryChk.checked = false;
   if (entryInputWrap)
     entryInputWrap.style.display = S.payMethod === "leasing" ? "none" : "";
   if (refsCard) refsCard.style.display = "";
@@ -3221,8 +3457,25 @@ function initOffer() {
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(entMin)} / Plazos: ${pre.plazo}</span></span><span>${clp(saldoFinanciado)}</span></div>`;
   document.getElementById("priceBreakdown").innerHTML = pbHTML;
   S.selectedPlazo = S.plazosDisponibles[0] || PLAZOS[0];
-  setRefsLocked(S.payMethod === "leasing" && !hasLeasingProductSelected());
+  setRefsLocked(S.payMethod === "leasing" && !hasLeasingCartValue());
   calcOffer();
+}
+function isRecoveredEntryActive() {
+  return !!document.getElementById("lp3RecoveredEntryChk")?.checked;
+}
+function toggleRecoveredEntry() {
+  const active = isRecoveredEntryActive();
+  const wrap = document.getElementById("lp3EntryInputWrap");
+  const input = document.getElementById("lp3_ent");
+  const entMin = entradaFromPrecal(
+    offerTotal(),
+    S.precalificacion || getDemoPrecalificacion(),
+  );
+  if (wrap) wrap.style.display = active || S.payMethod !== "leasing" ? "" : "none";
+  if (!active && input) input.value = entMin;
+  if (input) input.min = entMin;
+  calcOffer();
+  if (active) input?.focus();
 }
 
 function hydratePayAddressCard() {
@@ -3254,7 +3507,7 @@ function calcLp3Capacity() {
   msg.innerHTML = `<strong>Capacidad disponible: ${clp(cap)}/mes</strong><span>Ratio gastos/ingresos: ${Math.round(ratio * 100)}%</span>`;
 }
 
-function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
+function renderPrequalCard(productSelected = hasLeasingCartValue()) {
   const pre = S.precalificacion || getDemoPrecalificacion();
   const box = document.getElementById("lp3PrequalCard");
   document
@@ -3304,7 +3557,7 @@ function renderPrequalCard(productSelected = hasLeasingProductSelected()) {
 function calcOffer() {
   if (!S.precalificacion) S.precalificacion = getDemoPrecalificacion();
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
-  if (S.payMethod === "leasing" && !hasLeasingProductSelected()) {
+  if (S.payMethod === "leasing" && !hasLeasingCartValue()) {
     renderPrequalCard(false);
     S.entrada = 0;
     S.monto = 0;
@@ -3314,23 +3567,53 @@ function calcOffer() {
   }
   const tot = offerTotal();
   const entMin = entradaFromPrecal(tot, S.precalificacion);
-  const ent = parseInt(document.getElementById("lp3_ent")?.value) || 0;
+  const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const errEl = document.getElementById("entErr");
+  const entInput = document.getElementById("lp3_ent");
   const entMin_ = entradaFromPrecal(tot, S.precalificacion);
+  if (document.getElementById("lp3_entMin")) {
+    document.getElementById("lp3_entMin").textContent = clp(entMin_);
+  }
+  if (entInput) entInput.min = entMin_;
   renderPrequalCard(true);
   if (S.payMethod === "leasing") {
+    const useRecovered = isRecoveredEntryActive();
+    const entryValue = useRecovered ? ent : entMin_;
+    if (entryValue < entMin_) {
+      if (errEl) {
+        errEl.style.display = "flex";
+        errEl.innerHTML = `<span>!</span><div><strong>Entrada menor a la requerida.</strong><br>Debe ser igual o mayor a ${clp(entMin_)}.</div>`;
+      }
+      entInput?.classList.add("is-invalid");
+      S.entrada = entMin_;
+      S.monto = Math.max(0, tot - entMin_);
+      S.cuota = 0;
+      S.totalContrato = S.entrada;
+      renderPlazos();
+      renderOfferSummary(S.entrada, S.monto, 0, S.entrada);
+      return;
+    }
+    if (entryValue > tot) {
+      if (errEl) {
+        errEl.style.display = "flex";
+        errEl.innerHTML = `<span>!</span><div>La entrada no puede superar el valor total del activo (${clp(tot)}).</div>`;
+      }
+      entInput?.classList.add("is-invalid");
+      return;
+    }
     if (errEl) errEl.style.display = "none";
-    const montoAuto = Math.max(0, tot - entMin_);
-    S.entrada = entMin_;
+    entInput?.classList.remove("is-invalid");
+    const montoAuto = Math.max(0, tot - entryValue);
+    S.entrada = entryValue;
     S.monto = montoAuto;
-    hydratePayAddressCard(entMin_);
+    hydratePayAddressCard(entryValue);
     renderPlazos();
     if (!S.selectedPlazo) return;
     const pagareAuto = montoAuto * (1 + S.selectedPlazo.factor);
     const cuotaAuto = Math.ceil(pagareAuto / S.selectedPlazo.sem);
     S.cuota = cuotaAuto;
-    S.totalContrato = entMin_ + cuotaAuto * S.selectedPlazo.sem;
-    renderOfferSummary(entMin_, montoAuto, cuotaAuto, S.totalContrato);
+    S.totalContrato = entryValue + cuotaAuto * S.selectedPlazo.sem;
+    renderOfferSummary(entryValue, montoAuto, cuotaAuto, S.totalContrato);
     return;
   }
   if (ent < entMin_) {
@@ -3398,6 +3681,7 @@ function renderOfferSummary(ent, monto, cuota, tc) {
   const pre = S.precalificacion;
   const phone = items.find((x) => x.cat === "celular");
   const accs = items.filter((x) => x.cat === "accesorio");
+  updatePriceBreakdown(ent, monto);
   document.getElementById("lp3ofDet").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado </span><span>${clp(pre?.cupo || 0)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Entrada</span><span>${clp(ent)}</span></div>
@@ -3419,6 +3703,26 @@ function renderOfferSummary(ent, monto, cuota, tc) {
       <div style="font-size:10px;color:#5a7200;margin-top:2px">Cuota calculada según condiciones del contrato</div>
     </div>
     <div class="sum-row"><span>Total contrato</span><span>${clp(tc)}</span></div>`;
+}
+function updatePriceBreakdown(ent, monto) {
+  const items = offerItems();
+  const tot = offerTotal();
+  const pre = S.precalificacion || getDemoPrecalificacion();
+  const cel = items.find((x) => x.cat === "celular");
+  const accs = items.filter((x) => x.cat === "accesorio");
+  const el = document.getElementById("priceBreakdown");
+  if (!el) return;
+  let pbHTML = "";
+  if (cel) {
+    pbHTML += `<div class="pb-row"><span class="pb-lbl">${cel.simulated ? "Producto" : "Producto seleccionado"}<br><span class="pb-formula">${cel.simulated ? pre.producto : cel.name}</span></span><span>${clp(cel.price)}</span></div>`;
+  }
+  if (accs.length || items.filter((x) => x.cat === "celular").length > 1) {
+    pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito<br><span class="pb-formula">${items.length} item(s) seleccionados</span></span><span>${clp(tot)}</span></div>`;
+  }
+  pbHTML += `<div class="pb-row"><span class="pb-lbl">Cupo aprobado<br><span class="pb-formula">Perfil ${pre.perfil} - Ticket ${pre.ticket}</span></span><span>${clp(pre.cupo || 0)}</span></div>`;
+  pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada aplicada<br><span class="pb-formula">${isRecoveredEntryActive() ? "Entrada recuperada/manual" : `API ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}`}</span></span><span>${clp(ent)}</span></div>`;
+  pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(ent)} / Plazos: ${pre.plazo}</span></span><span>${clp(monto)}</span></div>`;
+  el.innerHTML = pbHTML;
 }
 function renderPlazos() {
   const monto = S.monto;
@@ -3458,7 +3762,7 @@ function continueLp3() {
   }
   const lp3Ing = parseMoneyInput(document.getElementById("lp3_ing")?.value);
   const lp3Gast = parseMoneyInput(document.getElementById("lp3_gast")?.value);
-  if (hasLeasingProductSelected() && (!lp3Ing || !lp3Gast)) {
+  if (hasLeasingCartValue() && (!lp3Ing || !lp3Gast)) {
     toast("Ingresa ingresos y gastos mensuales", "warn");
     document.getElementById(!lp3Ing ? "lp3_ing" : "lp3_gast")?.focus();
     return;
@@ -3466,7 +3770,7 @@ function continueLp3() {
   S.ingresos = lp3Ing || S.ingresos;
   S.gastos = lp3Gast || S.gastos;
   const tot3 = offerTotal();
-  const ent = parseInt(document.getElementById("lp3_ent")?.value) || 0;
+  const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const entMin3 = entradaFromPrecal(tot3, S.precalificacion);
   if (ent < entMin3) {
     const errEl = document.getElementById("entErr");
@@ -3663,7 +3967,7 @@ function continueLp2() {
 
 function validarRef(n) {
   refsState[n] = refsState[n] || { estado: "pendiente" };
-  if (S.payMethod === "leasing" && !hasLeasingProductSelected()) {
+  if (S.payMethod === "leasing" && !hasLeasingCartValue()) {
     toast("Referencias bloqueadas hasta escoger producto", "warn");
     return;
   }
@@ -4301,7 +4605,7 @@ function resetAll() {
     catFilter: "",
     catalogPage: 1,
     catalogFilterKey: "",
-    payMethod: null,
+    payMethod: "otro",
     isSigma: false,
     nombre: "",
     rut: "",
@@ -4318,8 +4622,10 @@ function resetAll() {
     totalContrato: 0,
     autoImei: null,
     assignedProduct: null,
+    pendingPhoneColor: null,
     opId: null,
     folio: null,
+    demoPrecalificacion: null,
   };
   evalRes = {};
   actRes = {};
@@ -4546,6 +4852,8 @@ function resetAll() {
   document
     .querySelectorAll(".nav-btn")
     .forEach((b) => b.classList.remove("on"));
+  updateDirectCreditCta();
+  applyHappyBrandLogos();
   goScreen("catalog");
   toast("Nueva venta iniciada");
 }
@@ -4554,6 +4862,8 @@ function resetAll() {
    INIT
 ═══════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
+  applyHappyBrandLogos();
+  updateDirectCreditCta();
   const now = new Date();
   const clockEl = document.getElementById("clockEl");
 
@@ -5246,16 +5556,41 @@ function cancelarComparacion() {
 }
 
 function cardComparacion(p) {
+  const score = Math.min(
+    98,
+    Math.round(
+      58 +
+        (parseInt(p.ram) || 4) * 2.2 +
+        (parseInt(p.rom) || 128) / 32 -
+        Math.max(0, (Number(p.price || 0) - 250) / 80),
+    ),
+  );
+  const perfil = (p.perfiles || []).join(" / ") || "venta general";
+  const pitch =
+    Number(p.price || 0) <= 300
+      ? "Ideal para cierre rapido por precio."
+      : Number(p.price || 0) <= 500
+        ? "Buen balance para cliente que busca rendimiento."
+        : "Equipo premium para cliente de mayor ticket.";
   return `
     <div class="compare-device">
       <div class="compare-device-img">${productImageMarkup(p)}</div>
-      <h3>${p.name}</h3>
+      <div class="compare-title-row">
+        <h3>${p.name}</h3>
+        <span>${score}/100</span>
+      </div>
+      <p class="compare-pitch">${pitch}</p>
+      <div class="compare-scorebar"><i style="width:${score}%"></i></div>
+      <div class="compare-spec-grid">
+        <div><small>Precio ref.</small><strong>${clp(p.price || 0)}</strong></div>
+        <div><small>RAM</small><strong>${p.ram || "-"}</strong></div>
+        <div><small>Almacenamiento</small><strong>${p.rom || "-"}</strong></div>
+        <div><small>Bateria</small><strong>${p.bateria || "estandar"}</strong></div>
+      </div>
       <div class="compare-row"><span>Marca</span><strong>${p.marca || "-"}</strong></div>
-      <div class="compare-row"><span>Precio ref.</span><strong>${clp(p.price || 0)}</strong></div>
-      <div class="compare-row"><span>RAM</span><strong>${p.ram || "-"}</strong></div>
-      <div class="compare-row"><span>Almacenamiento</span><strong>${p.rom || "-"}</strong></div>
-      <div class="compare-row"><span>Bateria</span><strong>${p.bateria || "-"}</strong></div>
-      <div class="compare-row"><span>Perfil sugerido</span><strong>${(p.perfiles || []).join(" / ") || "-"}</strong></div>
+      <div class="compare-row"><span>Modelo</span><strong>${p.modelo || "-"}</strong></div>
+      <div class="compare-row"><span>Perfil sugerido</span><strong>${perfil}</strong></div>
+      <div class="compare-row"><span>Argumento vendedor</span><strong>${pitch}</strong></div>
     </div>
   `;
 }
