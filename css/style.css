@@ -2160,20 +2160,16 @@ body {
 .cupo-card {
   margin: 12px 0;
   padding: 14px;
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(206, 237, 0, 0.2), transparent 28%),
-    linear-gradient(145deg, #111c18, #162235);
-  color: #fff;
-  border: 1px solid rgba(206, 237, 0, 0.34);
-  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.22);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--navy);
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   animation: productCardIn 0.32s ease both;
 }
 .cupo-card.over {
-  border-color: rgba(239, 68, 68, 0.5);
-  background:
-    radial-gradient(circle at 12% 0%, rgba(239, 68, 68, 0.18), transparent 28%),
-    linear-gradient(145deg, #19171b, #241b28);
+  border-color: rgba(239, 68, 68, 0.46);
+  background: #fffafa;
 }
 .cupo-head,
 .cupo-numbers,
@@ -2190,14 +2186,14 @@ body {
 }
 .cupo-head p {
   margin: 4px 0 0;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--slate4);
   font-size: 10px;
 }
 .cupo-head span {
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(206, 237, 0, 0.16);
-  color: var(--lime3);
+  background: var(--lime);
+  color: var(--navy);
   font-size: 10px;
   font-weight: 900;
   white-space: nowrap;
@@ -2214,22 +2210,22 @@ body {
 .cupo-terms div {
   padding: 8px 9px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #f8fafc;
+  border: 1px solid #dbe5ef;
 }
 .cupo-terms small,
 .cupo-terms strong {
   display: block;
 }
 .cupo-terms small {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--slate4);
   font-size: 8px;
   font-weight: 850;
   text-transform: uppercase;
 }
 .cupo-terms strong {
   margin-top: 3px;
-  color: var(--lime);
+  color: #6b8200;
   font-family: "JetBrains Mono", monospace;
   font-size: 14px;
   font-weight: 950;
@@ -2243,9 +2239,9 @@ body {
 .cupo-plazo-picks button {
   min-height: 44px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.07);
-  color: #ffffff;
+  border: 1px solid #dbe5ef;
+  background: #ffffff;
+  color: var(--navy);
   cursor: pointer;
   font-family: "Outfit", sans-serif;
   transition:
@@ -2255,7 +2251,7 @@ body {
 }
 .cupo-plazo-picks button:hover {
   transform: translateY(-2px);
-  border-color: rgba(206, 237, 0, 0.46);
+  border-color: var(--lime);
 }
 .cupo-plazo-picks button.on {
   background: linear-gradient(135deg, var(--lime2), var(--lime));
@@ -2281,12 +2277,12 @@ body {
 }
 .cupo-numbers small {
   display: block;
-  color: rgba(255, 255, 255, 0.56);
+  color: var(--slate4);
   font-size: 9px;
   margin-bottom: 2px;
 }
 .cupo-numbers strong {
-  color: var(--lime);
+  color: #6b8200;
   font-size: 20px;
   line-height: 1;
 }
@@ -2299,7 +2295,7 @@ body {
   overflow: hidden;
   margin-top: 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: #e2e8f0;
 }
 .cupo-meter i {
   position: absolute;
@@ -2316,26 +2312,26 @@ body {
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--lime3);
+  color: var(--navy);
   font-size: 9px;
   font-weight: 900;
 }
 .cupo-scale {
   margin-top: 5px;
-  color: rgba(255, 255, 255, 0.56);
+  color: var(--slate4);
   font-size: 9px;
 }
 .cupo-alert {
   margin-top: 12px;
-  color: var(--lime3);
+  color: #6b8200;
   font-size: 11px;
   font-weight: 900;
 }
 .cupo-alert.warn {
-  color: #fecdd3;
+  color: #b91c1c;
 }
 .cupo-alert.ok {
-  color: #bbf7d0;
+  color: #15803d;
 }
 .cupo-suggestions {
   display: grid;
@@ -2345,10 +2341,10 @@ body {
 }
 .cupo-suggestions button {
   min-height: 156px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid #dbe5ef;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: #ffffff;
+  color: var(--navy);
   padding: 10px;
   text-align: left;
   cursor: pointer;
@@ -2359,8 +2355,8 @@ body {
 }
 .cupo-suggestions button:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(206, 237, 0, 0.44);
+  background: #f8fafc;
+  border-color: var(--lime);
 }
 .cupo-suggestions span {
   display: grid;
@@ -2368,7 +2364,8 @@ body {
   height: 82px;
   margin-bottom: 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 .cupo-suggestions span .prod-img {
   max-width: 100%;
@@ -2377,7 +2374,7 @@ body {
 }
 .cupo-suggestions span .prod-ico {
   font-size: 28px;
-  color: var(--lime3);
+  color: var(--navy);
 }
 .cupo-suggestions strong {
   display: block;
@@ -2388,7 +2385,7 @@ body {
 .cupo-suggestions em {
   display: block;
   margin-top: 7px;
-  color: var(--lime);
+  color: #6b8200;
   font-style: normal;
   font-size: 14px;
   font-weight: 900;
@@ -2398,8 +2395,8 @@ body {
   margin-top: 7px;
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(206, 237, 0, 0.16);
-  color: var(--lime3);
+  background: var(--lime);
+  color: var(--navy);
   font-size: 8px;
   font-weight: 950;
   text-transform: uppercase;
@@ -5458,7 +5455,131 @@ body,
 }
 
 .upsell-box {
-  width: min(900px, 68vw) !important;
+  width: min(1120px, 76vw) !important;
+}
+
+.upsell-cupo-preview {
+  margin: 16px 0 !important;
+  padding: 18px !important;
+  border-radius: 18px !important;
+}
+
+.upsell-cupo-preview-head strong {
+  font-size: 17px !important;
+}
+
+.upsell-cupo-preview-head span,
+.upsell-cupo-preview-foot span {
+  font-size: 11px !important;
+}
+
+.upsell-cupo-preview-head b {
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+}
+
+.upsell-cupo-preview-metrics {
+  gap: 10px !important;
+  margin: 14px 0 12px !important;
+}
+
+.upsell-cupo-preview-metrics div {
+  min-height: 62px !important;
+  padding: 12px !important;
+  border-radius: 14px !important;
+}
+
+.upsell-cupo-preview-metrics small {
+  font-size: 10px !important;
+}
+
+.upsell-cupo-preview-metrics strong {
+  font-size: 17px !important;
+}
+
+.upsell-cupo-preview-track {
+  height: 16px !important;
+}
+
+.upsell-cupo-preview-track span {
+  font-size: 10px !important;
+}
+
+.upsell-cupo-preview-foot {
+  margin-top: 9px !important;
+}
+
+.upsell-options {
+  gap: 14px !important;
+}
+
+.upsell-option {
+  min-height: 282px !important;
+  padding: 16px !important;
+}
+
+.upsell-option.is-flying {
+  transform: translateY(-2px) scale(0.98) !important;
+  opacity: 0.78;
+}
+
+.cart-fly-clone {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--lime);
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.28);
+  transform-origin: center;
+  transition:
+    transform 0.58s cubic-bezier(0.2, 0.9, 0.2, 1),
+    opacity 0.58s ease;
+}
+
+.cart-pulse {
+  animation: cartPulse 0.58s ease;
+}
+
+.cart-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: var(--navy);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: normal;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.cart-auth-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--lime);
+  background: #f7fee7;
+}
+
+@keyframes cartPulse {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .upsell-side-panel {
@@ -5722,6 +5843,39 @@ body,
   font-size: 10px;
   font-style: normal;
   font-weight: 950;
+}
+
+.accessory-phone-rec {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  margin: 9px 0;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid #dbe5ef;
+  background: #f8fafc;
+}
+
+.accessory-phone-rec .prod-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px rgba(15, 23, 42, 0.16));
+}
+
+.accessory-phone-rec .prod-phone-fallback,
+.accessory-phone-rec .prod-ico {
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+}
+
+.accessory-phone-rec strong {
+  min-height: 0 !important;
+  color: var(--navy);
+  font-size: 12px !important;
+  line-height: 1.15;
 }
 
 @media (max-width: 980px) {

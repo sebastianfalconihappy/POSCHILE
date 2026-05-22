@@ -2,9 +2,21 @@
   min-height: 100vh;
   width: 100%;
   background:
-    radial-gradient(circle at 12% 12%, rgba(201, 232, 0, 0.28), transparent 28%),
-    radial-gradient(circle at 86% 18%, rgba(0, 166, 214, 0.22), transparent 32%),
-    radial-gradient(circle at 64% 92%, rgba(37, 75, 150, 0.45), transparent 42%),
+    radial-gradient(
+      circle at 12% 12%,
+      rgba(201, 232, 0, 0.28),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 86% 18%,
+      rgba(0, 166, 214, 0.22),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 64% 92%,
+      rgba(37, 75, 150, 0.45),
+      transparent 42%
+    ),
     linear-gradient(135deg, #05070a 0%, #0a0e14 46%, #182231 100%);
   color: #ffffff;
   position: fixed;
@@ -202,6 +214,7 @@
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
   backdrop-filter: blur(16px);
   animation: entradaInfo 0.9s ease;
+  text-align: center;
 }
 
 .publicidad-info h2 {
@@ -221,8 +234,11 @@
 
 .publicidad-progress {
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
-  margin: 28px 0;
+  margin: 28px auto;
+  width: 100%;
 }
 
 .publicidad-progress span {
@@ -243,6 +259,8 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-principal,
@@ -376,7 +394,11 @@
 /* Light restore for advertising screen */
 .publicidad-page {
   background:
-    radial-gradient(circle at 12% 8%, rgba(168, 196, 0, 0.14), transparent 280px),
+    radial-gradient(
+      circle at 12% 8%,
+      rgba(168, 196, 0, 0.14),
+      transparent 280px
+    ),
     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
   color: #1e293b !important;
 }
@@ -449,8 +471,12 @@
 
 /* Unified header for advertising */
 .publicidad-top {
-  background:
-    linear-gradient(90deg, #0a0e14 0%, #19375f 58%, #254b96 100%) !important;
+  background: linear-gradient(
+    90deg,
+    #0a0e14 0%,
+    #19375f 58%,
+    #254b96 100%
+  ) !important;
   border-bottom: 1px solid rgba(201, 232, 0, 0.2) !important;
   box-shadow: 0 12px 30px rgba(10, 14, 20, 0.22) !important;
   backdrop-filter: blur(18px) !important;
@@ -513,8 +539,7 @@
   border: 1px solid #dbe5ef;
   border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(168, 196, 0, 0.12), transparent 70%),
-    #ffffff;
+    linear-gradient(135deg, rgba(168, 196, 0, 0.12), transparent 70%), #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;

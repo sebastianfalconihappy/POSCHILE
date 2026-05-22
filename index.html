@@ -46,23 +46,11 @@
           </p>
 
           <div class="publicidad-metrics">
-            <div>
-              <strong>OTP</strong>
-              <span>flujo seguro</span>
-            </div>
-            <div>
-              <strong>POS</strong>
-              <span>venta guiada</span>
-            </div>
           </div>
 
           <div class="publicidad-progress" id="pubProgress"></div>
 
           <div class="publicidad-actions">
-            <button onclick="siguientePublicidad()" class="btn-secundario">
-              Siguiente publicidad
-            </button>
-
             <button onclick="entrarAlLogin()" class="btn-principal">
               Continuar
             </button>
@@ -591,11 +579,20 @@
                       </div>
                     </div>
                     <div id="cupoUsageBox"></div>
+                    <div id="authDiscountPanel" style="display: none"></div>
                     <div id="cartFoot" style="display: none">
                       <div class="sum-div"></div>
                       <div class="sum-row">
                         <span class="sum-lbl">Subtotal</span
                         ><span id="cSub">$0</span>
+                      </div>
+                      <div
+                        class="sum-row"
+                        id="cAuthDiscountRow"
+                        style="display: none"
+                      >
+                        <span class="sum-lbl">Descuento autorizado</span
+                        ><span id="cAuthDiscount">-$0</span>
                       </div>
                       <div class="sum-row">
                         <span>TOTAL</span><span id="cTot">$0</span>
@@ -873,6 +870,124 @@
                 <div id="nfRes" style="display: none; margin-top: 11px">
                   <div class="alert a-ok">
                     ✅ Boleta emitida — Folio: <strong id="nFolio"></strong>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid var(--slate2);
+                      border-radius: var(--rs);
+                      padding: 12px;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div class="card-title" style="font-size: 12px">
+                      Metodo de pago de entrada (demo normal)
+                    </div>
+                    <div class="card-sub">
+                      Puede ser efectivo, tarjeta de credito o pago mixto
+                    </div>
+                    <div class="pay-grid" style="margin-top: 9px">
+                      <div class="pay-opt">
+                        <div class="pay-ico">💵</div>
+                        <div>
+                          <div class="pay-name">Efectivo</div>
+                          <div class="pay-sub">Entrada completa</div>
+                        </div>
+                      </div>
+                      <div class="pay-opt">
+                        <div class="pay-ico">💳</div>
+                        <div>
+                          <div class="pay-name">Credito</div>
+                          <div class="pay-sub">Tarjeta bancaria</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="g2col" style="margin-top: 9px">
+                      <div class="fg">
+                        <label class="fl">Efectivo (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="nfFactPayCash"
+                          type="number"
+                          min="0"
+                          disabled
+                        />
+                      </div>
+                      <div class="fg">
+                        <label class="fl">Tarjeta credito (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="nfFactPayCard"
+                          type="number"
+                          min="0"
+                          disabled
+                        />
+                      </div>
+                    </div>
+                    <div
+                      id="nfFactPayMsg"
+                      class="alert a-info"
+                      style="display: none; margin: 0"
+                    ></div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid var(--slate2);
+                      border-radius: var(--rs);
+                      padding: 12px;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div class="card-title" style="font-size: 12px">
+                      Metodo de pago de entrada
+                    </div>
+                    <div class="card-sub">
+                      Puede ser efectivo, tarjeta de credito o pago mixto
+                    </div>
+                    <div class="pay-grid" style="margin-top: 9px">
+                      <div class="pay-opt" onclick="setEntryPaymentMode('efectivo')">
+                        <div class="pay-ico">💵</div>
+                        <div>
+                          <div class="pay-name">Efectivo</div>
+                          <div class="pay-sub">Entrada completa</div>
+                        </div>
+                      </div>
+                      <div class="pay-opt" onclick="setEntryPaymentMode('credito')">
+                        <div class="pay-ico">💳</div>
+                        <div>
+                          <div class="pay-name">Credito</div>
+                          <div class="pay-sub">Tarjeta bancaria</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="g2col" style="margin-top: 9px">
+                      <div class="fg">
+                        <label class="fl">Efectivo (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="nfFactPayCash2"
+                          type="number"
+                          min="0"
+                          disabled
+                        />
+                      </div>
+                      <div class="fg">
+                        <label class="fl">Tarjeta credito (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="nfFactPayCard2"
+                          type="number"
+                          min="0"
+                          disabled
+                        />
+                      </div>
+                    </div>
+                    <div
+                      id="nfFactPayMsg2"
+                      class="alert a-info"
+                      style="display: none; margin: 0"
+                    ></div>
                   </div>
                   <button
                     class="btn btn-navy btn-lg btn-full"
@@ -1482,6 +1597,11 @@
                   style="display: none; margin-top: 13px"
                 ></div>
               </div>
+              <div class="action-bar">
+                <button class="btn btn-ghost" onclick="backToLeasingIdentification()">
+                  ← Volver a Identificación
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1492,6 +1612,8 @@
             <div class="g6040" id="lp3OfferGrid">
               <!-- COLUMNA IZQUIERDA -->
               <div>
+                <div id="lp3BioSlot"></div>
+
                 <!-- Entrada + Plazos -->
                 <div class="card mb10" id="lp3EntryTermCard">
                   <div class="card-title">Plazo y Entrada</div>
@@ -1636,6 +1758,119 @@
                   >
                     Ir a inventario
                   </button>
+                </div>
+
+                <!-- DATOS DEL CLIENTE -->
+                <div class="card mb10" id="lp3ClientDataCard" style="display: none">
+                  <div class="card-title">Datos del Cliente</div>
+                  <div class="card-sub">
+                    Autollenado desde identificacion. Completa direccion,
+                    comuna y region antes de validar capacidad.
+                  </div>
+                  <div class="g2col">
+                    <div class="fg">
+                      <label class="fl">Nombre completo</label>
+                      <input
+                        class="fi"
+                        id="lp3_nom"
+                        readonly
+                        style="background: var(--slate1); color: var(--slate4)"
+                      />
+                    </div>
+                    <div class="fg">
+                      <label class="fl">RUT</label>
+                      <input
+                        class="fi"
+                        id="lp3_rut"
+                        readonly
+                        style="background: var(--slate1); color: var(--slate4)"
+                      />
+                    </div>
+                  </div>
+                  <div class="g2col">
+                    <div class="fg">
+                      <label class="fl">Email</label>
+                      <input
+                        class="fi"
+                        id="lp3_email"
+                        readonly
+                        style="background: var(--slate1); color: var(--slate4)"
+                      />
+                    </div>
+                    <div class="fg">
+                      <label class="fl">Telefono</label>
+                      <input
+                        class="fi"
+                        id="lp3_tel"
+                        readonly
+                        style="background: var(--slate1); color: var(--slate4)"
+                      />
+                    </div>
+                  </div>
+                  <div class="g2col">
+                    <div class="fg">
+                      <label class="fl">Direccion <span class="req">*</span></label>
+                      <input
+                        class="fi"
+                        id="lp3_dir"
+                        autocomplete="street-address"
+                        maxlength="90"
+                        placeholder="Av. Providencia 1234"
+                      />
+                    </div>
+                    <div class="fg">
+                      <label class="fl">Comuna <span class="req">*</span></label>
+                      <select class="fs" id="lp3_comuna">
+                        <option value="">-- Selecciona comuna --</option>
+                        <option>Alhue</option>
+                        <option>Buin</option>
+                        <option>Calera de Tango</option>
+                        <option>Cerrillos</option>
+                        <option>Cerro Navia</option>
+                        <option>Colina</option>
+                        <option>Conchali</option>
+                        <option>Curacavi</option>
+                        <option>El Bosque</option>
+                        <option>El Monte</option>
+                        <option>Estacion Central</option>
+                        <option>Huechuraba</option>
+                        <option>Independencia</option>
+                        <option>La Cisterna</option>
+                        <option>La Florida</option>
+                        <option>La Granja</option>
+                        <option>La Pintana</option>
+                        <option>La Reina</option>
+                        <option>Lampa</option>
+                        <option>Las Condes</option>
+                        <option>Lo Barnechea</option>
+                        <option>Lo Espejo</option>
+                        <option>Lo Prado</option>
+                        <option>Macul</option>
+                        <option>Maipu</option>
+                        <option>Nunoa</option>
+                        <option>Providencia</option>
+                        <option>Puente Alto</option>
+                        <option>Santiago</option>
+                        <option>Vitacura</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="fg">
+                    <label class="fl">Region <span class="req">*</span></label>
+                    <select class="fs" id="lp3_region">
+                      <option value="">-- Selecciona region --</option>
+                      <option>Metropolitana de Santiago</option>
+                      <option>Valparaiso</option>
+                      <option>Biobio</option>
+                      <option>La Araucania</option>
+                      <option>Los Lagos</option>
+                      <option>Maule</option>
+                      <option>O'Higgins</option>
+                      <option>Atacama</option>
+                      <option>Coquimbo</option>
+                      <option>Antofagasta</option>
+                    </select>
+                  </div>
                 </div>
 
                 <!-- CAPACIDAD + PERFIL -->
@@ -1888,8 +2123,8 @@
               </div>
             </div>
             <div class="action-bar">
-              <button class="btn btn-ghost" onclick="goScreen('lp3eval')">
-                ← Volver
+              <button class="btn btn-ghost" onclick="backToLeasingIdentification()">
+                ← Volver a Identificación
               </button>
               <div class="ab-r">
                 <button class="btn btn-lime btn-lg" onclick="continueLp3()">
@@ -1993,7 +2228,7 @@
                 <div class="card mb10" id="bioCard">
                   <div class="card-title" style="font-size: 12px">
                     <span style="font-size: 16px">🪪</span>
-                    Paso 1 — Verificación Biométrica
+                     Verificación Biométrica
                     <span
                       class="badge b-slate"
                       id="s2badge"
@@ -2436,6 +2671,11 @@
           <div class="screen" id="screen-lp6">
             <div style="max-width: 580px; margin: 0 auto">
               <div id="lp6hdr" style="margin-bottom: 13px"></div>
+              <div class="action-bar" style="padding-top: 0; margin-bottom: 12px">
+                <button class="btn btn-ghost" onclick="backToLeasingFormalization()">
+                  ← Volver a Formalización
+                </button>
+              </div>
               <!-- Activación automática -->
               <div class="card mb14">
                 <div class="card-title">⚡ Activando Leasing…</div>
@@ -2544,6 +2784,65 @@
                       <span>Monto a facturar (entrada)</span
                       ><span id="factMonto">—</span>
                     </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid var(--slate2);
+                      border-radius: var(--rs);
+                      padding: 12px;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div class="card-title" style="font-size: 12px">
+                      Metodo de pago de entrada
+                    </div>
+                    <div class="card-sub">
+                      Puede ser efectivo, tarjeta de credito o pago mixto
+                    </div>
+                    <div class="pay-grid" style="margin-top: 9px">
+                      <div class="pay-opt" onclick="setEntryPaymentMode('efectivo')">
+                        <div class="pay-ico">💵</div>
+                        <div>
+                          <div class="pay-name">Efectivo</div>
+                          <div class="pay-sub">Entrada completa</div>
+                        </div>
+                      </div>
+                      <div class="pay-opt" onclick="setEntryPaymentMode('credito')">
+                        <div class="pay-ico">💳</div>
+                        <div>
+                          <div class="pay-name">Credito</div>
+                          <div class="pay-sub">Tarjeta bancaria</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="g2col" style="margin-top: 9px">
+                      <div class="fg">
+                        <label class="fl">Efectivo (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="factPayCash"
+                          type="number"
+                          min="0"
+                          oninput="syncEntryPayment()"
+                        />
+                      </div>
+                      <div class="fg">
+                        <label class="fl">Tarjeta credito (USD)</label>
+                        <input
+                          class="fi mono"
+                          id="factPayCard"
+                          type="number"
+                          min="0"
+                          oninput="syncEntryPayment()"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      id="factPayMsg"
+                      class="alert a-info"
+                      style="display: none; margin: 0"
+                    ></div>
                   </div>
                   <button
                     class="btn btn-navy btn-lg btn-full"

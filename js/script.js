@@ -1026,6 +1026,17 @@ const PRODUCT_IMAGE_MAP = {
   "Gamepad de mano": "assets/ads/Gamepad de mano.jpg",
 };
 
+const COMBO_IMAGE_MAP = {
+  701: "assets/ads/Samsung Galaxy A56 5G.jpg",
+  702: "assets/ads/Honor X9c.jpg",
+  703: "assets/ads/Infinix Note 40.jpg",
+  704: "assets/ads/Tecno Pova 6.jpg",
+  705: "assets/ads/Xiaomi 14T.jpg",
+  706: "assets/ads/Xiaomi Redmi 13C.jpg",
+  707: "assets/ads/Samsung Galaxy S25 Ultra.jpg",
+  708: "assets/ads/Honor 200.png",
+};
+
 PRODUCTS.forEach((p) => {
   p.pvp = p.costo;
   p.price = p.costo;
@@ -1033,6 +1044,7 @@ PRODUCTS.forEach((p) => {
   p.perfiles = productProfiles(p);
   p.bateria = productBatteryTag(p);
   p.recomendado = productRecommended(p);
+  if (p.cat === "combo" && COMBO_IMAGE_MAP[p.id]) p.img = COMBO_IMAGE_MAP[p.id];
   if (PRODUCT_IMAGE_MAP[p.name]) p.img = PRODUCT_IMAGE_MAP[p.name];
   if (p.cat === "celular" && !p.img) {
     p.img = `assets/products/${productImageFileName(p)}.png`;
@@ -1345,6 +1357,8 @@ let S = {
   totalContrato: 0,
   autoImei: null,
   assignedProduct: null,
+  entryPayment: { efectivo: 0, credito: 0 },
+  activeAuthDiscountId: null,
   pendingPhoneColor: null,
   opId: null,
   folio: null,
@@ -1881,7 +1895,7 @@ function renderCatalog() {
   const pageItems = list.slice(start, start + pageSize);
   grid.innerHTML =
     renderCompareSelectionBar() +
-    renderPromoShowcase(list) +
+    renderCategoryShowcase(list) +
     pageItems
       .map((p, idx) => {
         const avail = (p.units || []).filter((u) => u.st === "disponible");
@@ -1947,20 +1961,43 @@ function renderCatalog() {
     renderCatalogPager(list.length, S.catalogPage, pageSize);
 }
 
-function renderPromoShowcase(list) {
-  if (S.catFilter !== "promo") return "";
+function renderCategoryShowcase(list) {
+  const config = {
+    promo: {
+      title: "Promos activas",
+      sub: `${list.length} oportunidades para ofrecer una mejor opcion al cliente`,
+      text: "Descuentos del prototipo - Packs listos - Audio - Proteccion - Accesorios",
+    },
+    celular: {
+      title: "Celulares disponibles",
+      sub: `${list.length} equipos para venta directa o leasing`,
+      text: "Equipos con IMEI - Opciones para maximizar - Descuento autorizado - Accesorios sugeridos",
+    },
+    combo: {
+      title: "Combos para maximizar",
+      sub: `${list.length} paquetes listos para subir el ticket`,
+      text: "Packs listos - Audio - Proteccion - Entretenimiento - Ahorro referencial",
+    },
+    accesorio: {
+      title: "Accesorios sugeridos",
+      sub: `${list.length} agregados para completar la venta`,
+      text: "Audio - Proteccion - Carga - Entretenimiento - Regalos para cierre",
+    },
+  };
+  const cfg = config[S.catFilter];
+  if (!cfg) return "";
   const savings = list
     .filter((p) => p.oldPrice)
     .map((p) => Math.max(0, p.oldPrice - p.price))
     .reduce((a, b) => a + b, 0);
   return `<div class="promo-showcase">
     <div>
-      <strong>Promos activas</strong>
-      <span>${list.length} oportunidades para ofrecer una mejor opcion al cliente</span>
+      <strong>${cfg.title}</strong>
+      <span>${cfg.sub}</span>
     </div>
     <div class="promo-marquee" aria-hidden="true">
-      <span>Descuentos del prototipo - Packs listos - Audio - Proteccion - Accesorios - Ahorro referencial ${clp(savings)}</span>
-      <span>Descuentos del prototipo - Packs listos - Audio - Proteccion - Accesorios - Ahorro referencial ${clp(savings)}</span>
+      <span>${cfg.text} - Ahorro referencial ${clp(savings)}</span>
+      <span>${cfg.text} - Ahorro referencial ${clp(savings)}</span>
     </div>
   </div>`;
 }
@@ -2220,9 +2257,10 @@ function makeAccessoryUpsellOptions(accessory) {
   const speaker = upsellAccessory(610);
   const gamepad = upsellAccessory(616);
   const isAudio = /parlante|audifono|audio|tws/i.test(accessory.name || "");
+  const recommendedPhone = recommendedPhoneForAccessory(accessory);
   const primary = isAudio ? tws : micas;
   const secondary = isAudio ? speaker : bottle;
-  return [
+  const options = [
     {
       title: "Solo accesorio",
       badge: "Compra rapida",
@@ -2282,6 +2320,34 @@ function makeAccessoryUpsellOptions(accessory) {
       total: accessory.price + gamepad.price + keychain.price - 4,
     },
   ];
+  if (recommendedPhone) {
+    options.push({
+      title: "Con celular recomendado",
+      badge: "Sube la venta",
+      offer: "CEL",
+      desc: `Este accesorio calza bien con ${recommendedPhone.name}. Puedes comprar todo a este precio.`,
+      pack: null,
+      phoneId: recommendedPhone.id,
+      phoneName: recommendedPhone.name,
+      phoneImg: recommendedPhone.img,
+      total: accessory.price + recommendedPhone.price,
+    });
+  }
+  return options;
+}
+
+function recommendedPhoneForAccessory(accessory) {
+  const name = String(accessory?.name || "").toLowerCase();
+  const preferredName = /gamepad|drone|parlante|audifono|tws/i.test(name)
+    ? "Tecno Pova 6"
+    : /mochila|tomatodo|llavero|micas|protector/i.test(name)
+      ? "Samsung Galaxy A16"
+      : "Honor X7c";
+  return (
+    PRODUCTS.find((p) => p.cat === "celular" && p.name === preferredName) ||
+    PRODUCTS.find((p) => p.cat === "celular" && (p.units || []).some((u) => u.st === "disponible")) ||
+    PRODUCTS.find((p) => p.cat === "celular")
+  );
 }
 
 function setUpsellColor(btn) {
@@ -2337,7 +2403,7 @@ function showUpsell(id) {
       ${options
         .map((op, idx) => {
           const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
-          return `<button class="upsell-option ${idx === 1 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectUpsellOption(${phone.id}, ${idx})">
+          return `<button class="upsell-option ${idx === 1 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectUpsellOption(${phone.id}, ${idx}, this)">
             ${op.offer ? `<span class="upsell-offer-label">${op.offer}</span>` : ""}
             <span class="upsell-badge">${op.badge}</span>
             <div class="upsell-option-icon">${op.icon}</div>
@@ -2394,7 +2460,7 @@ function toggleUpsellAccessories(phoneId) {
     <div class="upsell-custom-grid">
       ${upsellAccessorySuggestions(phoneId)
         .map(
-          (p) => `<button type="button" class="upsell-custom-item" onclick="addUpsellAccessory(${p.id})">
+          (p) => `<button type="button" class="upsell-custom-item" onclick="addUpsellAccessory(${p.id}, this)">
             <span>${productImageMarkup(p)}</span>
             <strong>${p.name}</strong>
             <em>${clp(p.price)}</em>
@@ -2405,21 +2471,23 @@ function toggleUpsellAccessories(phoneId) {
     </div>`;
 }
 
-function addUpsellAccessory(id) {
-  addCart(id, { skipUpsell: true, quiet: true });
-  const item = PRODUCTS.find((p) => p.id === id);
-  renderCart();
-  renderCatalog();
-  refreshUpsellCupoPreview();
-  const basePrice = Number(
-    document.getElementById("upsellCupoBasePrice")?.value || 0,
-  );
-  const exceso = leasingCupoExcess(cartTotal() + basePrice);
-  if (exceso > 0) {
-    toast(`Excediste tu cupo por ${clp(exceso)}. Retira un extra o cambia de equipo.`, "warn");
-    return;
-  }
-  toast(`${item?.name || "Accesorio"} agregado`);
+function addUpsellAccessory(id, sourceEl) {
+  animateAddToCart(sourceEl, () => {
+    addCart(id, { skipUpsell: true, quiet: true });
+    const item = PRODUCTS.find((p) => p.id === id);
+    renderCart();
+    renderCatalog();
+    refreshUpsellCupoPreview();
+    const basePrice = Number(
+      document.getElementById("upsellCupoBasePrice")?.value || 0,
+    );
+    const exceso = leasingCupoExcess(cartTotal() + basePrice);
+    if (exceso > 0) {
+      toast(`Excediste tu cupo por ${clp(exceso)}. Retira un extra o cambia de equipo.`, "warn");
+      return;
+    }
+    toast(`${item?.name || "Accesorio"} agregado`);
+  });
 }
 
 function refreshUpsellCupoPreview() {
@@ -2449,26 +2517,62 @@ function addPromoPackToCart(pack) {
   else S.cart.push({ ...pack, extraImeis: [] });
 }
 
-function selectUpsellOption(phoneId, optionIndex) {
+function animateAddToCart(sourceEl, onDone) {
+  const target =
+    document.getElementById("cartBadge") ||
+    document.getElementById("cartBody") ||
+    document.getElementById("cartFoot");
+  if (!sourceEl || !target) {
+    if (typeof onDone === "function") onDone();
+    return;
+  }
+  const from = sourceEl.getBoundingClientRect();
+  const to = target.getBoundingClientRect();
+  const clone = sourceEl.cloneNode(true);
+  sourceEl.classList.add("is-flying");
+  clone.classList.add("cart-fly-clone");
+  clone.style.left = `${from.left}px`;
+  clone.style.top = `${from.top}px`;
+  clone.style.width = `${from.width}px`;
+  clone.style.height = `${from.height}px`;
+  document.body.appendChild(clone);
+  requestAnimationFrame(() => {
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    clone.style.transform = `translate(${dx}px, ${dy}px) scale(0.18)`;
+    clone.style.opacity = "0.08";
+  });
+  setTimeout(() => {
+    clone.remove();
+    sourceEl.classList.remove("is-flying");
+    target.classList.add("cart-pulse");
+    setTimeout(() => target.classList.remove("cart-pulse"), 620);
+    if (typeof onDone === "function") onDone();
+  }, 620);
+}
+
+function selectUpsellOption(phoneId, optionIndex, sourceEl) {
   const phone = PRODUCTS.find((p) => p.id === phoneId);
   if (!phone) return;
   const option = makeUpsellOptions(phone)[optionIndex];
   S.pendingPhoneColor = selectedUpsellColor();
-  closeUpsell();
-  const beforeQty = S.cart
-    .filter((x) => x.id === phoneId)
-    .reduce((sum, x) => sum + x.qty, 0);
-  addCart(phoneId, { skipUpsell: true, quiet: true });
-  const afterQty = S.cart
-    .filter((x) => x.id === phoneId)
-    .reduce((sum, x) => sum + x.qty, 0);
-  if (afterQty <= beforeQty) return;
-  addPromoPackToCart(option.pack);
-  OP.carrito = true;
-  renderCart();
-  renderCatalog();
-  S.pendingPhoneColor = null;
-  toast(`${option.title} agregado al carrito`);
+  animateAddToCart(sourceEl, () => {
+    closeUpsell();
+    const beforeQty = S.cart
+      .filter((x) => x.id === phoneId)
+      .reduce((sum, x) => sum + x.qty, 0);
+    addCart(phoneId, { skipUpsell: true, quiet: true });
+    const afterQty = S.cart
+      .filter((x) => x.id === phoneId)
+      .reduce((sum, x) => sum + x.qty, 0);
+    if (afterQty <= beforeQty) return;
+    addPromoPackToCart(option.pack);
+    OP.carrito = true;
+    renderCart();
+    renderCatalog();
+    S.pendingPhoneColor = null;
+    toast(`${option.title} agregado al carrito`);
+  });
 }
 
 function showComboUpsell(id) {
@@ -2496,7 +2600,7 @@ function showComboUpsell(id) {
       ${options
         .map((op, idx) => {
           const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
-          return `<button class="upsell-option ${idx === 2 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectComboUpsellOption(${combo.id}, ${idx})">
+          return `<button class="upsell-option ${idx === 2 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectComboUpsellOption(${combo.id}, ${idx}, this)">
             ${op.offer ? `<span class="upsell-offer-label">${op.offer}</span>` : ""}
             <span class="upsell-badge">${op.badge}</span>
             <div class="upsell-option-icon">${op.icon}</div>
@@ -2515,17 +2619,19 @@ function showComboUpsell(id) {
   document.getElementById("upsellModal").style.display = "flex";
 }
 
-function selectComboUpsellOption(comboId, optionIndex) {
+function selectComboUpsellOption(comboId, optionIndex, sourceEl) {
   const combo = PRODUCTS.find((p) => p.id === comboId);
   if (!combo) return;
   const option = makeComboUpsellOptions(combo)[optionIndex];
-  closeUpsell();
-  addCart(comboId, { skipUpsell: true, quiet: true });
-  addPromoPackToCart(option.pack);
-  OP.carrito = true;
-  renderCart();
-  renderCatalog();
-  toast(`${option.title} agregado al carrito`);
+  animateAddToCart(sourceEl, () => {
+    closeUpsell();
+    addCart(comboId, { skipUpsell: true, quiet: true });
+    addPromoPackToCart(option.pack);
+    OP.carrito = true;
+    renderCart();
+    renderCatalog();
+    toast(`${option.title} agregado al carrito`);
+  });
 }
 
 function showAccessoryUpsell(id) {
@@ -2548,13 +2654,17 @@ function showAccessoryUpsell(id) {
         ${options
           .map((op, idx) => {
             const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
-            return `<button class="accessory-upsell-option ${idx === 1 ? "featured" : ""}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx})">
+            return `<button class="accessory-upsell-option ${idx === 1 || op.phoneId ? "featured" : ""}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx}, this)">
               ${op.offer ? `<i>${op.offer}</i>` : ""}
               <span>${op.badge}</span>
               <h3>${op.title}</h3>
               <p>${op.desc}</p>
-              ${upsellPackVisual(op.pack)}
-              ${op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
+              ${
+                op.phoneId
+                  ? `<div class="accessory-phone-rec">${productImageMarkup(PRODUCTS.find((p) => p.id === op.phoneId))}<strong>${op.phoneName}</strong></div>`
+                  : upsellPackVisual(op.pack)
+              }
+              ${op.phoneId ? `<small>${accessory.name} + ${op.phoneName}</small>` : op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
               <div><strong>${clp(op.total)}</strong>${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}</div>
             </button>`;
           })
@@ -2569,17 +2679,22 @@ function showAccessoryUpsell(id) {
   document.getElementById("upsellModal").style.display = "flex";
 }
 
-function selectAccessoryUpsellOption(accessoryId, optionIndex) {
+function selectAccessoryUpsellOption(accessoryId, optionIndex, sourceEl) {
   const accessory = PRODUCTS.find((p) => p.id === accessoryId);
   if (!accessory) return;
   const option = makeAccessoryUpsellOptions(accessory)[optionIndex];
-  closeUpsell();
-  addCart(accessoryId, { skipUpsell: true, quiet: true });
-  addPromoPackToCart(option.pack);
-  OP.carrito = true;
-  renderCart();
-  renderCatalog();
-  toast(`${option.title} agregado al carrito`);
+  animateAddToCart(sourceEl, () => {
+    closeUpsell();
+    if (option.phoneId) {
+      addCart(option.phoneId, { skipUpsell: true, quiet: true });
+    }
+    addCart(accessoryId, { skipUpsell: true, quiet: true });
+    addPromoPackToCart(option.pack);
+    OP.carrito = true;
+    renderCart();
+    renderCatalog();
+    toast(`${option.title} agregado al carrito`);
+  });
 }
 
 function showPromoPersonalize(id) {
@@ -2710,6 +2825,7 @@ function removeCart(id) {
     }
   }
   S.cart = S.cart.filter((x) => x.id !== id);
+  if (String(S.activeAuthDiscountId) === String(id)) S.activeAuthDiscountId = null;
   if (!S.cart.length) OP.carrito = false;
   renderCart();
   renderCatalog();
@@ -2741,13 +2857,23 @@ function clearCart() {
   S.cart = [];
   S.autoImei = null;
   S.assignedProduct = null;
+  S.activeAuthDiscountId = null;
   OP.carrito = false;
   renderCart();
   renderCatalog();
   document.getElementById("tbImei").style.display = "none";
 }
 function cartTotal() {
+  return S.cart.reduce(
+    (a, x) => a + Math.max(0, x.price * x.qty - Number(x.authDiscountAmount || 0)),
+    0,
+  );
+}
+function cartGrossTotal() {
   return S.cart.reduce((a, x) => a + x.price * x.qty, 0);
+}
+function cartAuthDiscountTotal() {
+  return S.cart.reduce((a, x) => a + Number(x.authDiscountAmount || 0), 0);
 }
 function simulatedLeasingAsset() {
   if (S.cart.length) return null;
@@ -2776,7 +2902,10 @@ function offerItems() {
   return S.cart.length ? S.cart : [simulatedLeasingAsset()];
 }
 function offerTotal() {
-  return offerItems().reduce((a, x) => a + x.price * x.qty, 0);
+  return offerItems().reduce(
+    (a, x) => a + Math.max(0, x.price * x.qty - Number(x.authDiscountAmount || 0)),
+    0,
+  );
 }
 function cartSumm() {
   return (
@@ -2962,6 +3091,8 @@ function renderCart() {
     body.innerHTML =
       '<div class="cart-empty"><div style="font-size:26px;margin-bottom:6px">🛍️</div>Carrito vacío</div>';
     foot.style.display = "none";
+    const authPanel = document.getElementById("authDiscountPanel");
+    if (authPanel) authPanel.style.display = "none";
     renderCupoUsage();
     return;
   }
@@ -2973,21 +3104,39 @@ function renderCart() {
       <div class="ci-inf">
         <div class="ci-name">${it.name}</div>
         <div class="ci-price">${clp(it.price)} c/u</div>
+        ${
+          it.authDiscountAmount
+            ? `<div class="ci-color"><strong>Descuento autorizado:</strong> -${clp(it.authDiscountAmount)}</div>`
+            : ""
+        }
         ${it.color ? `<div class="ci-color">Color: ${it.color}</div>` : ""}
         ${it.autoImei ? `<div class="ci-imei">IMEI: ${it.autoImei}</div>` : ""}
+        ${
+          it.cat === "celular"
+            ? `<button class="cart-auth-btn" type="button" onclick="openCartAuthDiscount(${it.id})">Solicitar descuento por autorizacion</button>`
+            : ""
+        }
       </div>
       <div class="ci-qty">
         <button class="qb" onclick="qtyCart(${it.id},-1)">−</button>
         <span style="font-size:12px;font-weight:700;min-width:14px;text-align:center">${it.qty}</span>
         <button class="qb" onclick="qtyCart(${it.id},1)">+</button>
       </div>
-      <div class="ci-sub">${clp(it.price * it.qty)}</div>
+      <div class="ci-sub">${clp(Math.max(0, it.price * it.qty - Number(it.authDiscountAmount || 0)))}</div>
       <button class="ci-del" onclick="removeCart(${it.id})">🗑</button>
     </div>`,
     )
     .join("");
-  document.getElementById("cSub").textContent = clp(cartTotal());
+  document.getElementById("cSub").textContent = clp(cartGrossTotal());
+  const cDiscRow = document.getElementById("cAuthDiscountRow");
+  const cDisc = document.getElementById("cAuthDiscount");
+  const discTotal = cartAuthDiscountTotal();
+  if (cDiscRow && cDisc) {
+    cDiscRow.style.display = discTotal > 0 ? "flex" : "none";
+    cDisc.textContent = "-" + clp(discTotal);
+  }
   document.getElementById("cTot").textContent = clp(cartTotal());
+  renderAuthDiscountPanel();
   const iEl = document.getElementById("cImeiInfo");
   if (S.autoImei) {
     iEl.style.display = "";
@@ -3016,6 +3165,136 @@ function renderCart() {
 /* ═══════════════════════════════════════════════════
    PAGO
 ═══════════════════════════════════════════════════ */
+function openCartAuthDiscount(id) {
+  const item = S.cart.find((it) => it.id === id && it.cat === "celular");
+  if (!item) {
+    toast("Solo puedes solicitar descuento sobre celulares", "warn");
+    return;
+  }
+  S.activeAuthDiscountId = id;
+  renderAuthDiscountPanel();
+  setTimeout(() => {
+    const panel = document.getElementById("authDiscountPanel");
+    panel?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("authReason_" + id)?.focus();
+  }, 60);
+}
+
+function renderAuthDiscountPanel() {
+  const panel = document.getElementById("authDiscountPanel");
+  if (!panel) return;
+  const phones = S.cart.filter(
+    (it) => it.cat === "celular" && String(it.id) === String(S.activeAuthDiscountId),
+  );
+  if (!phones.length) {
+    panel.style.display = "none";
+    panel.innerHTML = "";
+    return;
+  }
+  panel.style.display = "";
+  panel.innerHTML = `
+    <div style="border:1px solid #bfdbfe;background:#eff6ff;border-radius:7px;padding:10px;margin:10px 0">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px">
+        <strong style="font-size:12px;color:var(--navy)">Descuento por autorizacion</strong>
+        <span class="badge b-navy">ZONAL</span>
+      </div>
+      ${phones
+        .map((it) => {
+          const requested = !!it.authDiscountRequested;
+          const approved = !!it.authDiscountAmount;
+          const amount =
+            it.authDiscountPendingAmount || Math.min(50, Math.round(it.price * 0.1));
+          return `
+            <div style="border-top:1px solid #bfdbfe;padding-top:8px;margin-top:8px">
+              <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px">${it.name}</div>
+              ${
+                approved
+                  ? `<div class="alert a-ok" style="margin:0;font-size:11px">Descuento autorizado aplicado: <strong>-${clp(it.authDiscountAmount)}</strong></div>`
+                  : `
+                    <div style="display:grid;grid-template-columns:1fr 92px;gap:6px;margin-top:7px">
+                      <input class="fi" id="authReason_${it.id}" placeholder="Motivo de autorizacion" value="${it.authDiscountReason || ""}" style="height:32px;font-size:11px" />
+                      <input class="fi mono" id="authAmount_${it.id}" type="number" min="1" max="${it.price - 1}" placeholder="Valor" value="${it.authDiscountPendingAmount || ""}" style="height:32px;font-size:11px" />
+                    </div>
+                    <button class="btn btn-ghost btn-sm btn-full" style="margin-top:7px" onclick="requestAuthDiscount(${it.id})">
+                      ${requested ? "Reenviar solicitud al zonal" : "Solicitar descuento por autorizacion"}
+                    </button>
+                    ${
+                      requested
+                        ? `<div style="display:flex;gap:6px;margin-top:7px">
+                            <input class="fi mono" id="authCode_${it.id}" placeholder="Codigo zonal" style="height:32px;font-size:11px" />
+                            <button class="btn btn-navy btn-sm" onclick="applyAuthDiscount(${it.id})">Aplicar</button>
+                          </div>
+                          <div style="font-size:10px;color:var(--slate4);margin-top:4px">
+                            Demo: codigo ${it.authDiscountCode || "ZONAL720"} autoriza ${clp(amount)} · Motivo: ${it.authDiscountReason || "pendiente"}.
+                          </div>`
+                        : ""
+                    }
+                  `
+              }
+            </div>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+function requestAuthDiscount(id) {
+  const item = S.cart.find((it) => it.id === id);
+  if (!item) return;
+  const reason = document.getElementById("authReason_" + id)?.value.trim();
+  const amount = parseMoneyInput(document.getElementById("authAmount_" + id)?.value);
+  if (!reason) {
+    toast("Ingresa el motivo del descuento", "warn");
+    document.getElementById("authReason_" + id)?.focus();
+    return;
+  }
+  if (!amount || amount >= item.price * item.qty) {
+    toast("Ingresa un valor de descuento valido", "warn");
+    document.getElementById("authAmount_" + id)?.focus();
+    return;
+  }
+  item.authDiscountRequested = true;
+  item.authDiscountReason = reason;
+  item.authDiscountCode = item.authDiscountCode || "ZONAL720";
+  item.authDiscountPendingAmount = amount;
+  addLog(
+    "DESCUENTO_AUTORIZACION",
+    "Solicitud enviada a zonal - " +
+      item.name +
+      " - Motivo: " +
+      reason +
+      " - Monto: " +
+      clp(item.authDiscountPendingAmount),
+    "OK",
+  );
+  toast("Solicitud enviada al zonal. Ingresa el codigo de autorizacion");
+  renderCart();
+}
+
+function applyAuthDiscount(id) {
+  const item = S.cart.find((it) => it.id === id);
+  if (!item) return;
+  const code = document.getElementById("authCode_" + id)?.value.trim().toUpperCase();
+  const validCode = String(item.authDiscountCode || "ZONAL720").toUpperCase();
+  if (!item.authDiscountRequested) {
+    toast("Primero solicita autorizacion al zonal", "warn");
+    return;
+  }
+  if (code !== validCode && code !== "AUTORIZADO") {
+    toast("Codigo de autorizacion invalido", "err");
+    return;
+  }
+  item.authDiscountAmount =
+    item.authDiscountPendingAmount || Math.min(50, Math.round(item.price * 0.1));
+  addLog(
+    "DESCUENTO_APLICADO",
+    "Codigo: " + code + " - " + item.name + " - Descuento: " + clp(item.authDiscountAmount),
+    "OK",
+  );
+  toast("Descuento autorizado aplicado al telefono");
+  renderCart();
+  if (S.payMethod === "leasing") initOffer();
+}
+
 function goPago() {
   if (!S.cart.length) {
     toast("Agrega productos primero", "warn");
@@ -3115,10 +3394,10 @@ function continueLeasingFromCatalog() {
   goScreen("lp3oferta");
   initOffer();
   setTimeout(() => {
-    const nextCard =
-      document.getElementById("lp3PayAddressCard") ||
-      document.getElementById("lp3RefsCard");
-    if (nextCard) nextCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    document
+      .getElementById("screen-lp3oferta")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 90);
   toast("Producto seleccionado. Continua con referencias");
 }
@@ -3307,6 +3586,18 @@ function backToLdpd() {
   document.getElementById("lp1A").style.display = "";
   document.getElementById("lp1B").style.display = "none";
 }
+function backToLeasingIdentification() {
+  setProgress(0);
+  setTitle("Leasing - Identificacion + LDPD + OTP");
+  document.getElementById("lp1A").style.display = "";
+  document.getElementById("lp1B").style.display = "none";
+  goScreen("lp1");
+}
+function backToLeasingFormalization() {
+  setProgress(4);
+  setTitle("Leasing - Formalizacion + Activacion");
+  goScreen("lp5");
+}
 function otpN(el, nextId) {
   el.value = el.value.replace(/[^0-9]/g, "");
   el.classList.toggle("ok", el.value.length > 0);
@@ -3331,10 +3622,12 @@ function verifyOtp() {
     document.getElementById("otpMsg").innerHTML =
       '<div style="color:#15803d;font-weight:700">✅ OTP verificado correctamente</div>';
     setTimeout(() => {
-      setProgress(1);
-      setTitle("Leasing — Datos del Cliente");
-      initLp2();
-      goScreen("lp2");
+      setProgress(2);
+      setTitle("Leasing - Evaluacion automatica...");
+      S.precalificacion = getDemoPrecalificacion();
+      S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
+      goScreen("lp3eval");
+      runEval();
     }, 800);
   } else {
     ["o1", "o2", "o3", "o4", "o5", "o6"].forEach((id) => {
@@ -3506,8 +3799,10 @@ function initOffer() {
   const recoveredEntryControl = document.getElementById("lp3RecoveredEntryControl");
   const recoveredEntryChk = document.getElementById("lp3RecoveredEntryChk");
   const refsCard = document.getElementById("lp3RefsCard");
+  const clientDataCard = document.getElementById("lp3ClientDataCard");
   const payAddressCard = document.getElementById("lp3PayAddressCard");
   const productSelected = hasLeasingCartValue();
+  moveBiometricCardToOffer(productSelected);
   if (entryCard) entryCard.style.display = "";
   if (recoveredEntryControl) {
     recoveredEntryControl.style.display =
@@ -3520,6 +3815,7 @@ function initOffer() {
     refsCard.style.display =
       S.payMethod === "leasing" && !productSelected ? "none" : "";
   }
+  if (clientDataCard) clientDataCard.style.display = productSelected ? "" : "none";
   if (payAddressCard) payAddressCard.style.display = productSelected ? "" : "none";
   if (!S.precalificacion) S.precalificacion = getDemoPrecalificacion();
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
@@ -3529,6 +3825,8 @@ function initOffer() {
   const entMin = entradaFromPrecal(tot, S.precalificacion);
   document.getElementById("lp3_ent").value = entMin;
   document.getElementById("lp3_entMin").textContent = clp(entMin);
+  hydrateLp3ClientDataCard();
+  hydrateBiometricCard();
   hydratePayAddressCard(entMin);
   document.getElementById("lp3ofNom").textContent = S.nombre;
   document.getElementById("lp3ofRut").textContent = "RUT: " + S.rut;
@@ -3582,6 +3880,56 @@ function updateFinanceFormula(total, entrada, saldo, warn = false) {
   el.style.display = "";
   el.className = "finance-formula" + (warn ? " is-warn" : "");
   el.innerHTML = `Total productos <strong>${clp(total)}</strong> - entrada cliente <strong>${clp(entrada)}</strong> = saldo a financiar <strong>${clp(saldo)}</strong>`;
+}
+
+function moveBiometricCardToOffer(active = hasLeasingCartValue()) {
+  const slot = document.getElementById("lp3BioSlot");
+  const card = document.getElementById("bioCard");
+  if (!slot || !card) return;
+  if (active && card.parentElement !== slot) slot.appendChild(card);
+  card.style.display = active ? "" : "none";
+}
+
+function hydrateBiometricCard() {
+  const bioNom = document.getElementById("bioNom5");
+  const bioRut = document.getElementById("bioRut5");
+  if (bioNom) bioNom.textContent = S.nombre || "—";
+  if (bioRut) bioRut.textContent = S.rut || "—";
+}
+
+function hydrateLp3ClientDataCard() {
+  const values = {
+    lp3_nom: S.nombre || "",
+    lp3_rut: S.rut || "",
+    lp3_email: S.email || "",
+    lp3_tel: S.tel || "",
+  };
+  Object.entries(values).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  });
+}
+
+function validateLp3ClientData() {
+  const dir = document.getElementById("lp3_dir");
+  const comuna = document.getElementById("lp3_comuna");
+  const region = document.getElementById("lp3_region");
+  const dirValue = dir?.value.trim() || "";
+  const results = [
+    markFieldState(
+      dir,
+      !dirValue
+        ? "Ingresa la direccion."
+        : dirValue.length < 8
+          ? "La direccion debe ser mas especifica."
+          : !/[A-Za-z]/.test(dirValue) || !/\d/.test(dirValue)
+            ? "Incluye calle y numero."
+            : "",
+    ),
+    markFieldState(comuna, comuna?.value ? "" : "Selecciona una opcion."),
+    markFieldState(region, region?.value ? "" : "Selecciona una opcion."),
+  ];
+  return results.every(Boolean);
 }
 
 function hydratePayAddressCard() {
@@ -3871,15 +4219,40 @@ function continueLp3() {
     toast("Acepta las condiciones del leasing", "warn");
     return;
   }
+  if (hasLeasingCartValue() && !OP.biometriaOk) {
+    toast("Completa la biometria antes de formalizar", "warn");
+    document
+      .getElementById("bioCard")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (hasLeasingCartValue() && !validateLp3ClientData()) {
+    toast("Completa los datos del cliente", "warn");
+    return;
+  }
   const lp3Ing = parseMoneyInput(document.getElementById("lp3_ing")?.value);
   const lp3Gast = parseMoneyInput(document.getElementById("lp3_gast")?.value);
+  const lp3Ocup = document.getElementById("lp3_ocup")?.value || "";
+  const lp3Act = document.getElementById("lp3_act")?.value || "";
   if (hasLeasingCartValue() && (!lp3Ing || !lp3Gast)) {
     toast("Ingresa ingresos y gastos mensuales", "warn");
     document.getElementById(!lp3Ing ? "lp3_ing" : "lp3_gast")?.focus();
     return;
   }
+  if (hasLeasingCartValue() && !lp3Ocup) {
+    markFieldState(document.getElementById("lp3_ocup"), "Selecciona una opcion.");
+    toast("Selecciona la ocupacion", "warn");
+    document.getElementById("lp3_ocup")?.focus();
+    return;
+  }
+  markFieldState(document.getElementById("lp3_ocup"), "");
   S.ingresos = lp3Ing || S.ingresos;
   S.gastos = lp3Gast || S.gastos;
+  S.direccion = document.getElementById("lp3_dir")?.value.trim() || S.direccion;
+  S.comuna = document.getElementById("lp3_comuna")?.value || S.comuna;
+  S.region = document.getElementById("lp3_region")?.value || S.region;
+  S.ocupacion = lp3Ocup || S.ocupacion;
+  S.actividad = lp3Act || S.actividad;
   const tot3 = offerTotal();
   const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const entMin3 = entradaFromPrecal(tot3, S.precalificacion);
@@ -4670,6 +5043,12 @@ function mostrarFactEntrada() {
   document.getElementById("factMonto").textContent = S.entrada
     ? clp(S.entrada)
     : "—";
+  S.entryPayment = { efectivo: Number(S.entrada || 0), credito: 0 };
+  const cash = document.getElementById("factPayCash");
+  const card = document.getElementById("factPayCard");
+  if (cash) cash.value = S.entryPayment.efectivo;
+  if (card) card.value = "";
+  syncEntryPayment();
   document.getElementById("factEntradaCard").style.display = "";
   addLog(
     "FACT_ENTRADA_SHOW",
@@ -4677,7 +5056,42 @@ function mostrarFactEntrada() {
     "OK",
   );
 }
+function setEntryPaymentMode(mode) {
+  const cash = document.getElementById("factPayCash");
+  const card = document.getElementById("factPayCard");
+  const amount = Number(S.entrada || 0);
+  if (mode === "efectivo") {
+    if (cash) cash.value = amount;
+    if (card) card.value = "";
+  } else if (mode === "credito") {
+    if (cash) cash.value = "";
+    if (card) card.value = amount;
+  }
+  syncEntryPayment();
+}
+function syncEntryPayment() {
+  const cash = parseMoneyInput(document.getElementById("factPayCash")?.value);
+  const card = parseMoneyInput(document.getElementById("factPayCard")?.value);
+  const total = cash + card;
+  const expected = Number(S.entrada || 0);
+  const msg = document.getElementById("factPayMsg");
+  S.entryPayment = { efectivo: cash, credito: card };
+  if (!msg) return total === expected;
+  msg.style.display = "";
+  if (total === expected) {
+    msg.className = "alert a-ok";
+    msg.innerHTML = `Pago cuadrado: efectivo <strong>${clp(cash)}</strong> + credito <strong>${clp(card)}</strong>.`;
+    return true;
+  }
+  msg.className = "alert a-warn";
+  msg.innerHTML = `La suma debe ser ${clp(expected)}. Registrado: <strong>${clp(total)}</strong>.`;
+  return false;
+}
 function emitirFactEntrada() {
+  if (!syncEntryPayment()) {
+    toast("Cuadra el metodo de pago de la entrada", "warn");
+    return;
+  }
   const btn = document.getElementById("btnFactEntrada");
   btn.disabled = true;
   btn.textContent = "⏳ Emitiendo DTE…";
@@ -5010,6 +5424,9 @@ function resetAll() {
   }
   const fER = document.getElementById("factEntradaResult");
   if (fER) fER.style.display = "none";
+  S.entryPayment = { efectivo: 0, credito: 0 };
+  const payMsg = document.getElementById("factPayMsg");
+  if (payMsg) payMsg.style.display = "none";
   // Lp3
   const chkA = document.getElementById("chkAcepta");
   if (chkA) chkA.checked = false;
