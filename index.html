@@ -2069,23 +2069,8 @@
           <!-- LEASING P4: REFERENCIAS -->
           <div class="screen" id="screen-lp4refs">
             <div id="lp4hdr" style="margin-bottom: 13px"></div>
-            <div class="g6040">
-              <div>
+            <div style="max-width: 860px; margin: 0 auto">
                 <div id="lp4RefsMount"></div>
-              </div>
-              <div>
-                <div class="card mb10 sticky">
-                  <div class="card-title">Resumen de oferta</div>
-                  <div id="lp4OfferSummary" class="price-breakdown"></div>
-                  <div class="alert a-info" style="margin-top: 10px">
-                    <span>Info</span>
-                    <div>
-                      Las referencias ayudan a completar el expediente antes de
-                      formalizar.
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="action-bar">
               <button class="btn btn-ghost" onclick="goScreen('lp3oferta')">
@@ -2093,7 +2078,54 @@
               </button>
               <div class="ab-r">
                 <button class="btn btn-lime btn-lg" onclick="continueLp4Refs()">
-                  Continuar a Formalizacion
+                  Continuar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEASING P4B: VERIFICACION FINAL -->
+          <div class="screen" id="screen-lp4verify">
+            <div id="lp4VerifyHdr" style="margin-bottom: 13px"></div>
+            <div style="max-width: 560px; margin: 0 auto">
+              <div class="card">
+                <div style="text-align: center; margin-bottom: 16px">
+                  <div
+                    style="
+                      font-size: 13px;
+                      font-weight: 800;
+                      color: var(--navy);
+                    "
+                  >
+                    Validando expediente...
+                  </div>
+                  <div
+                    style="
+                      font-size: 11px;
+                      color: var(--slate4);
+                      margin-top: 3px;
+                    "
+                  >
+                    Identificacion, OTP, oferta y referencias
+                  </div>
+                </div>
+                <div id="lp4VerifyList"></div>
+                <div
+                  id="lp4VerifyResult"
+                  style="display: none; margin-top: 13px"
+                ></div>
+                <button
+                  class="btn btn-lime btn-lg btn-full"
+                  id="btnSendVerification"
+                  onclick="sendFinalVerification()"
+                  style="display: none; margin-top: 12px"
+                >
+                  Enviar verificacion
+                </button>
+              </div>
+              <div class="action-bar">
+                <button class="btn btn-ghost" onclick="goScreen('lp4refs')">
+                  Volver a Referencias
                 </button>
               </div>
             </div>
@@ -2186,7 +2218,7 @@
           <!-- LEASING P5: VALIDACIÓN FINAL — 6 PASOS SECUENCIALES -->
           <div class="screen" id="screen-lp5">
             <div id="lp5hdr" style="margin-bottom: 13px"></div>
-            <div class="g5050">
+            <div class="lp5-flow-grid">
               <!-- COLUMNA IZQUIERDA: pasos 1-5 -->
               <div>
                 <!-- PASO 1: BIOMETRÍA (primero) -->
@@ -2606,14 +2638,6 @@
                 </div>
               </div>
 
-              <!-- COLUMNA DERECHA: estado general -->
-              <div>
-                <div class="card sticky">
-                  <div class="card-title">⚙️ Estado de Validación</div>
-                  <div id="execStatusList"></div>
-                  <div style="margin-top: 13px" id="execSummary"></div>
-                </div>
-              </div>
             </div>
             <div class="action-bar">
               <button class="btn btn-ghost" onclick="goScreen('lp3oferta')">
@@ -2626,7 +2650,7 @@
                   disabled
                   onclick="continueLp5()"
                 >
-                  Activar Leasing →
+                  Continuar →
                 </button>
               </div>
             </div>
@@ -2638,12 +2662,12 @@
               <div id="lp6hdr" style="margin-bottom: 13px"></div>
               <div class="action-bar" style="padding-top: 0; margin-bottom: 12px">
                 <button class="btn btn-ghost" onclick="backToLeasingFormalization()">
-                  ← Volver a Formalización
+                  ← Volver a Contrato, Candado y Facturacion
                 </button>
               </div>
               <!-- Activación automática -->
               <div class="card mb14">
-                <div class="card-title">⚡ Activando Leasing…</div>
+                <div class="card-title">⚡ Activando Crédito Directo</div>
                 <div class="card-sub">
                   Proceso automático · Sin acción requerida
                 </div>
@@ -2657,7 +2681,7 @@
               <div id="activoCard" style="display: none">
                 <div class="activo-box">
                   <div class="activo-title">
-                    📊 Activo de Leasing Registrado
+                    📊 Activo de Crédito Registrado
                     <span class="badge b-lime">ACTIVO</span>
                   </div>
                   <div id="activoContent"></div>
@@ -2670,7 +2694,7 @@
                   <div class="card-title">🧾 Facturación de Entrada</div>
                   <div class="card-sub">
                     Se factura solo el valor de la entrada · No el total del
-                    leasing
+                    crédito directo
                   </div>
                   <div
                     style="
@@ -2691,7 +2715,7 @@
                       "
                     >
                       <span style="color: var(--slate4)">Concepto</span
-                      ><span>Entrada contrato leasing</span>
+                      ><span>Entrada contrato Crédito Directo</span>
                     </div>
                     <div
                       style="
@@ -2714,7 +2738,7 @@
                         border-bottom: 1px solid var(--slate2);
                       "
                     >
-                      <span style="color: var(--slate4)">RUT</span
+                      <span style="color: var(--slate4)">CI</span
                       ><span id="factRut">—</span>
                     </div>
                     <div
