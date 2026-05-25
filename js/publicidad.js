@@ -119,7 +119,26 @@ function entrarAlLogin() {
   limpiarTimersPublicidad();
 
   if (typeof mostrarMetodoPago === "function") {
-    mostrarMetodoPago();
+    const overlay = document.getElementById("publicidadOverlay");
+    const metodoPagoScreen = document.getElementById("metodoPagoScreen");
+    const loginOverlay = document.getElementById("loginOverlay");
+    if (overlay) {
+      if (loginOverlay) loginOverlay.style.display = "none";
+      if (metodoPagoScreen) {
+        document.body.classList.add("metodo-pago-open");
+        metodoPagoScreen.style.display = "block";
+        metodoPagoScreen.classList.remove("metodo-pago--exit");
+        metodoPagoScreen.classList.add("metodo-pago--enter");
+        setTimeout(() => metodoPagoScreen.classList.remove("metodo-pago--enter"), 720);
+      }
+      overlay.classList.add("publicidad-page--exit");
+      setTimeout(() => {
+        overlay.style.display = "none";
+        overlay.classList.remove("publicidad-page--exit");
+      }, 520);
+    } else {
+      mostrarMetodoPago();
+    }
   }
 }
 

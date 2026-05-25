@@ -85,12 +85,12 @@
           <div class="metodo-pago__options">
             <button
               class="metodo-pago__card"
-              onclick="seleccionarMetodoPago('Leasing')"
+              onclick="seleccionarMetodoPago('Leasing', this)"
             >
               <span class="metodo-pago__icon">▣</span>
               <span class="metodo-pago__badge">Credito directo</span>
-              <h2>Leasing</h2>
-              <p>Compra financiada bajo modalidad leasing.</p>
+              <h2>Crédito Directo</h2>
+              <p>Compra financiada bajo modalidad Crédito Directo.</p>
               <div class="metodo-pago__route">
                 <span>LDPD + OTP</span>
                 <span>Cupo</span>
@@ -100,7 +100,7 @@
 
             <button
               class="metodo-pago__card"
-              onclick="seleccionarMetodoPago('Otro método')"
+              onclick="seleccionarMetodoPago('Otro método', this)"
             >
               <span class="metodo-pago__icon">◉</span>
               <h2>Otro método</h2>
@@ -117,8 +117,8 @@
           <div class="metodo-pago__assistant">
             <strong>Recomendacion de venta</strong>
             <span>
-              Si el cliente tiene cupo, inicia por Leasing. Si ya llega con un
-              pago definido, continua por otro metodo y mantiene el catalogo
+              Si el cliente tiene cupo, inicia por Crédito Directo. Si ya llega con un
+              pago definido, continua por otro método y mantiene el catalogo
               disponible.
             </span>
           </div>
@@ -398,14 +398,26 @@
                     Promos
                   </div>
                 </div>
-                <div class="catalog-filter-panel">
+                <div class="catalog-filter-panel collapsed" id="catalogFilterPanel">
                   <div class="catalog-filter-head">
-                    <div class="catalog-filter-title">
-                      <span>Filtros</span>
-                      <small
-                        >Recomienda segun perfil, presupuesto y stock</small
+                    <button
+                      type="button"
+                      class="catalog-filter-toggle"
+                      id="catalogFilterToggle"
+                      aria-expanded="false"
+                      onclick="toggleCatalogFilters()"
+                    >
+                      <span class="filter-toggle-mark">F</span>
+                      <span class="filter-toggle-copy">
+                        <strong>Filtro</strong>
+                        <small id="catalogFilterHint"
+                          >Buscar por marca, modelo, precio o IMEI</small
+                        >
+                      </span>
+                      <span class="filter-toggle-count" id="catalogFilterCount"
+                        >0 activos</span
                       >
-                    </div>
+                    </button>
 
                     <div class="catalog-filter-actions">
                       <button
@@ -425,98 +437,73 @@
                       </button>
                     </div>
                   </div>
-                  <input
-                    class="fi catalog-filter-search"
-                    placeholder="Buscar por nombre, marca, modelo o IMEI..."
-                    id="searchQ"
-                    oninput="renderCatalog()"
-                  />
-                  
-                  <div class="catalog-filter-grid">
-                    <div class="catalog-filter-field">
-                      <label>Perfil de uso</label>
-                      <select
-                        class="fs"
-                        id="filterProfile"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todos</option>
-                        <option value="gamer">Gamer</option>
-                        <option value="deportista">Deportista</option>
-                        <option value="estudiante">Estudiante</option>
-                        <option value="creador">Creador de contenido</option>
-                        <option value="trabajo">Trabajo y ventas</option>
-                      </select>
-                    </div>
-                    <div class="catalog-filter-field">
-                      <label>Marca</label>
-                      <select
-                        class="fs"
-                        id="filterBrand"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todas</option>
-                        <option value="Samsung">Samsung</option>
-                        <option value="Honor">Honor</option>
-                        <option value="Infinix">Infinix</option>
-                        <option value="Tecno">Tecno</option>
-                        <option value="Xiaomi">Xiaomi</option>
-                      </select>
-                    </div>
-                    <div class="catalog-filter-field">
-                      <label>Precio</label>
-                      <select
-                        class="fs"
-                        id="filterPrice"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todos</option>
-                        <option value="low">Hasta US$250</option>
-                        <option value="mid">US$250 a US$500</option>
-                        <option value="high">Sobre US$500</option>
-                      </select>
-                    </div>
-                    <div class="catalog-filter-field">
-                      <label>RAM</label>
-                      <select
-                        class="fs"
-                        id="filterRam"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todas</option>
-                        <option value="4GB">4GB</option>
-                        <option value="6GB">6GB</option>
-                        <option value="8GB">8GB</option>
-                        <option value="12GB">12GB</option>
-                        <option value="16GB">16GB</option>
-                      </select>
-                    </div>
-                    <div class="catalog-filter-field">
-                      <label>Almacenamiento</label>
-                      <select
-                        class="fs"
-                        id="filterRom"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todos</option>
-                        <option value="64GB">64GB</option>
-                        <option value="128GB">128GB</option>
-                        <option value="256GB">256GB</option>
-                        <option value="512GB">512GB</option>
-                      </select>
-                    </div>
-                    <div class="catalog-filter-field">
-                      <label>Bateria</label>
-                      <select
-                        class="fs"
-                        id="filterBattery"
-                        onchange="renderCatalog()"
-                      >
-                        <option value="">Todas</option>
-                        <option value="alta">Alta duracion</option>
-                        <option value="premium">Gama premium</option>
-                        <option value="estandar">Uso diario</option>
-                      </select>
+                  <div class="catalog-filter-body" id="catalogFilterBody">
+                    <input
+                      class="fi catalog-filter-search"
+                      placeholder="Buscar por nombre, marca, modelo o IMEI..."
+                      id="searchQ"
+                      oninput="renderCatalog()"
+                    />
+
+                    <div class="catalog-filter-grid">
+                      <div class="catalog-filter-field">
+                        <label>Marca</label>
+                        <select
+                          class="fs"
+                          id="filterBrand"
+                          onchange="renderCatalog()"
+                        >
+                          <option value="">Todas</option>
+                          <option value="Samsung">Samsung</option>
+                          <option value="Honor">Honor</option>
+                          <option value="Infinix">Infinix</option>
+                          <option value="Tecno">Tecno</option>
+                          <option value="Xiaomi">Xiaomi</option>
+                        </select>
+                      </div>
+                      <div class="catalog-filter-field">
+                        <label>Precio</label>
+                        <select
+                          class="fs"
+                          id="filterPrice"
+                          onchange="renderCatalog()"
+                        >
+                          <option value="">Todos</option>
+                          <option value="low">Hasta US$250</option>
+                          <option value="mid">US$250 a US$500</option>
+                          <option value="high">Sobre US$500</option>
+                        </select>
+                      </div>
+                      <div class="catalog-filter-field">
+                        <label>Modelo</label>
+                        <select
+                          class="fs"
+                          id="filterModel"
+                          onchange="renderCatalog()"
+                        >
+                          <option value="">Todos</option>
+                          <option value="Galaxy A">Galaxy A</option>
+                          <option value="Galaxy S">Galaxy S</option>
+                          <option value="Redmi">Redmi</option>
+                          <option value="Poco">Poco</option>
+                          <option value="Honor X">Honor X</option>
+                          <option value="Infinix Hot">Infinix Hot</option>
+                          <option value="Tecno Spark">Tecno Spark</option>
+                        </select>
+                      </div>
+                      <div class="catalog-filter-field">
+                        <label>Gama</label>
+                        <select
+                          class="fs"
+                          id="filterGama"
+                          onchange="renderCatalog()"
+                        >
+                          <option value="">Todos</option>
+                          <option value="baja">Gama baja</option>
+                          <option value="media">Gama media</option>
+                          <option value="alta">Gama alta</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -622,7 +609,7 @@
                   <div class="ads-selfservice-card">
                     <div class="ads-header">
                       <span>🔥 Ofertas Happy</span>
-                      <small>Happy Chile</small>
+                      <small>Happy Ecuador</small>
                     </div>
 
                     <div
@@ -758,11 +745,11 @@
                     />
                   </div>
                   <div class="fg">
-                    <label class="fl">RUT <span class="req">*</span></label
+                    <label class="fl">CI <span class="req">*</span></label
                     ><input
                       class="fi"
                       id="nc_rut"
-                      placeholder="12.345.678-9"
+                      placeholder="1752015725"
                       oninput="fmtRut(this)"
                     />
                   </div>
@@ -773,7 +760,7 @@
                     ><input
                       class="fi"
                       id="nc_tel"
-                      placeholder="+56 9 8765 4321"
+                      placeholder="+593 99 123 4567"
                     />
                   </div>
                   <div class="fg">
@@ -1055,17 +1042,17 @@
                   <div class="card-title">👤 Identificación del Cliente</div>
                   <div class="g2col">
                     <div class="fg">
-                      <label class="fl">RUT <span class="req">*</span></label>
+                      <label class="fl">CI <span class="req">*</span></label>
                       <input
                         class="fi"
                         id="lp1_rut"
                         autocomplete="off"
-                        inputmode="text"
-                        maxlength="12"
-                        placeholder="12.345.678-9"
+                        inputmode="numeric"
+                        maxlength="10"
+                        placeholder="17XXXXXXXX"
                         oninput="fmtRut(this)"
                       />
-                      <div class="fhint">Formato: 12.345.678-9</div>
+                      <div class="fhint">10 digitos, solo numeros</div>
                     </div>
                     <div class="fg">
                       <label class="fl"
@@ -1089,8 +1076,8 @@
                         id="lp1_tel"
                         autocomplete="tel"
                         inputmode="tel"
-                        maxlength="17"
-                        placeholder="+56 9 8765 4321"
+                        maxlength="16"
+                        placeholder="+593 99 123 4567"
                         oninput="fmtTel(this)"
                       />
                       <div class="fhint">Se enviará OTP a este número</div>
@@ -1102,7 +1089,7 @@
                         id="lp1_email"
                         autocomplete="email"
                         type="email"
-                        placeholder="cliente@correo.cl"
+                        placeholder="cliente@correo.com"
                       />
                     </div>
                   </div>
@@ -1123,36 +1110,83 @@
                 <!-- LDPD (1 solo checkbox) -->
                 <div class="card mb14">
                   <div class="ldpd-hero">
-                    <div class="ldpd-hero-ico">🔐</div>
-                    <div class="ldpd-hero-title">
-                      Autorización de Datos — LDPD Chile
-                    </div>
-                    <div class="ldpd-hero-sub">
-                      Ley N° 19.628 sobre Protección de la Vida Privada
+                    <img
+                      src="assets/ads/HappyLogoAzul.png"
+                      alt="Happy"
+                      class="ldpd-logo"
+                    />
+                    <div>
+                      <div class="ldpd-hero-title">
+                        Autorizacion de consulta de informacion
+                      </div>
+                      <div class="ldpd-hero-sub">
+                        Politica de proteccion de datos - HAPPYCEL S.A.
+                      </div>
                     </div>
                   </div>
                   <div class="ldpd-body">
-                    <h4>Responsable</h4>
-                    HappyChile SpA, RUT 76.XXX.XXX-X, Santiago de Chile.
-                    Contacto: privacidad@happychile.cl<br /><br />
-                    <h4>Datos tratados</h4>
-                    Identificación (RUT, nombre), contacto (teléfono, email),
-                    económicos (ingresos), crediticios (Equifax), biométricos
-                    (reconocimiento facial), técnicos (IMEI del dispositivo
-                    arrendado).<br /><br />
-                    <h4>Finalidades</h4>
-                    Verificar identidad · Consultar Equifax Chile · Evaluar
-                    riesgo crediticio · Generar oferta de leasing · Formalizar
-                    contrato · Gestionar cobros · Activar candado MDM en el
-                    dispositivo como garantía del contrato.<br /><br />
-                    <h4>Terceros</h4>
-                    Equifax Chile (score) · Proveedor biometría · Proveedor
-                    firma electrónica · Proveedor MDM · Empresas relacionadas
-                    (bajo acuerdo de confidencialidad).<br /><br />
-                    <h4>Derechos</h4>
-                    Acceder, rectificar, cancelar y oponerse al tratamiento
-                    enviando solicitud a privacidad@happychile.cl. Datos
-                    conservados durante la relación contractual y según ley.
+                    <p>
+                      Los datos personales que nos comparte como Titular seran
+                      tratados por HAPPYCEL S.A. en calidad del responsable.
+                      HAPPYCEL S.A. recopilara datos de identificacion,
+                      economicos y crediticios para las finalidades descritas en
+                      la presente autorizacion.
+                    </p>
+                    <p>
+                      Con base en el consentimiento que brinda a traves de esta
+                      autorizacion, usted autoriza el tratamiento de sus datos
+                      personales para realizar la consulta, almacenamiento y uso
+                      de la informacion correspondiente a la mora en las bases de
+                      COBRAFACIL S.A., en las bases de los diferentes buros de
+                      credito, y el envio de cotizaciones a las diferentes
+                      tiendas de propiedad de o administradas por HAPPYCEL S.A.
+                    </p>
+                    <p>
+                      Sus datos personales se conservaran por el tiempo que dure
+                      la relacion comercial o mientras exista una base
+                      legitimadora para el tratamiento. Posterior a ello,
+                      HAPPYCEL S.A. podra anonimizar los datos o proceder a su
+                      eliminacion.
+                    </p>
+                    <p>
+                      HAPPYCEL S.A. adopta medidas de seguridad para garantizar
+                      la confidencialidad y seguridad de los datos personales. En
+                      caso de vulneracion se actuara y notificara conforme a la
+                      normativa correspondiente.
+                    </p>
+                    <p>
+                      HAPPYCEL S.A. solamente comparte datos personales con
+                      terceros con los que este contractual o legalmente obligado
+                      a facilitarlos, asi como con partes relacionadas cuando sea
+                      necesario para prestar sus servicios y productos. Usted
+                      autoriza expresamente a HAPPYCEL S.A. a transferir su
+                      informacion a las companias del grupo, incluyendo
+                      COBRAFACIL S.A., HAPPYPAY S.A., entre otras, para las
+                      finalidades mencionadas.
+                    </p>
+                    <p>
+                      Como titular podra ejercer sus derechos de acceso,
+                      eliminacion, rectificacion y actualizacion, oposicion,
+                      suspension, portabilidad y a no ser objeto de una decision
+                      basada unica o parcialmente en valoraciones. Tambien podra
+                      revocar el consentimiento cuando aplique.
+                    </p>
+                    <p>
+                      El titular declara que los datos proporcionados son
+                      verdaderos y sera responsable en caso de entregar datos
+                      erroneos o incorrectos. HAPPYCEL S.A. se reserva el
+                      derecho de prestar los servicios o continuar la relacion
+                      contractual en caso de comprobar datos erroneos o
+                      incorrectos.
+                    </p>
+                    <p>
+                      Para ejercer derechos o consultar sobre el tratamiento de
+                      datos, puede dirigirse a Av. 6 de diciembre N59-161 y Sta.
+                      Lucia, Quito-Ecuador, 099795800 o 0223922607 y
+                      servicioalcliente@happy.ec. Si no recibe respuesta dentro
+                      del termino previsto en la normativa aplicable, podra
+                      acudir ante la Autoridad de Proteccion de Datos Personales.
+                    </p>
                   </div>
                   <label class="ldpd-check" id="ldpdCheck" onclick="tglLdpd()">
                     <input
@@ -1161,16 +1195,16 @@
                       onclick="event.stopPropagation()"
                     />
                     <span class="ldpd-check-txt">
-                      <strong>Autorizo</strong> el tratamiento de mis datos
-                      personales según las condiciones descritas, incluyendo la
-                      consulta en Equifax Chile, verificación biométrica, firma
-                      electrónica e instalación del candado MDM en el
-                      dispositivo arrendado.
+                      <strong>He leido y autorizo</strong> el tratamiento,
+                      consulta, almacenamiento, uso y transferencia de mis datos
+                      personales para las finalidades descritas por HAPPYCEL
+                      S.A., incluyendo buros de credito, COBRAFACIL S.A.,
+                      HAPPYPAY S.A. y companias relacionadas.
                     </span>
                   </label>
                   <div id="ldpdErr" class="val-err" style="display: none">
                     <span>🚫</span
-                    ><span>Debes aceptar la autorización para continuar.</span>
+                    ><span>Debes aceptar la autorizacion para continuar.</span>
                   </div>
                 </div>
                 <div class="action-bar">
@@ -1201,7 +1235,7 @@
                       "
                       id="otpTelShow"
                     >
-                      +56 9 **** ****
+                      +593 99 *** ****
                     </div>
                     <div
                       style="
@@ -1333,7 +1367,7 @@
                       />
                     </div>
                     <div class="fg">
-                      <label class="fl">RUT</label
+                      <label class="fl">CI</label
                       ><input
                         class="fi"
                         id="lp2_rut"
@@ -1629,7 +1663,7 @@
                       onchange="toggleRecoveredEntry()"
                     />
                     <span>
-                      <strong>Usar entrada recuperada</strong>
+                      <strong>Cambiar valor entrada</strong>
                       <small
                         >Activa un valor manual. Debe ser igual o mayor a la
                         entrada mínima.</small
@@ -1712,46 +1746,18 @@
                       Propuesta · HappyChile Leasing
                     </div>
                     <div class="offer-client" id="lp3ofNom">—</div>
-                    <div class="offer-rut" id="lp3ofRut">RUT: —</div>
+                    <div class="offer-rut" id="lp3ofRut">CI: —</div>
                   </div>
                   <div id="lp3ofDet"></div>
                   <div class="alert a-info" style="margin-top: 10px">
                     <span>📋</span>
                     <div>
                       El equipo es
-                      <strong>propiedad de HappyChile</strong> durante el
+                      <strong>propiedad de Ecuador</strong> durante el
                       contrato. Candado MDM obligatorio.
                     </div>
                   </div>
-                  <label
-                    style="
-                      display: flex;
-                      align-items: flex-start;
-                      gap: 9px;
-                      cursor: pointer;
-                      margin-top: 10px;
-                      padding: 10px;
-                      background: var(--slate1);
-                      border-radius: var(--rs);
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      id="chkAcepta"
-                      style="
-                        width: 16px;
-                        height: 16px;
-                        margin-top: 1px;
-                        flex-shrink: 0;
-                        accent-color: var(--navy);
-                      "
-                    />
-                    <span style="font-size: 11px; line-height: 1.45"
-                      >Acepto las condiciones del leasing, el plazo seleccionado
-                      y las cuotas indicadas. Entiendo que el equipo es
-                      arrendado.</span
-                    >
-                  </label>
+                  <input type="checkbox" id="chkAcepta" checked style="display: none" />
                   <button
                     class="btn btn-lg btn-full inventory-cta"
                     onclick="goInventoryFromOffer()"
@@ -1778,7 +1784,7 @@
                       />
                     </div>
                     <div class="fg">
-                      <label class="fl">RUT</label>
+                      <label class="fl">CI</label>
                       <input
                         class="fi"
                         id="lp3_rut"
@@ -1873,80 +1879,6 @@
                   </div>
                 </div>
 
-                <!-- CAPACIDAD + PERFIL -->
-                <div class="card mb10" id="lp3PayAddressCard">
-                  <div class="card-title">Capacidad de pago y perfil laboral</div>
-                  <div class="card-sub">
-                    Confirma ingresos, gastos y actividad antes de validar
-                    referencias
-                  </div>
-                  <div class="pay-address-grid">
-                    <div class="pay-address-panel">
-                      <div class="pay-address-kicker">Capacidad de pago</div>
-                      <div class="g2col">
-                        <div class="fg">
-                          <label class="fl"
-                            >Ingresos mensuales (USD)
-                            <span class="req">*</span></label
-                          >
-                          <input
-                            class="fi mono"
-                            id="lp3_ing"
-                            type="number"
-                            min="0"
-                            placeholder="850"
-                            oninput="calcLp3Capacity()"
-                          />
-                        </div>
-                        <div class="fg">
-                          <label class="fl"
-                            >Gastos mensuales (USD)
-                            <span class="req">*</span></label
-                          >
-                          <input
-                            class="fi mono"
-                            id="lp3_gast"
-                            type="number"
-                            min="0"
-                            placeholder="350"
-                            oninput="calcLp3Capacity()"
-                          />
-                        </div>
-                      </div>
-                      <div id="lp3CapMsg" class="cap-msg" style="display:none"></div>
-                    </div>
-                    <div class="pay-address-panel">
-                      <div class="pay-address-kicker">Perfil laboral</div>
-                      <div class="g2col">
-                        <div class="fg">
-                          <label class="fl"
-                            >Ocupacion <span class="req">*</span></label
-                          >
-                          <select class="fs" id="lp3_ocup">
-                            <option value="">-- Selecciona --</option>
-                            <option>Dependiente</option>
-                            <option>Independiente</option>
-                            <option>Comerciante</option>
-                            <option>Estudiante</option>
-                          </select>
-                        </div>
-                        <div class="fg">
-                          <label class="fl">Actividad economica</label>
-                          <select class="fs" id="lp3_act">
-                            <option value="">-- Selecciona --</option>
-                            <option>Comercio</option>
-                            <option>Servicios</option>
-                            <option>Tecnologia</option>
-                            <option>Salud</option>
-                            <option>Educacion</option>
-                            <option>Transporte</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- REFERENCIAS -->
                 <div class="card" id="lp3RefsCard">
                   <div class="card-title">Referencias</div>
@@ -1997,7 +1929,7 @@
                         ><input
                           class="fi"
                           id="ref1_tel"
-                          placeholder="+56 9 8765 4321"
+                          placeholder="+593 99 123 4567"
                           oninput="fmtTel(this)"
                         />
                       </div>
@@ -2065,7 +1997,7 @@
                         ><input
                           class="fi"
                           id="ref2_tel"
-                          placeholder="+56 9 7654 3210"
+                          placeholder="+593 98 765 4321"
                           oninput="fmtTel(this)"
                         />
                       </div>
@@ -2129,6 +2061,39 @@
               <div class="ab-r">
                 <button class="btn btn-lime btn-lg" onclick="continueLp3()">
                   Aceptar Oferta y Continuar →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEASING P4: REFERENCIAS -->
+          <div class="screen" id="screen-lp4refs">
+            <div id="lp4hdr" style="margin-bottom: 13px"></div>
+            <div class="g6040">
+              <div>
+                <div id="lp4RefsMount"></div>
+              </div>
+              <div>
+                <div class="card mb10 sticky">
+                  <div class="card-title">Resumen de oferta</div>
+                  <div id="lp4OfferSummary" class="price-breakdown"></div>
+                  <div class="alert a-info" style="margin-top: 10px">
+                    <span>Info</span>
+                    <div>
+                      Las referencias ayudan a completar el expediente antes de
+                      formalizar.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="goScreen('lp3oferta')">
+                Volver a Oferta
+              </button>
+              <div class="ab-r">
+                <button class="btn btn-lime btn-lg" onclick="continueLp4Refs()">
+                  Continuar a Formalizacion
                 </button>
               </div>
             </div>
@@ -2933,7 +2898,7 @@
                             margin-bottom: 2px;
                           "
                         >
-                          IMEI Colateral
+                          IMEI
                         </div>
                         <div
                           style="

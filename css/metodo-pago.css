@@ -1,4 +1,7 @@
 .metodo-pago {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
   width: 100%;
   min-height: 100vh;
   background:
@@ -6,8 +9,21 @@
     radial-gradient(circle at 92% 12%, rgba(0, 166, 214, 0.18), transparent 340px),
     linear-gradient(135deg, #05070a 0%, #0a0e14 48%, #182231 100%);
   color: #eff6ff;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
   display: none;
+}
+
+body.metodo-pago-open {
+  overflow: hidden;
+}
+
+.metodo-pago--enter {
+  animation: metodoScreenEnter 0.68s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.metodo-pago--exit {
+  animation: metodoScreenExit 0.52s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .metodo-pago__top {
@@ -113,6 +129,18 @@
   opacity: 1;
 }
 
+.metodo-pago__card.is-selected {
+  border-color: #c9e800 !important;
+  transform: translateY(-9px) scale(1.025);
+  box-shadow:
+    0 28px 72px rgba(25, 55, 95, 0.38),
+    0 0 0 4px rgba(201, 232, 0, 0.18) !important;
+}
+
+.metodo-pago__card.is-selected::before {
+  opacity: 1;
+}
+
 .metodo-pago__icon {
   display: block;
   color: #c9e800;
@@ -148,6 +176,34 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes metodoScreenEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes metodoScreenExit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.985) translateY(-18px);
+    filter: blur(8px);
   }
 }
 

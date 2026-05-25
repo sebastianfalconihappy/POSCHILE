@@ -1149,7 +1149,7 @@ const PRECALIFICACIONES_DEMO = [
     analistaObs: "",
   },
   {
-    identificacion: "111111111",
+    identificacion: "1700000300",
     nombre: "CLIENTE DEMO F2",
     idPerfil: 31,
     perfil: "F2",
@@ -1164,37 +1164,55 @@ const PRECALIFICACIONES_DEMO = [
     verificacion: "DFL",
   },
   {
-    identificacion: "222222222",
-    nombre: "CLIENTE DEMO F1",
+    identificacion: "1711063633",
+    nombre: "CLIENTE DEMO F2 400",
+    idPerfil: 32,
+    perfil: "F2+",
+    producto: "CELULAR",
+    cupo: 400,
+    entrada: 22,
+    tipoEntrada: "PORCENTAJE",
+    plazo: "13-18-26",
+    cupoDisponible: 400,
+    ticket: 20260417100240,
+    promocionEntrada: "",
+    verificacion: "DFL,OTP WHATSAPP",
+    nacionalidad: "ECUATORIANA",
+  },
+  {
+    identificacion: "1752015725",
+    nombre: "CLIENTE DEMO F1 500",
     idPerfil: 21,
     perfil: "F1",
     producto: "CELULAR",
     cupo: 500,
-    entrada: 20,
+    entrada: 18,
     tipoEntrada: "PORCENTAJE",
-    plazo: "13-18-26-33",
+    plazo: "18-26-33",
     cupoDisponible: 500,
     ticket: 20260417101540,
     promocionEntrada: "",
-    verificacion: "DFL",
+    verificacion: "DFL,LLAMADA TELEFONICA",
+    nacionalidad: "ECUATORIANA",
   },
   {
-    identificacion: "444444444",
+    identificacion: "1700000600",
     nombre: "CLIENTE DEMO F1 600",
     idPerfil: 21,
     perfil: "F1",
     producto: "CELULAR",
     cupo: 600,
-    entrada: 20,
+    entrada: 15,
     tipoEntrada: "PORCENTAJE",
-    plazo: "13-18-26-33",
+    plazo: "18-26-33",
     cupoDisponible: 600,
     ticket: 20260417122570,
     promocionEntrada: "",
-    verificacion: "DFL",
+    verificacion: "DFL,BIOMETRIA",
+    nacionalidad: "ECUATORIANA",
   },
   {
-    identificacion: "333333333",
+    identificacion: "1700000220",
     nombre: "CLIENTE DEMO F3",
     idPerfil: 41,
     perfil: "F3",
@@ -1211,10 +1229,9 @@ const PRECALIFICACIONES_DEMO = [
 ];
 let DEMO_PRECAL_TURN = 0;
 function nextLeasingDemoPrecalificacion() {
-  const demos = [
-    PRECALIFICACIONES_DEMO.find((p) => p.cupo === 300),
-    PRECALIFICACIONES_DEMO.find((p) => p.cupo === 600),
-  ].filter(Boolean);
+  const demos = [300, 400, 500, 600]
+    .map((cupo) => PRECALIFICACIONES_DEMO.find((p) => p.cupo === cupo))
+    .filter(Boolean);
   const demo = demos[DEMO_PRECAL_TURN % demos.length] || PRECALIFICACIONES_DEMO[0];
   DEMO_PRECAL_TURN++;
   return {
@@ -1272,11 +1289,11 @@ function renderLogs() {
    PROGRESS STRIP
 ═══════════════════════════════════════════════════ */
 const STEPS_DEF = [
-  { lbl: "Identificación\n+LDPD+OTP" },
-  { lbl: "Datos\nCapacidad Pago" },
+  { lbl: "Identificación\n+LDPD" },
+  { lbl: "OTP" },
   { lbl: "Evaluación\nAutomática" },
   { lbl: "Oferta" },
-  { lbl: "Formalización\n+ Activación" },
+  { lbl: "Referencias\n+ Formalización" },
   { lbl: "Contrato\nActivo" },
 ];
 let timerPct = 0,
@@ -1337,7 +1354,7 @@ let OP = {
 };
 let S = {
   cart: [],
-  catFilter: "",
+  catFilter: "celular",
   catalogPage: 1,
   catalogFilterKey: "",
   payMethod: null,
@@ -1397,10 +1414,9 @@ function getDemoPrecalificacion() {
   const gast = Number(S.gastos || 0);
   const disponibleBase = ing > 0 ? ing - gast : 300;
   if (disponibleBase === 300) {
-    const rotating = [
-      PRECALIFICACIONES_DEMO[0],
-      PRECALIFICACIONES_DEMO.find((p) => p.cupo === 600),
-    ].filter(Boolean);
+    const rotating = [300, 400, 500, 600]
+      .map((cupo) => PRECALIFICACIONES_DEMO.find((p) => p.cupo === cupo))
+      .filter(Boolean);
     const demo = rotating[DEMO_PRECAL_TURN % rotating.length];
     DEMO_PRECAL_TURN++;
     return {
@@ -1459,61 +1475,44 @@ function entradaFromPrecal(total, precal) {
   return Math.min(total, Math.max(entradaPorTipo, excesoSobreCupo));
 }
 function fmtRut(el) {
-  let v = el.value.replace(/[^0-9kK\-\.]/g, "").replace(/\./g, "");
-  const dv = v.slice(-1);
-  const num = v.slice(0, -1).replace(/-/g, "");
-  if (num.length > 0)
-    el.value = num.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
+  el.value = el.value.replace(/\D/g, "").slice(0, 10);
   if (el.id === "lp1_rut") validateLp1Field("rut");
 }
 function fmtTel(el) {
   let digits = el.value.replace(/\D/g, "");
-  if (digits.startsWith("56")) digits = digits.slice(2);
+  if (digits.startsWith("593")) digits = digits.slice(3);
   digits = digits.replace(/^0+/, "");
   if (digits && !digits.startsWith("9")) digits = "9" + digits;
   digits = digits.slice(0, 9);
   let v = digits;
-  if (digits.length > 0) v = "+56 " + digits.slice(0, 1);
-  if (digits.length > 1) v += " " + digits.slice(1, 5);
+  if (digits.length > 0) v = "+593 " + digits.slice(0, 2);
+  if (digits.length > 2) v += " " + digits.slice(2, 5);
   if (digits.length > 5) v += " " + digits.slice(5, 9);
   el.value = v;
   if (el.id === "lp1_tel") validateLp1Field("tel");
 }
 
 function cleanRut(value) {
-  return value.replace(/\./g, "").replace(/-/g, "").trim().toUpperCase();
+  return value.replace(/\D/g, "").trim();
 }
 function formatRut(value) {
   const clean = cleanRut(value);
-  if (clean.length < 2) return value.trim();
-  const num = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
+  return clean.slice(0, 10);
 }
 function isValidRut(value) {
   const clean = cleanRut(value);
-  if (!/^\d{7,8}[0-9K]$/.test(clean)) return false;
-  const num = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-  let sum = 0;
-  let mul = 2;
-  for (let i = num.length - 1; i >= 0; i--) {
-    sum += Number(num[i]) * mul;
-    mul = mul === 7 ? 2 : mul + 1;
-  }
-  const calc = 11 - (sum % 11);
-  const expected = calc === 11 ? "0" : calc === 10 ? "K" : String(calc);
-  return dv === expected;
+  return /^\d{10}$/.test(clean);
 }
-function normalizeChileMobile(value) {
+function normalizeEcuadorMobile(value) {
   let digits = value.replace(/\D/g, "");
-  if (digits.startsWith("56")) digits = digits.slice(2);
+  if (digits.startsWith("593")) digits = digits.slice(3);
   digits = digits.replace(/^0+/, "");
   if (/^9\d{8}$/.test(digits)) {
-    return "+56 9 " + digits.slice(1, 5) + " " + digits.slice(5);
+    return "+593 " + digits.slice(0, 2) + " " + digits.slice(2, 5) + " " + digits.slice(5);
   }
   return "";
 }
+const normalizeChileMobile = normalizeEcuadorMobile;
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
 }
@@ -1562,12 +1561,14 @@ function validateLp1Field(field, touched = true) {
   const value = el.value.trim();
   let message = "";
   if (!value) message = "Campo obligatorio.";
+  else if (field === "rut" && !/^\d+$/.test(value))
+    message = "La CI debe contener solo numeros.";
   else if (field === "rut" && !isValidRut(value))
-    message = "Ingresa un RUT chileno válido.";
+    message = "Ingresa una CI de Ecuador de 10 digitos.";
   else if (field === "nom" && !isValidFullName(value))
     message = "Ingresa nombre y apellido, solo letras.";
-  else if (field === "tel" && !normalizeChileMobile(value))
-    message = "Usa un celular chileno válido: +56 9 XXXX XXXX.";
+  else if (field === "tel" && !normalizeEcuadorMobile(value))
+    message = "Usa un celular ecuatoriano valido: +593 99 123 4567.";
   else if (field === "email" && !isValidEmail(value))
     message = "Ingresa un correo válido.";
   else if (field === "birth") {
@@ -1623,11 +1624,24 @@ function toast(msg, type = "ok") {
    NAVIGATION
 ═══════════════════════════════════════════════════ */
 function goScreen(id) {
+  const mainContent = document.getElementById("mainContent");
+  if (mainContent) {
+    mainContent.classList.remove("screen-transition");
+    void mainContent.offsetWidth;
+    mainContent.classList.add("screen-transition");
+  }
   document
     .querySelectorAll(".screen")
     .forEach((s) => s.classList.remove("active"));
-  document.getElementById("screen-" + id).classList.add("active");
-  document.getElementById("mainContent").scrollTop = 0;
+  const next = document.getElementById("screen-" + id);
+  if (next) {
+    next.classList.add("active");
+    next.style.setProperty("--screen-items", next.querySelectorAll(".card, .prod-card, .catalog-filter-panel").length);
+  }
+  if (mainContent) {
+    mainContent.scrollTop = 0;
+    setTimeout(() => mainContent.classList.remove("screen-transition"), 620);
+  }
   document
     .querySelectorAll(".nav-btn")
     .forEach((b) => b.classList.remove("on"));
@@ -1641,6 +1655,7 @@ function goScreen(id) {
     lp2: "navLeas",
     lp3eval: "navLeas",
     lp3oferta: "navLeas",
+    lp4refs: "navLeas",
     rechazado: "navLeas",
     lp5: "navLeas",
     lp6: "navLeas",
@@ -1668,8 +1683,12 @@ function navGo(target) {
     setTitle("Cartola de Crédito Leasing");
     return;
   }
+  if (target === "catalog") {
+    openPosCatalog();
+    return;
+  }
   if (target === "lp1" && S.isSigma) goScreen("lp1");
-  else goScreen("catalog");
+  else openPosCatalog();
 }
 function setTitle(t) {
   document.getElementById("tbTitle").textContent = t;
@@ -1708,12 +1727,13 @@ function syncSidebarCategory(f) {
 
 function openPosCatalog() {
   goScreen("catalog");
-  S.catFilter = "";
+  S.catFilter = "celular";
   S.catalogPage = 1;
   S.catalogFilterKey = "";
-  document.querySelectorAll(".ftab").forEach((t) => t.classList.remove("on"));
-  syncSidebarCategory("");
+  syncCatalogTabs("celular");
+  syncSidebarCategory("celular");
   renderCatalog();
+  animateInventoryOpen();
 }
 
 function setFilter(f, el) {
@@ -1737,6 +1757,7 @@ function setSidebarCategory(f) {
     subnav.classList.add("picked");
     setTimeout(() => subnav.classList.remove("picked"), 220);
   }
+  animateInventoryOpen();
 }
 function setCatalogPage(page) {
   S.catalogPage = page;
@@ -1760,22 +1781,61 @@ function clearCatalogFilters() {
   const search = document.getElementById("searchQ");
   if (search) search.value = "";
   [
-    "filterProfile",
     "filterBrand",
     "filterPrice",
-    "filterRam",
-    "filterRom",
-    "filterBattery",
+    "filterModel",
+    "filterGama",
   ].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
-  S.catFilter = "";
+  S.catFilter = "celular";
   S.catalogPage = 1;
   S.catalogFilterKey = "";
-  document.querySelectorAll(".ftab").forEach((t) => t.classList.remove("on"));
-  syncSidebarCategory("");
+  syncCatalogTabs("celular");
+  syncSidebarCategory("celular");
   renderCatalog();
+}
+
+function catalogActiveFilterCount() {
+  return [
+    document.getElementById("searchQ")?.value?.trim(),
+    catalogSelectValue("filterBrand"),
+    catalogSelectValue("filterPrice"),
+    catalogSelectValue("filterModel"),
+    catalogSelectValue("filterGama"),
+  ].filter(Boolean).length;
+}
+
+function updateCatalogFilterButton() {
+  const panel = document.getElementById("catalogFilterPanel");
+  const toggle = document.getElementById("catalogFilterToggle");
+  const count = document.getElementById("catalogFilterCount");
+  const hint = document.getElementById("catalogFilterHint");
+  const active = catalogActiveFilterCount();
+  if (count) count.textContent = active ? `${active} activos` : "0 activos";
+  if (hint) {
+    hint.textContent = active
+      ? "Filtros aplicados al inventario"
+      : "Buscar por marca, modelo, precio o IMEI";
+  }
+  if (toggle) toggle.setAttribute("aria-expanded", String(!panel?.classList.contains("collapsed")));
+  panel?.classList.toggle("has-active-filters", active > 0);
+}
+
+function toggleCatalogFilters(forceOpen) {
+  const panel = document.getElementById("catalogFilterPanel");
+  if (!panel) return;
+  const shouldOpen =
+    typeof forceOpen === "boolean" ? forceOpen : panel.classList.contains("collapsed");
+  panel.classList.toggle("collapsed", !shouldOpen);
+  panel.classList.remove("filter-pop");
+  void panel.offsetWidth;
+  panel.classList.add("filter-pop");
+  updateCatalogFilterButton();
+  if (shouldOpen) {
+    setTimeout(() => document.getElementById("searchQ")?.focus(), 180);
+  }
 }
 
 function renderCatalogCategoryHub() {
@@ -1828,27 +1888,24 @@ function renderCatalog() {
   const q = (document.getElementById("searchQ")?.value || "")
     .toLowerCase()
     .trim();
-  const profile = catalogSelectValue("filterProfile");
   const brand = catalogSelectValue("filterBrand");
   const price = catalogSelectValue("filterPrice");
-  const ram = catalogSelectValue("filterRam");
-  const rom = catalogSelectValue("filterRom");
-  const battery = catalogSelectValue("filterBattery");
+  const model = catalogSelectValue("filterModel");
+  const gama = catalogSelectValue("filterGama");
   const grid = document.getElementById("prodGrid");
+  updateCatalogFilterButton();
   if (!S.catFilter) {
-    grid.classList.remove("promo-grid");
-    grid.innerHTML = renderCatalogCategoryHub();
-    return;
+    S.catFilter = "celular";
+    syncCatalogTabs("celular");
+    syncSidebarCategory("celular");
   }
   const filterKey = [
     S.catFilter,
     q,
-    profile,
     brand,
     price,
-    ram,
-    rom,
-    battery,
+    model,
+    gama,
   ].join("|");
   if (S.catalogFilterKey !== filterKey) {
     S.catalogFilterKey = filterKey;
@@ -1866,6 +1923,12 @@ function renderCatalog() {
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
+    const priceValue = Number(p.price || 0);
+    const gamaMatch =
+      !gama ||
+      (gama === "baja" && priceValue <= 250) ||
+      (gama === "media" && priceValue > 250 && priceValue <= 500) ||
+      (gama === "alta" && priceValue > 500);
     const mc =
       S.catFilter === "todos" ||
       p.cat === S.catFilter ||
@@ -1873,18 +1936,16 @@ function renderCatalog() {
     return (
       mc &&
       (!brand || p.marca === brand) &&
-      (!profile || (p.perfiles || []).includes(profile)) &&
       matchCatalogPrice(p, price) &&
-      (!ram || p.ram === ram) &&
-      (!rom || p.rom === rom) &&
-      (!battery || p.bateria === battery) &&
+      (!model || (p.modelo || p.name || "").toLowerCase().includes(model.toLowerCase())) &&
+      gamaMatch &&
       (!q || haystack.includes(q))
     );
   });
   if (!list.length) {
     grid.classList.toggle("promo-grid", S.catFilter === "promo");
     grid.innerHTML =
-      '<div class="catalog-empty">No hay productos para esos filtros. Ajusta perfil, precio o marca.</div>';
+      '<div class="catalog-empty">No hay productos para esos filtros. Ajusta marca, modelo, precio o gama.</div>';
     return;
   }
   grid.classList.toggle("promo-grid", S.catFilter === "promo");
@@ -1905,10 +1966,6 @@ function renderCatalog() {
         const selectedForCompare = productosComparados.some(
           (x) => String(x.id) === String(p.id),
         );
-        const tagText = (p.perfiles || [])
-          .slice(0, 2)
-          .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
-          .join(" / ");
         const catLabel =
           p.cat === "celular"
             ? "Celular - Elegible leasing"
@@ -1919,9 +1976,7 @@ function renderCatalog() {
                 : p.cat === "regalo"
                   ? "Regalo para cierre"
                   : "Accesorio";
-        const pvpShow = eligible
-          ? `<div class="prod-pvp">Ref. USD ${clp(p.pvp)}</div>`
-          : p.oldPrice
+        const pvpShow = !eligible && p.oldPrice
             ? `<div class="prod-pvp prod-old">Antes ${clp(p.oldPrice)}</div>`
             : "";
         const promoCard = p.cat === "promo";
@@ -1941,7 +1996,7 @@ function renderCatalog() {
       ${p.marca ? `<div class="prod-spec">${p.marca} · ${p.modelo || ""}</div>` : ""}
       ${p.ram ? `<div class="prod-spec" style="color:var(--slate3)">${p.ram} · ${p.rom}</div>` : ""}
       <div class="prod-cat">${catLabel}</div>
-      ${promoCard ? `<div class="prod-tags promo-tags"><b>${p.promoTag || "Promo activa"}</b></div>` : tagText ? `<div class="prod-tags"><span>${tagText}</span>${p.recomendado ? "<b>Recomendado</b>" : ""}</div>` : ""}
+      ${promoCard ? `<div class="prod-tags promo-tags"><b>${p.promoTag || "Promo activa"}</b></div>` : p.recomendado ? `<div class="prod-tags"><b>Recomendado</b></div>` : ""}
       ${promoCard && p.desc ? `<div class="prod-promo-desc">${p.desc}</div>` : ""}
       ${comboCard ? `<ul class="combo-includes">${comboIncludes.map((item) => `<li>${item}</li>`).join("")}</ul>` : ""}
       ${pvpShow}
@@ -1961,27 +2016,42 @@ function renderCatalog() {
     renderCatalogPager(list.length, S.catalogPage, pageSize);
 }
 
+function animateInventoryOpen() {
+  const grid = document.getElementById("prodGrid");
+  const filters = document.querySelector(".catalog-filter-panel");
+  if (filters) {
+    filters.classList.remove("inventory-filter-in");
+    void filters.offsetWidth;
+    filters.classList.add("inventory-filter-in");
+  }
+  if (grid) {
+    grid.classList.remove("inventory-open-in");
+    void grid.offsetWidth;
+    grid.classList.add("inventory-open-in");
+  }
+}
+
 function renderCategoryShowcase(list) {
   const config = {
     promo: {
       title: "Promos activas",
       sub: `${list.length} oportunidades para ofrecer una mejor opcion al cliente`,
-      text: "Descuentos del prototipo - Packs listos - Audio - Proteccion - Accesorios",
+      text: "Descuentos - Packs listos - Audio - Proteccion - Accesorios",
     },
     celular: {
       title: "Celulares disponibles",
-      sub: `${list.length} equipos para venta directa o leasing`,
-      text: "Equipos con IMEI - Opciones para maximizar - Descuento autorizado - Accesorios sugeridos",
+      sub: `${list.length} equipos para venta a crédito directo`,
+      text: "Equipos con IMEI - Diferentes Opciones - Descuentos autorizados - Accesorios sugeridos",
     },
     combo: {
-      title: "Combos para maximizar",
-      sub: `${list.length} paquetes listos para subir el ticket`,
-      text: "Packs listos - Audio - Proteccion - Entretenimiento - Ahorro referencial",
+      title: "Combos",
+      //sub: `${list.length} paquetes listos para subir el ticket`,
+      text: "Packs listos - Audio - Proteccion - Entretenimiento - Ahorro",
     },
     accesorio: {
       title: "Accesorios sugeridos",
       sub: `${list.length} agregados para completar la venta`,
-      text: "Audio - Proteccion - Carga - Entretenimiento - Regalos para cierre",
+      text: "Audio - Proteccion - Carga - Entretenimiento",
     },
   };
   const cfg = config[S.catFilter];
@@ -2404,9 +2474,7 @@ function showUpsell(id) {
         .map((op, idx) => {
           const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
           return `<button class="upsell-option ${idx === 1 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectUpsellOption(${phone.id}, ${idx}, this)">
-            ${op.offer ? `<span class="upsell-offer-label">${op.offer}</span>` : ""}
             <span class="upsell-badge">${op.badge}</span>
-            <div class="upsell-option-icon">${op.icon}</div>
             ${upsellPackVisual(op.pack)}
             <h3>${op.title}</h3>
             <p>${op.desc}</p>
@@ -2450,15 +2518,45 @@ function toggleUpsellAccessories(phoneId) {
     return;
   }
   panel.style.display = "";
+  renderUpsellAccessoriesPanel(phoneId);
+}
+
+function upsellAccessoryList(query = "") {
+  const bestSellers = [604, 610, 607, 601, 613, 616, 615, 606, 602, 614, 612, 611];
+  const q = String(query || "").trim().toLowerCase();
+  return PRODUCTS.filter((p) => p.cat === "accesorio" && Number(p.id) < 900000)
+    .sort((a, b) => {
+      const ai = bestSellers.indexOf(a.id);
+      const bi = bestSellers.indexOf(b.id);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi) || String(a.name).localeCompare(String(b.name));
+    })
+    .filter((p) => {
+      if (!q) return true;
+      return [p.name, p.marca, p.modelo, p.ico].filter(Boolean).join(" ").toLowerCase().includes(q);
+    });
+}
+
+function renderUpsellAccessoriesPanel(phoneId, query = "") {
+  const panel = document.getElementById("upsellSidePanel");
+  if (!panel) return;
+  const accessories = upsellAccessoryList(query);
+  const shouldFocusSearch = document.activeElement?.classList?.contains("upsell-accessory-search");
+  const caretPos = String(query || "").length;
   panel.innerHTML = `
     <div class="upsell-custom-head">
       <div>
         <strong>Accesorios para agregar</strong>
-        <span>Selecciona extras individuales para subir el ticket.</span>
+        <span>Primero se muestran los mas vendidos.</span>
       </div>
     </div>
+    <input
+      class="upsell-accessory-search"
+      value="${String(query || "").replace(/"/g, "&quot;")}"
+      placeholder="Buscar accesorio..."
+      oninput="renderUpsellAccessoriesPanel(${phoneId}, this.value)"
+    />
     <div class="upsell-custom-grid">
-      ${upsellAccessorySuggestions(phoneId)
+      ${accessories
         .map(
           (p) => `<button type="button" class="upsell-custom-item" onclick="addUpsellAccessory(${p.id}, this)">
             <span>${productImageMarkup(p)}</span>
@@ -2468,7 +2566,13 @@ function toggleUpsellAccessories(phoneId) {
           </button>`,
         )
         .join("")}
+      ${accessories.length ? "" : '<div class="catalog-empty">No hay accesorios con esa busqueda.</div>'}
     </div>`;
+  if (shouldFocusSearch) {
+    const search = panel.querySelector(".upsell-accessory-search");
+    search?.focus();
+    search?.setSelectionRange(caretPos, caretPos);
+  }
 }
 
 function addUpsellAccessory(id, sourceEl) {
@@ -2601,9 +2705,7 @@ function showComboUpsell(id) {
         .map((op, idx) => {
           const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
           return `<button class="upsell-option ${idx === 2 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectComboUpsellOption(${combo.id}, ${idx}, this)">
-            ${op.offer ? `<span class="upsell-offer-label">${op.offer}</span>` : ""}
             <span class="upsell-badge">${op.badge}</span>
-            <div class="upsell-option-icon">${op.icon}</div>
             ${upsellPackVisual(op.pack)}
             <h3>${op.title}</h3>
             <p>${op.desc}</p>
@@ -2655,7 +2757,6 @@ function showAccessoryUpsell(id) {
           .map((op, idx) => {
             const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
             return `<button class="accessory-upsell-option ${idx === 1 || op.phoneId ? "featured" : ""}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx}, this)">
-              ${op.offer ? `<i>${op.offer}</i>` : ""}
               <span>${op.badge}</span>
               <h3>${op.title}</h3>
               <p>${op.desc}</p>
@@ -2963,7 +3064,6 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
           <strong>Barra de cupo leasing</strong>
           <span>${S.payMethod === "leasing" ? "Leasing activo" : "Simulacion para credito directo"}</span>
         </div>
-        <b>${S.precalificacion?.perfil || pre.perfil || "F2"} - ${clp(cupo)}</b>
       </div>
       <div class="upsell-cupo-preview-metrics">
         <div><small>Cupo</small><strong>${clp(cupo)}</strong></div>
@@ -3149,7 +3249,7 @@ function renderCart() {
     if (flowNote) {
       flowNote.style.display = "";
       flowNote.innerHTML =
-        '<div class="cart-flow-note"><strong>Leasing activo</strong><span>Producto reservado. Continúa a plazo, entrada y referencias.</span></div>';
+        '<div class="cart-flow-note"><strong>Leasing activo</strong><span>Producto reservado. Continúa a oferta y luego referencias.</span></div>';
     }
     if (contBtn) contBtn.innerHTML = "Continuar con leasing →";
   } else {
@@ -3390,7 +3490,7 @@ function continueLeasingFromCatalog() {
   document.getElementById("navLeas").style.display = "";
   document.getElementById("btnCancel").style.display = "";
   setProgress(3);
-  setTitle("Leasing - Oferta + Referencias");
+  setTitle("Leasing - Oferta");
   goScreen("lp3oferta");
   initOffer();
   setTimeout(() => {
@@ -3399,7 +3499,7 @@ function continueLeasingFromCatalog() {
       .getElementById("screen-lp3oferta")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 90);
-  toast("Producto seleccionado. Continua con referencias");
+  toast("Producto seleccionado. Revisa la oferta");
 }
 
 function selPay(m, el) {
@@ -3531,7 +3631,7 @@ function tglLdpd() {
     OP.ldpd = true;
     addLog(
       "LDPD",
-      "Consentimiento v2024-CL aceptado — RUT: " +
+      "Consentimiento Ecuador aceptado — CI: " +
         document.getElementById("lp1_rut").value,
       "OK",
     );
@@ -3550,7 +3650,7 @@ function continueLdpd() {
   const emailEl = document.getElementById("lp1_email");
   const rut = formatRut(rutEl.value);
   const nom = nomEl.value.trim().replace(/\s+/g, " ");
-  const tel = normalizeChileMobile(telEl.value);
+  const tel = normalizeEcuadorMobile(telEl.value);
   const email = emailEl.value.trim().toLowerCase();
   if (!validateLp1Form()) {
     toast("Revisa los campos marcados", "warn");
@@ -3578,13 +3678,24 @@ function continueLdpd() {
   addLog("OTP_ENVIO", "SMS enviado — " + tel, "OK");
   toast("OTP enviado por SMS", "warn");
   document.getElementById("otpTelShow").textContent =
-    tel.replace(/(\+56 9 )(\d{4})(\d{4})/, "$1****$3") || tel;
-  document.getElementById("lp1A").style.display = "none";
-  document.getElementById("lp1B").style.display = "";
+    tel.replace(/(\+593 \d{2} )(\d{3})(\d{4})/, "$1***$3") || tel;
+  transitionLp1Step("lp1A", "lp1B");
 }
 function backToLdpd() {
-  document.getElementById("lp1A").style.display = "";
-  document.getElementById("lp1B").style.display = "none";
+  transitionLp1Step("lp1B", "lp1A");
+}
+function transitionLp1Step(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  if (!from || !to) return;
+  from.classList.add("form-step-exit");
+  setTimeout(() => {
+    from.style.display = "none";
+    from.classList.remove("form-step-exit");
+    to.style.display = "";
+    to.classList.add("form-step-enter");
+    setTimeout(() => to.classList.remove("form-step-enter"), 520);
+  }, 260);
 }
 function backToLeasingIdentification() {
   setProgress(0);
@@ -3698,14 +3809,14 @@ function runEvalNext(idx, birth) {
     // TODO OK
     OP.apiDatos = true;
     OP.scoreOk = true;
-    addLog("API_DATOS", "Consulta Equifax base — RUT: " + S.rut, "OK");
-    addLog("EQUIFAX", "Score 720 — RUT: " + S.rut, "OK");
+    addLog("API_DATOS", "Consulta buro base — CI: " + S.rut, "OK");
+    addLog("EQUIFAX", "Score 720 — CI: " + S.rut, "OK");
     document.getElementById("evalResult").style.display = "";
     document.getElementById("evalResult").innerHTML =
       '<div class="alert a-ok">✅ Cliente aprobado para leasing · Score: 720 · Riesgo: BAJO</div>';
     setTimeout(() => {
       setProgress(3);
-      setTitle("Leasing — Oferta");
+      setTitle("Crédito Directo — Oferta");
       initOffer();
       goScreen("lp3oferta");
     }, 1100);
@@ -3728,7 +3839,7 @@ function runEvalNext(idx, birth) {
         api: "No fue posible validar la información del cliente.",
         score: "El score crediticio no cumple el mínimo requerido (700).",
       };
-      addLog(f.id.toUpperCase(), "Evaluación fallida — RUT: " + S.rut, "FAIL");
+      addLog(f.id.toUpperCase(), "Evaluación fallida — CI: " + S.rut, "FAIL");
       setTimeout(() => {
         document.getElementById("rjTitle").textContent =
           "No califica para leasing";
@@ -3740,7 +3851,7 @@ function runEvalNext(idx, birth) {
         setProgress(2);
       }, 700);
     } else {
-      addLog(f.id.toUpperCase(), "Verificación OK — RUT: " + S.rut, "OK");
+      addLog(f.id.toUpperCase(), "Verificación OK — CI: " + S.rut, "OK");
       runEvalNext(idx + 1, birth);
     }
   }, delay);
@@ -3786,7 +3897,7 @@ function clientMiniCard() {
     <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0">${S.nombre[0]}</div>
     <div style="flex:1;min-width:0">
       <div style="font-size:12px;font-weight:800;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${S.nombre}</div>
-      <div style="font-size:10px;color:var(--slate4)">RUT: ${S.rut} · ${S.tel}</div>
+      <div style="font-size:10px;color:var(--slate4)">CI: ${S.rut} · ${S.tel}</div>
     </div>
     <span class="badge b-lime">Score 720</span>
     ${S.autoImei ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy2);background:#eff6ff;padding:2px 7px;border-radius:3px">${S.autoImei}</span>` : ""}
@@ -3829,7 +3940,7 @@ function initOffer() {
   hydrateBiometricCard();
   hydratePayAddressCard(entMin);
   document.getElementById("lp3ofNom").textContent = S.nombre;
-  document.getElementById("lp3ofRut").textContent = "RUT: " + S.rut;
+  document.getElementById("lp3ofRut").textContent = "CI: " + S.rut;
   // Mostrar breakdown de precios
   const cel = items.find((x) => x.cat === "celular");
   let pbHTML = "";
@@ -4117,7 +4228,7 @@ function calcOffer() {
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} semanas</span></div>
     <div class="sum-row" style="color:var(--lime)"><span class="sum-lbl" style="color:#5a7200">Cuota semanal</span><span style="font-weight:800;font-family:'JetBrains Mono',monospace">${clp(cuota)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Total contrato</span><span>${clp(tc)}</span></div>
-    ${phone ? `<div class="sum-row"><span class="sum-lbl">IMEI colateral</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">${phone.autoImei || "—"}</span></div>` : ""}
+    ${phone ? `<div class="sum-row"><span class="sum-lbl">IMEI</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">${phone.autoImei || "—"}</span></div>` : ""}
     ${accs.length ? `<div class="sum-row"><span class="sum-lbl">Accesorios</span><span style="font-size:11px">${accs.map((a) => a.name).join(", ")}</span></div>` : ""}`;
   document.getElementById("lp3ofDet").innerHTML = ofDetHTML;
   document.getElementById("finSumm").innerHTML = `
@@ -4148,7 +4259,7 @@ function renderOfferSummary(ent, monto, cuota, tc) {
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} semanas</span></div>
     <div class="sum-row" style="color:var(--lime)"><span class="sum-lbl" style="color:#5a7200">Cuota semanal</span><span style="font-weight:800;font-family:'JetBrains Mono',monospace">${clp(cuota)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Total contrato</span><span>${clp(tc)}</span></div>
-    ${phone ? `<div class="sum-row"><span class="sum-lbl">IMEI colateral</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">${phone.autoImei || "—"}</span></div>` : ""}
+    ${phone ? `<div class="sum-row"><span class="sum-lbl">IMEI</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px">${phone.autoImei || "—"}</span></div>` : ""}
     ${accs.length ? `<div class="sum-row"><span class="sum-lbl">Accesorios</span><span style="font-size:11px">${accs.map((a) => a.name).join(", ")}</span></div>` : ""}`;
   document.getElementById("finSumm").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado API</span><span>${clp(pre?.cupo || 0)}</span></div>
@@ -4212,13 +4323,37 @@ function selectPlazo(i) {
 }
 function goInventoryFromOffer() {
   setTitle("Catálogo de Productos");
-  goScreen("catalog");
+  openPosCatalog();
+}
+function renderLp4OfferSummary() {
+  const el = document.getElementById("lp4OfferSummary");
+  if (!el) return;
+  const tot = offerTotal();
+  const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
+  const monto = Math.max(0, tot - ent);
+  const plazo = S.selectedPlazo;
+  const cuota = plazo ? Math.ceil((monto * (1 + plazo.factor)) / plazo.sem) : 0;
+  el.innerHTML = `
+    <div class="pb-row"><span class="pb-lbl">Cliente<br><span class="pb-formula">${S.nombre || "Sin nombre"}</span></span><span>${S.rut || "CI"}</span></div>
+    <div class="pb-row"><span class="pb-lbl">Total seleccionado<br><span class="pb-formula">${S.cart.length} item(s)</span></span><span>${clp(tot)}</span></div>
+    <div class="pb-row"><span class="pb-lbl">Entrada aprobada<br><span class="pb-formula">Oferta aceptada</span></span><span>${clp(ent)}</span></div>
+    <div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${plazo?.label || "Plazo pendiente"}</span></span><span>${clp(monto)}</span></div>
+    <div class="pb-row"><span class="pb-lbl">Cuota estimada<br><span class="pb-formula">Por semana</span></span><span>${clp(cuota)}</span></div>
+  `;
+}
+function prepareReferencesStep() {
+  const mount = document.getElementById("lp4RefsMount");
+  const refsCard = document.getElementById("lp3RefsCard");
+  if (mount && refsCard && refsCard.parentElement !== mount) {
+    mount.appendChild(refsCard);
+  }
+  const lockedCard = document.getElementById("lp3RefsLockedCard");
+  if (lockedCard) lockedCard.style.display = "none";
+  document.getElementById("lp4hdr").innerHTML = clientMiniCard();
+  renderLp4OfferSummary();
+  setRefsLocked(false);
 }
 function continueLp3() {
-  if (!document.getElementById("chkAcepta").checked) {
-    toast("Acepta las condiciones del leasing", "warn");
-    return;
-  }
   if (hasLeasingCartValue() && !OP.biometriaOk) {
     toast("Completa la biometria antes de formalizar", "warn");
     document
@@ -4271,12 +4406,19 @@ function continueLp3() {
   }
   addLog(
     "ENTRADA_APROBADA",
-    "Entrada: " + clp(ent) + " — mínimo: " + clp(entMin3) + " — RUT: " + S.rut,
+    "Entrada: " + clp(ent) + " — mínimo: " + clp(entMin3) + " — CI: " + S.rut,
     "OK",
   );
   OP.ofertaAceptada = true;
   setProgress(4);
-  setTitle("Leasing — Formalización + Activación");
+  setTitle("Leasing - Referencias");
+  prepareReferencesStep();
+  goScreen("lp4refs");
+}
+function continueLp4Refs() {
+  OP.ofertaAceptada = true;
+  setProgress(4);
+  setTitle("Leasing - Formalizacion + Activacion");
   // Setup P5
   document.getElementById("lp5hdr").innerHTML = clientMiniCard();
   const demoAsset = simulatedLeasingAsset();
@@ -4431,7 +4573,7 @@ function continueLp2() {
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
   addLog(
     "DATOS_CLIENTE",
-    "Perfil completo — RUT: " +
+    "Perfil completo — CI: " +
       S.rut +
       " — " +
       dir +
@@ -4766,7 +4908,7 @@ function bioValidar5() {
     const ts = new Date().toISOString();
     addLog(
       "BIOMETRIA",
-      "Reconocimiento facial aprobado — RUT: " + S.rut + " — " + ts,
+      "Reconocimiento facial aprobado — CI: " + S.rut + " — " + ts,
       "OK",
     );
     const cam = document.getElementById("bioCam5");
@@ -5099,7 +5241,7 @@ function emitirFactEntrada() {
     const folio = "DTE-" + Math.floor(Math.random() * 90000 + 10000);
     addLog(
       "FACT_ENTRADA_DTE",
-      "Folio: " + folio + " — Monto: " + clp(S.entrada) + " — RUT: " + S.rut,
+      "Folio: " + folio + " — Monto: " + clp(S.entrada) + " — CI: " + S.rut,
       "OK",
     );
     document.getElementById("factEntradaResult").style.display = "";
@@ -5125,7 +5267,7 @@ function buildExito() {
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">LDPD aceptada · OTP verificado</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Score Equifax: 720 · Riesgo BAJO</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Contratos firmados digitalmente</div></div>
-    <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Biometría facial aprobada — RUT: ${S.rut}</div></div>
+    <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Biometría facial aprobada — CI: ${S.rut}</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">IMEI: ${S.autoImei} · Candado MDM activo</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Operación: ${S.opId} · ACTIVO en cartera</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Cuota: ${clp(S.cuota)} / ${S.selectedPlazo?.sem} semanas</div></div>
@@ -5200,7 +5342,7 @@ function resetAll() {
   Object.keys(OP).forEach((k) => (OP[k] = false));
   S = {
     cart: [],
-    catFilter: "",
+    catFilter: "celular",
     catalogPage: 1,
     catalogFilterKey: "",
     payMethod: "otro",
@@ -5456,7 +5598,7 @@ function resetAll() {
     .forEach((b) => b.classList.remove("on"));
   updateDirectCreditCta();
   applyHappyBrandLogos();
-  goScreen("catalog");
+  openPosCatalog();
   toast("Nueva venta iniciada");
 }
 
@@ -5477,7 +5619,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }) + "<br>Caja 2";
   }
 
+  syncCatalogTabs("celular");
+  syncSidebarCategory("celular");
   if (typeof renderCatalog === "function") renderCatalog();
+  if (typeof animateInventoryOpen === "function") animateInventoryOpen();
   if (typeof renderCart === "function") renderCart();
   if (typeof renderLogs === "function") renderLogs();
 
