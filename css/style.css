@@ -1533,6 +1533,32 @@ body {
   border-radius: 4px;
   display: inline-block;
 }
+.prod-imei-select {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 6px;
+  padding: 5px 6px;
+  border: 1px solid #dbe5ef;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+.prod-imei-select span {
+  color: var(--navy);
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.prod-imei-select select {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--navy2);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 800;
+  outline: none;
+}
 .prod-add {
   width: 100%;
   padding: 6px;
@@ -2233,6 +2259,30 @@ body {
 }
 .finance-formula.is-warn strong {
   color: #b91c1c;
+}
+.plazo-card.disabled {
+  opacity: 0.48;
+  filter: grayscale(0.35);
+  cursor: not-allowed;
+}
+.plazo-card.disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+}
+.plazo-empty {
+  grid-column: 1 / -1;
+  padding: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #991b1b;
+  font-size: 11px;
+  font-weight: 800;
+}
+.cupo-plazo-picks button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.35);
 }
 .compare-select-bar {
   grid-column: 1 / -1;

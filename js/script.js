@@ -1129,6 +1129,20 @@ const PLAZOS = [
   { sem: 26, factor: 1.0, label: "26 sem." },
   { sem: 33, factor: 1.21, label: "33 sem." },
 ];
+const CUOTA_MINIMA_SEMANAL = 10;
+const CUOTA_MAXIMA_SEMANAL = 40;
+
+function cuotaForPlazo(monto, plazo) {
+  return plazo ? Math.ceil((Number(monto || 0) * (1 + plazo.factor)) / plazo.sem) : 0;
+}
+
+function isValidWeeklyPayment(cuota) {
+  return cuota >= CUOTA_MINIMA_SEMANAL && cuota <= CUOTA_MAXIMA_SEMANAL;
+}
+
+function weeklyPaymentRangeText() {
+  return `La cuota semanal debe ser mayor a ${clp(CUOTA_MINIMA_SEMANAL - 1)} y menor o igual a ${clp(CUOTA_MAXIMA_SEMANAL)}.`;
+}
 const PRECALIFICACIONES_DEMO = [
   {
     identificacion: "1751234061",
@@ -1377,6 +1391,7 @@ let S = {
   entryPayment: { efectivo: 0, credito: 0 },
   activeAuthDiscountId: null,
   pendingPhoneColor: null,
+  pendingImeiByProduct: {},
   forceRecoveredEntry: false,
   opId: null,
   folio: null,
@@ -1922,13 +1937,14 @@ function creditQuoteData(total) {
   const plazos = S.plazosDisponibles?.length
     ? S.plazosDisponibles
     : plazosFromPrecal(pre);
-  const plazo = S.selectedPlazo || plazos[0] || PLAZOS[0];
   const price = Number(total || 0);
   let entrada = entradaFromPrecal(price, pre);
   if (entrada >= price) entrada = Math.ceil(price * 0.25);
   entrada = Math.min(price, Math.max(entrada, Math.max(0, price - currentLeasingCupo())));
   const saldo = Math.max(0, price - entrada);
-  const cuota = plazo ? Math.ceil((saldo * (1 + plazo.factor)) / plazo.sem) : 0;
+  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
+  const plazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0] || PLAZOS[0];
+  const cuota = cuotaForPlazo(saldo, plazo);
   return { cuota, entrada, plazo };
 }
 
@@ -2025,6 +2041,11 @@ function renderCatalog() {
       .map((p, idx) => {
         const avail = (p.units || []).filter((u) => u.st === "disponible");
         const nextImei = avail[0]?.imei;
+        const selectedImei =
+          S.pendingImeiByProduct?.[p.id] &&
+          avail.some((u) => u.imei === S.pendingImeiByProduct[p.id])
+            ? S.pendingImeiByProduct[p.id]
+            : nextImei;
         const inCart = S.cart.find((x) => x.id === p.id);
         const eligible = p.cat === "celular";
         const selectedForCompare = productosComparados.some(
@@ -2069,11 +2090,20 @@ function renderCatalog() {
       ${creditQuote}
       ${superaCupo ? `<div class="prod-cupo-note">Supera cupo. Se ajusta con entrada.</div>` : ""}
       ${modoComparacion && eligible ? `<button class="prod-add prod-compare-pick" type="button" onclick="event.stopPropagation(); seleccionarParaComparar(${p.id})">${selectedForCompare ? "Seleccionado" : "Comparar"}</button>` : ""}
-      ${eligible && nextImei ? `<div class="prod-imei-tag" title="IMEI auto-asignado">🔑 ${nextImei}</div>` : ""}
+      ${
+        eligible && nextImei
+          ? `<label class="prod-imei-select" onclick="event.stopPropagation()">
+              <span>IMEI</span>
+              <select id="imeiSelect_${p.id}" onchange="rememberCatalogImei(${p.id}, this.value)">
+                ${avail.map((u) => `<option value="${u.imei}" ${u.imei === selectedImei ? "selected" : ""}>${u.imei}</option>`).join("")}
+              </select>
+            </label>`
+          : ""
+      }
       <div style="margin-bottom:6px">${avail.length > 0 || !eligible ? `<span class="badge b-lime">Stock: ${eligible ? avail.length : p.stock || "✓"}</span>` : `<span class="badge b-red">Sin stock</span>`}</div>
 <button 
   class="prod-add" 
-  onclick="addCart(${p.id})" 
+  onclick="event.stopPropagation(); addCart(${p.id}, { imei: getCatalogImeiSelection(${p.id}) })" 
   ${eligible && avail.length === 0 ? "disabled" : ""}
 >
   ${inCart ? `✓ ${inCart.qty} en carrito` : comboCard ? "+ Agregar combo" : " + Agregar"}
@@ -2212,11 +2242,33 @@ function upsellPackVisual(pack) {
   </div>`;
 }
 
-function assignImei(product) {
-  const u = (product.units || []).find((x) => x.st === "disponible");
+function assignImei(product, preferredImei = null) {
+  const units = product.units || [];
+  const u = preferredImei
+    ? units.find((x) => x.imei === preferredImei && x.st === "disponible")
+    : units.find((x) => x.st === "disponible");
   if (!u) return null;
   u.st = "reservado";
   return u.imei;
+}
+
+function getCatalogImeiSelection(productId) {
+  return document.getElementById(`imeiSelect_${productId}`)?.value || "";
+}
+
+function rememberCatalogImei(productId, imei) {
+  if (!S.pendingImeiByProduct) S.pendingImeiByProduct = {};
+  if (imei) S.pendingImeiByProduct[productId] = imei;
+}
+
+function clearRememberedImei(productId, imei) {
+  if (S.pendingImeiByProduct?.[productId] === imei) {
+    delete S.pendingImeiByProduct[productId];
+  }
+}
+
+function selectedImeiForProduct(productId, opts = {}) {
+  return opts.imei || S.pendingImeiByProduct?.[productId] || "";
 }
 
 function upsellAccessory(id) {
@@ -2919,6 +2971,7 @@ function selectPromoBase(id) {
 function addCart(id, opts = {}) {
   const p = PRODUCTS.find((x) => x.id === id);
   if (p?.cat === "celular" && !opts.skipUpsell) {
+    rememberCatalogImei(id, opts.imei || getCatalogImeiSelection(id));
     showUpsell(id);
     return;
   }
@@ -2942,21 +2995,24 @@ function addCart(id, opts = {}) {
   const ex = S.cart.find((x) => x.id === id);
   if (ex) {
     if (p.cat === "celular") {
-      const im = assignImei(p);
+      const selectedImei = selectedImeiForProduct(id, opts);
+      const im = assignImei(p, selectedImei);
       if (!im) {
-        toast("Sin IMEIs", "err");
+        toast(selectedImei ? "El IMEI seleccionado ya no esta disponible" : "Sin IMEIs", "err");
         return;
       }
       ex.qty++;
       ex.extraImeis = ex.extraImeis || [];
       ex.extraImeis.push(im);
+      clearRememberedImei(id, im);
     } else ex.qty++;
   } else {
     let autoImei = null;
     if (p.cat === "celular") {
-      autoImei = assignImei(p);
+      const selectedImei = selectedImeiForProduct(id, opts);
+      autoImei = assignImei(p, selectedImei);
       if (!autoImei) {
-        toast("Sin IMEIs", "err");
+        toast(selectedImei ? "El IMEI seleccionado ya no esta disponible" : "Sin IMEIs", "err");
         return;
       }
       if (!S.autoImei) {
@@ -2964,6 +3020,7 @@ function addCart(id, opts = {}) {
         S.assignedProduct = p;
         OP.imei = true;
       }
+      clearRememberedImei(id, autoImei);
     }
     S.cart.push({
       ...p,
@@ -3208,11 +3265,10 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
   const plazos = S.plazosDisponibles?.length
     ? S.plazosDisponibles
     : plazosFromPrecal(pre);
-  const plazo = S.selectedPlazo || plazos[0];
   const saldo = Math.max(0, previewTotal - entrada);
-  const cuota = plazo
-    ? Math.ceil((saldo * (1 + plazo.factor)) / plazo.sem)
-    : 0;
+  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
+  const plazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0];
+  const cuota = cuotaForPlazo(saldo, plazo);
   return `
     <div class="upsell-cupo-preview ${exceso ? "over" : ""}" style="--cupo-pct:${pct}%">
       <input type="hidden" id="upsellCupoBasePrice" value="${Number(basePrice || 0)}" />
@@ -3271,12 +3327,11 @@ function renderCupoUsage() {
   const plazos = S.plazosDisponibles?.length
     ? S.plazosDisponibles
     : plazosFromPrecal(pre);
-  if (!S.selectedPlazo && plazos.length) S.selectedPlazo = plazos[0];
   const entrada = entradaFromPrecal(usado, pre);
   const saldo = Math.max(0, usado - entrada);
-  const cuotaPreview = S.selectedPlazo
-    ? Math.ceil((saldo * (1 + S.selectedPlazo.factor)) / S.selectedPlazo.sem)
-    : 0;
+  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
+  const previewPlazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0];
+  const cuotaPreview = cuotaForPlazo(saldo, previewPlazo);
   const restante = Math.max(0, cupo - usado);
   const exceso = Math.max(0, usado - cupo);
   const pct = Math.min(100, Math.round((usado / Math.max(cupo, 1)) * 100));
@@ -3294,16 +3349,20 @@ function renderCupoUsage() {
       <div class="cupo-terms">
         <div><small>Cupo aprobado</small><strong>${clp(cupo)}</strong></div>
         <div><small>Entrada ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}</small><strong>${clp(entrada)}</strong></div>
-        <div><small>Plazo elegido</small><strong>${S.selectedPlazo?.sem || "-"} sem.</strong></div>
+        <div><small>Plazo elegido</small><strong>${previewPlazo?.sem || "-"} sem.</strong></div>
         <div><small>Cuota estimada</small><strong>${clp(cuotaPreview)}</strong></div>
       </div>
       <div class="cupo-plazo-picks">
         ${plazos
           .map(
-            (p, i) => `<button type="button" class="${S.selectedPlazo?.sem === p.sem ? "on" : ""}" onclick="selectPlazo(${i})">
+            (p, i) => {
+              const cuota = cuotaForPlazo(saldo, p);
+              const valid = isValidWeeklyPayment(cuota);
+              return `<button type="button" class="${previewPlazo?.sem === p.sem ? "on" : ""}" ${valid ? `onclick="selectPlazo(${i})"` : "disabled"}>
               <span>${p.sem} sem.</span>
-              <strong>${clp(Math.ceil((saldo * (1 + p.factor)) / p.sem))}</strong>
-            </button>`,
+              <strong>${clp(cuota)}</strong>
+            </button>`;
+            },
           )
           .join("")}
       </div>
@@ -4362,8 +4421,7 @@ function calcOffer() {
     hydratePayAddressCard(entryValue);
     renderPlazos();
     if (!S.selectedPlazo) return;
-    const pagareAuto = montoAuto * (1 + S.selectedPlazo.factor);
-    const cuotaAuto = Math.ceil(pagareAuto / S.selectedPlazo.sem);
+    const cuotaAuto = cuotaForPlazo(montoAuto, S.selectedPlazo);
     S.cuota = cuotaAuto;
     S.totalContrato = entryValue + cuotaAuto * S.selectedPlazo.sem;
     renderOfferSummary(entryValue, montoAuto, cuotaAuto, S.totalContrato);
@@ -4399,8 +4457,7 @@ function calcOffer() {
   // MODELO SOBREPRECIO:
   // Pagaré = Monto × (1 + Factor)
   // Cuota  = ceil(Pagaré / Semanas)
-  const pagare = monto * (1 + S.selectedPlazo.factor);
-  const cuota = Math.ceil(pagare / S.selectedPlazo.sem);
+  const cuota = cuotaForPlazo(monto, S.selectedPlazo);
   const tc = ent + cuota * S.selectedPlazo.sem;
   S.cuota = cuota;
   S.totalContrato = tc;
@@ -4483,27 +4540,40 @@ function updatePriceBreakdown(ent, monto) {
 function renderPlazos() {
   const monto = S.monto;
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
-  if (!S.selectedPlazo && plazos.length) S.selectedPlazo = plazos[0];
+  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(monto, p)));
+  if (!validPlazos.some((p) => p.sem === S.selectedPlazo?.sem)) {
+    S.selectedPlazo = validPlazos[0] || null;
+  }
   const grid = document.getElementById("plazoGrid");
   if (!grid) return;
   grid.style.display = "";
+  if (!validPlazos.length) {
+    grid.innerHTML = `<div class="plazo-empty">${weeklyPaymentRangeText()} Ajusta la entrada para ver plazos disponibles.</div>`;
+    return;
+  }
   grid.innerHTML = plazos
     .map((p, i) => {
       // Pagaré = Monto × (1 + Factor) | Cuota = ceil(Pagaré / Semanas)
-      const pagare = monto * (1 + p.factor);
-      const cuota = Math.ceil(pagare / p.sem);
+      const cuota = cuotaForPlazo(monto, p);
+      const valid = isValidWeeklyPayment(cuota);
       const sel = S.selectedPlazo?.sem === p.sem;
-      return `<div class="plazo-card ${sel ? "on" : ""}" onclick="selectPlazo(${i})">
+      return `<div class="plazo-card ${sel ? "on" : ""} ${valid ? "" : "disabled"}" ${valid ? `onclick="selectPlazo(${i})"` : ""}>
       <div class="plazo-sem">${p.label}</div>
       <div class="plazo-cuota">${clp(cuota)}</div>
-      <div class="plazo-sub">/ semana</div>
+      <div class="plazo-sub">${valid ? "/ semana" : "fuera de rango"}</div>
     </div>`;
     })
     .join("");
 }
 function selectPlazo(i) {
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
-  S.selectedPlazo = plazos[i];
+  const nextPlazo = plazos[i];
+  const cuota = cuotaForPlazo(S.monto, nextPlazo);
+  if (!isValidWeeklyPayment(cuota)) {
+    toast(weeklyPaymentRangeText(), "warn");
+    return;
+  }
+  S.selectedPlazo = nextPlazo;
   calcOffer();
   renderCart();
 }
@@ -4518,7 +4588,7 @@ function renderLp4OfferSummary() {
   const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const monto = Math.max(0, tot - ent);
   const plazo = S.selectedPlazo;
-  const cuota = plazo ? Math.ceil((monto * (1 + plazo.factor)) / plazo.sem) : 0;
+  const cuota = cuotaForPlazo(monto, plazo);
   el.innerHTML = `
     <div class="pb-row"><span class="pb-lbl">Cliente<br><span class="pb-formula">${S.nombre || "Sin nombre"}</span></span><span>${S.rut || "CI"}</span></div>
     <div class="pb-row"><span class="pb-lbl">Total seleccionado<br><span class="pb-formula">${S.cart.length} item(s)</span></span><span>${clp(tot)}</span></div>
@@ -4655,6 +4725,16 @@ function continueLp3() {
     toast("Entrada inválida", "err");
     return;
   }
+  calcOffer();
+  if (!S.selectedPlazo || !isValidWeeklyPayment(S.cuota)) {
+    const errEl = document.getElementById("entErr");
+    if (errEl) {
+      errEl.style.display = "flex";
+      errEl.innerHTML = `<span>!</span><div><strong>Cuota fuera de rango.</strong><br>${weeklyPaymentRangeText()}</div>`;
+    }
+    toast(weeklyPaymentRangeText(), "err");
+    return;
+  }
   addLog(
     "ENTRADA_APROBADA",
     "Entrada: " + clp(ent) + " — mínimo: " + clp(entMin3) + " — CI: " + S.rut,
@@ -4681,6 +4761,7 @@ function sendFinalVerification() {
     sendBtn.textContent = "Enviando verificacion...";
   }
   showVerificationSent(result);
+  toast("Verificacion aprobada por Recover. Continua con contratos e instalacion de candado.", "ok");
   addLog("ENVIO_VERIFICACION", "Solicitud enviada — CI: " + S.rut, "OK");
   setTimeout(() => {
     if (sendBtn) {
@@ -5654,6 +5735,7 @@ function resetAll() {
     autoImei: null,
     assignedProduct: null,
     pendingPhoneColor: null,
+    pendingImeiByProduct: {},
     forceRecoveredEntry: false,
     opId: null,
     folio: null,
