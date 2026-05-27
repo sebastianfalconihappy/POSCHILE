@@ -1124,14 +1124,15 @@ function productRecommended(p) {
 
 /* PLAZOS — factor real de pricing */
 const PLAZOS = [
-  { sem: 13, factor: 0.59, label: "13 sem." },
-  { sem: 18, factor: 1.05, label: "18 sem." },
-  { sem: 26, factor: 1.0, label: "26 sem." },
-  { sem: 33, factor: 1.21, label: "33 sem." },
+  { sem: 13, factor: 0.55, label: "13 sem." },
+  { sem: 18, factor: 0.85, label: "18 sem." },
+  { sem: 22, factor: 1.04, label: "22 sem." },
+  { sem: 26, factor: 0.9, label: "26 sem." },
+  { sem: 33, factor: 1.1, label: "33 sem." },
 ];
 const CUOTA_MINIMA_SEMANAL = 10;
 const CUOTA_MAXIMA_SEMANAL = 40;
-const CREDITO_PROMEDIO_ENTRADA = 28;
+const CREDITO_PROMEDIO_ENTRADA_PCT = 0.11;
 const CREDITO_PROMEDIO_PLAZO = 26;
 const CREDITO_PROMEDIO_PORCENTAJE = 0.9;
 
@@ -1179,7 +1180,7 @@ const PRECALIFICACIONES_DEMO = [
     identificacion: "1700000300",
     nombre: "CLIENTE DEMO F2",
     idPerfil: 31,
-    perfil: "F2",
+    perfil: "SP",
     producto: "CELULAR",
     cupo: 300,
     entrada: 25,
@@ -1194,12 +1195,12 @@ const PRECALIFICACIONES_DEMO = [
     identificacion: "1711063633",
     nombre: "CLIENTE DEMO F2 400",
     idPerfil: 32,
-    perfil: "F2+",
+    perfil: "F2",
     producto: "CELULAR",
     cupo: 400,
     entrada: 22,
     tipoEntrada: "PORCENTAJE",
-    plazo: "13-18-26",
+    plazo: "13-26",
     cupoDisponible: 400,
     ticket: 20260417100240,
     promocionEntrada: "",
@@ -1210,12 +1211,12 @@ const PRECALIFICACIONES_DEMO = [
     identificacion: "1752015725",
     nombre: "CLIENTE DEMO F1 500",
     idPerfil: 21,
-    perfil: "F1",
+    perfil: "C2",
     producto: "CELULAR",
     cupo: 500,
     entrada: 18,
     tipoEntrada: "PORCENTAJE",
-    plazo: "18-26-33",
+    plazo: "26-33",
     cupoDisponible: 500,
     ticket: 20260417101540,
     promocionEntrada: "",
@@ -1226,12 +1227,12 @@ const PRECALIFICACIONES_DEMO = [
     identificacion: "1700000600",
     nombre: "CLIENTE DEMO F1 600",
     idPerfil: 21,
-    perfil: "F1",
+    perfil: "F2",
     producto: "CELULAR",
     cupo: 600,
     entrada: 15,
     tipoEntrada: "PORCENTAJE",
-    plazo: "18-26-33",
+    plazo: "13-26",
     cupoDisponible: 600,
     ticket: 20260417122570,
     promocionEntrada: "",
@@ -1496,12 +1497,14 @@ function entradaFromPrecal(total, precal) {
   if (!precal) return Math.round(total * 0.14);
   const cupo = Number(precal.cupoDisponible ?? precal.cupo ?? 0);
   const entradaApi = Number(precal.entrada || 0);
-  const entradaPorTipo =
-    precal.tipoEntrada === "PORCENTAJE"
-      ? Math.ceil(total * (entradaApi / 100))
-      : Math.ceil(entradaApi);
+  if (precal.tipoEntrada !== "PORCENTAJE") {
+    return Math.min(total, entradaApi);
+  }
+  const pctEntrada = entradaApi / 100;
+  const baseCalculo = cupo > 0 ? Math.min(total, cupo) : total;
   const excesoSobreCupo = cupo > 0 ? Math.max(0, total - cupo) : 0;
-  return Math.min(total, Math.max(entradaPorTipo, excesoSobreCupo));
+  const entrada = excesoSobreCupo + baseCalculo * pctEntrada;
+  return Math.min(total, Number(entrada.toFixed(2)));
 }
 function fmtRut(el) {
   el.value = el.value.replace(/\D/g, "").slice(0, 10);
@@ -1947,7 +1950,7 @@ function renderCatalogCategoryHub() {
 
 function creditQuoteData(total) {
   const price = Number(total || 0);
-  const entrada = Math.min(price, CREDITO_PROMEDIO_ENTRADA);
+  const entrada = Math.min(price, price * CREDITO_PROMEDIO_ENTRADA_PCT);
   const saldo = Math.max(0, price - entrada);
   const recargo = saldo * CREDITO_PROMEDIO_PORCENTAJE;
   const totalPagar = saldo + recargo;
@@ -4578,10 +4581,18 @@ function renderPlazos() {
     })
     .join("");
 }
+function currentFinancingAmount() {
+  if (Number(S.monto || 0) > 0) return Number(S.monto);
+  const total = cartTotal();
+  if (!total) return 0;
+  const pre = S.precalificacion || getDemoPrecalificacion();
+  return Math.max(0, total - entradaFromPrecal(total, pre));
+}
 function selectPlazo(i) {
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
   const nextPlazo = plazos[i];
-  const cuota = cuotaForPlazo(S.monto, nextPlazo);
+  const monto = currentFinancingAmount();
+  const cuota = cuotaForPlazo(monto, nextPlazo);
   if (!isValidWeeklyPayment(cuota)) {
     toast(weeklyPaymentRangeText(), "warn");
     return;
