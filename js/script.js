@@ -1131,6 +1131,9 @@ const PLAZOS = [
 ];
 const CUOTA_MINIMA_SEMANAL = 10;
 const CUOTA_MAXIMA_SEMANAL = 40;
+const CREDITO_PROMEDIO_ENTRADA = 28;
+const CREDITO_PROMEDIO_PLAZO = 26;
+const CREDITO_PROMEDIO_PORCENTAJE = 0.9;
 
 function cuotaForPlazo(monto, plazo) {
   return plazo ? Math.ceil((Number(monto || 0) * (1 + plazo.factor)) / plazo.sem) : 0;
@@ -1142,6 +1145,16 @@ function isValidWeeklyPayment(cuota) {
 
 function weeklyPaymentRangeText() {
   return `La cuota semanal debe ser mayor a ${clp(CUOTA_MINIMA_SEMANAL - 1)} y menor o igual a ${clp(CUOTA_MAXIMA_SEMANAL)}.`;
+}
+
+function usdFixed(n) {
+  return (
+    "US$" +
+    Number(n || 0).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  );
 }
 const PRECALIFICACIONES_DEMO = [
   {
@@ -1933,28 +1946,28 @@ function renderCatalogCategoryHub() {
 }
 
 function creditQuoteData(total) {
-  const pre = S.precalificacion || getDemoPrecalificacion();
-  const plazos = S.plazosDisponibles?.length
-    ? S.plazosDisponibles
-    : plazosFromPrecal(pre);
   const price = Number(total || 0);
-  let entrada = entradaFromPrecal(price, pre);
-  if (entrada >= price) entrada = Math.ceil(price * 0.25);
-  entrada = Math.min(price, Math.max(entrada, Math.max(0, price - currentLeasingCupo())));
+  const entrada = Math.min(price, CREDITO_PROMEDIO_ENTRADA);
   const saldo = Math.max(0, price - entrada);
-  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
-  const plazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0] || PLAZOS[0];
-  const cuota = cuotaForPlazo(saldo, plazo);
-  return { cuota, entrada, plazo };
+  const recargo = saldo * CREDITO_PROMEDIO_PORCENTAJE;
+  const totalPagar = saldo + recargo;
+  const cuota = totalPagar / CREDITO_PROMEDIO_PLAZO;
+  return {
+    cuota,
+    entrada,
+    saldo,
+    recargo,
+    totalPagar,
+    plazo: { sem: CREDITO_PROMEDIO_PLAZO, factor: CREDITO_PROMEDIO_PORCENTAJE },
+  };
 }
 
 function creditQuoteMarkup(total, cls = "prod-credit-quote") {
-  if (S.payMethod !== "leasing") return "";
   const quote = creditQuoteData(total);
   return `<div class="${cls}">
-    <span>En credito desde</span>
-    <strong>${clp(quote.cuota)}</strong>
-    <em>/ semana - entrada ref. ${clp(quote.entrada)}</em>
+    <span>Cuota promedio</span>
+    <strong>${usdFixed(quote.cuota)}</strong>
+    <em>/ semana - ${quote.plazo.sem} sem. - entrada ${clp(quote.entrada)}</em>
   </div>`;
 }
 
