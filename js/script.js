@@ -1272,7 +1272,8 @@ function prepareLeasingDemoPrecalificacion() {
   S.demoPrecalificacion = { ...demo };
   S.precalificacion = { ...demo };
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
-  S.selectedPlazo = S.plazosDisponibles[0] || null;
+  S.selectedPlazo = null;
+  S.userSelectedPlazo = false;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1396,6 +1397,7 @@ let S = {
   precalificacion: null,
   plazosDisponibles: [],
   selectedPlazo: null,
+  userSelectedPlazo: false,
   entrada: 0,
   monto: 0,
   cuota: 0,
@@ -1506,6 +1508,22 @@ function entradaFromPrecal(total, precal) {
   const entrada = excesoSobreCupo + baseCalculo * pctEntrada;
   return Math.min(total, Number(entrada.toFixed(2)));
 }
+
+function preferredLeasingPlazo(plazos, monto) {
+  const list = (plazos?.length ? plazos : PLAZOS).filter(Boolean);
+  const validPlazos = list.filter((p) => isValidWeeklyPayment(cuotaForPlazo(monto, p)));
+  const selectedIsValid = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem);
+  if (S.userSelectedPlazo && selectedIsValid) return selectedIsValid;
+  return (
+    validPlazos.find((p) => p.sem === CREDITO_PROMEDIO_PLAZO) ||
+    selectedIsValid ||
+    validPlazos[0] ||
+    list.find((p) => p.sem === CREDITO_PROMEDIO_PLAZO) ||
+    list[0] ||
+    null
+  );
+}
+
 function fmtRut(el) {
   el.value = el.value.replace(/\D/g, "").slice(0, 10);
   if (el.id === "lp1_rut") validateLp1Field("rut");
@@ -1967,10 +1985,16 @@ function creditQuoteData(total) {
 
 function creditQuoteMarkup(total, cls = "prod-credit-quote") {
   const quote = creditQuoteData(total);
-  return `<div class="${cls}">
+  const inRange = isValidWeeklyPayment(quote.cuota);
+  const warning =
+    quote.cuota > CUOTA_MAXIMA_SEMANAL
+      ? "Se puede escoger; sube la entrada en oferta."
+      : "Se puede escoger; revisa entrada/plazo en oferta.";
+  return `<div class="${cls}${inRange ? "" : " is-out-range"}">
     <span>Cuota promedio</span>
     <strong>${usdFixed(quote.cuota)}</strong>
     <em>/ semana - ${quote.plazo.sem} sem. - entrada ${clp(quote.entrada)}</em>
+    ${inRange ? "" : `<small class="quote-range-warning">${warning}</small>`}
   </div>`;
 }
 
@@ -2174,7 +2198,7 @@ function renderCategoryShowcase(list) {
     },
     combo: {
       title: "Combos",
-      //sub: `${list.length} paquetes listos para subir el ticket`,
+      sub: `${list.length} paquetes listos para subir el ticket`,
       text: "Packs listos - Audio - Proteccion - Entretenimiento - Ahorro",
     },
     accesorio: {
@@ -2192,7 +2216,7 @@ function renderCategoryShowcase(list) {
   return `<div class="promo-showcase">
     <div>
       <strong>${cfg.title}</strong>
-      <span>${cfg.sub}</span>
+      <span>${cfg.sub || ""}</span>
     </div>
     <div class="promo-marquee" aria-hidden="true">
       <span>${cfg.text} - Ahorro referencial ${clp(savings)}</span>
@@ -3287,14 +3311,7 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
   const restante = Math.max(0, cupo - previewTotal);
   const exceso = Math.max(0, previewTotal - cupo);
   const pct = Math.min(100, Math.round((previewTotal / Math.max(cupo, 1)) * 100));
-  const entrada = entradaFromPrecal(previewTotal, pre);
-  const plazos = S.plazosDisponibles?.length
-    ? S.plazosDisponibles
-    : plazosFromPrecal(pre);
-  const saldo = Math.max(0, previewTotal - entrada);
-  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
-  const plazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0];
-  const cuota = cuotaForPlazo(saldo, plazo);
+  const promedio = creditQuoteData(previewTotal);
   return `
     <div class="upsell-cupo-preview ${exceso ? "over" : ""}" style="--cupo-pct:${pct}%">
       <input type="hidden" id="upsellCupoBasePrice" value="${Number(basePrice || 0)}" />
@@ -3307,9 +3324,9 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
       </div>
       <div class="upsell-cupo-preview-metrics">
         <div><small>Cupo</small><strong>${clp(cupo)}</strong></div>
-        <div><small>Entrada min.</small><strong>${clp(entrada)}</strong></div>
-        <div><small>Plazo</small><strong>${plazo ? `${plazo.sem} sem.` : "-"}</strong></div>
-        <div><small>Cuota aprox.</small><strong>${clp(cuota)}</strong></div>
+        <div><small>Entrada prom.</small><strong>${clp(promedio.entrada)}</strong></div>
+        <div><small>Plazo</small><strong>${promedio.plazo.sem} sem.</strong></div>
+        <div><small>Cuota prom.</small><strong>${usdFixed(promedio.cuota)}</strong></div>
       </div>
       <div class="upsell-cupo-preview-track">
         <i></i>
@@ -3355,8 +3372,7 @@ function renderCupoUsage() {
     : plazosFromPrecal(pre);
   const entrada = entradaFromPrecal(usado, pre);
   const saldo = Math.max(0, usado - entrada);
-  const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(saldo, p)));
-  const previewPlazo = validPlazos.find((p) => p.sem === S.selectedPlazo?.sem) || validPlazos[0] || plazos[0];
+  const previewPlazo = preferredLeasingPlazo(plazos, saldo);
   const cuotaPreview = cuotaForPlazo(saldo, previewPlazo);
   const restante = Math.max(0, cupo - usado);
   const exceso = Math.max(0, usado - cupo);
@@ -3676,6 +3692,7 @@ function applyDirectCredit() {
   S.precalificacion = null;
   S.plazosDisponibles = [];
   S.selectedPlazo = null;
+  S.userSelectedPlazo = false;
   S.entrada = 0;
   S.monto = 0;
   S.cuota = 0;
@@ -4234,7 +4251,9 @@ function initOffer() {
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada (${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""})<br><span class="pb-formula">Tipo entrada: ${pre.tipoEntrada}</span></span><span>${clp(entMin)}</span></div>`;
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(entMin)} / Plazos: ${pre.plazo}</span></span><span>${clp(saldoFinanciado)}</span></div>`;
   document.getElementById("priceBreakdown").innerHTML = pbHTML;
-  S.selectedPlazo = S.plazosDisponibles[0] || PLAZOS[0];
+  if (!S.userSelectedPlazo) {
+    S.selectedPlazo = preferredLeasingPlazo(S.plazosDisponibles, saldoFinanciado);
+  }
   setRefsLocked(S.payMethod === "leasing" && !hasLeasingCartValue());
   calcOffer();
 }
@@ -4568,12 +4587,16 @@ function renderPlazos() {
   const plazos = S.plazosDisponibles?.length ? S.plazosDisponibles : PLAZOS;
   const validPlazos = plazos.filter((p) => isValidWeeklyPayment(cuotaForPlazo(monto, p)));
   if (!validPlazos.some((p) => p.sem === S.selectedPlazo?.sem)) {
-    S.selectedPlazo = validPlazos[0] || null;
+    S.userSelectedPlazo = false;
+    S.selectedPlazo = preferredLeasingPlazo(plazos, monto);
+  } else if (!S.userSelectedPlazo) {
+    S.selectedPlazo = preferredLeasingPlazo(plazos, monto);
   }
   const grid = document.getElementById("plazoGrid");
   if (!grid) return;
   grid.style.display = "";
   if (!validPlazos.length) {
+    S.selectedPlazo = null;
     grid.innerHTML = `<div class="plazo-empty">${weeklyPaymentRangeText()} Ajusta la entrada para ver plazos disponibles.</div>`;
     return;
   }
@@ -4608,6 +4631,7 @@ function selectPlazo(i) {
     return;
   }
   S.selectedPlazo = nextPlazo;
+  S.userSelectedPlazo = true;
   calcOffer();
   renderCart();
 }
@@ -5762,6 +5786,7 @@ function resetAll() {
     precalificacion: null,
     plazosDisponibles: [],
     selectedPlazo: null,
+    userSelectedPlazo: false,
     entrada: 0,
     monto: 0,
     cuota: 0,
