@@ -2284,6 +2284,24 @@ body {
   cursor: not-allowed;
   filter: grayscale(0.35);
 }
+.upsell-saving-only {
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.upsell-saving-only em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #ff6b2c;
+  color: #ffffff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
 .compare-select-bar {
   grid-column: 1 / -1;
   display: flex;
@@ -5703,6 +5721,7 @@ body,
   font-weight: 950 !important;
 }
 .upsell-price-row em,
+.upsell-saving-only em,
 .accessory-upsell-option div:last-child em {
   display: inline-flex !important;
   align-items: center !important;
@@ -6714,7 +6733,8 @@ body,
 }
 
 .accessory-upsell-option div:last-child em,
-.upsell-price-row em {
+.upsell-price-row em,
+.upsell-saving-only em {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;

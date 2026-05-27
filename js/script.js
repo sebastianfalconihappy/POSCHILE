@@ -1979,6 +1979,22 @@ function catalogCreditQuote(p) {
   return creditQuoteMarkup(p.price, "prod-credit-quote");
 }
 
+function isDirectCreditContext() {
+  return S.payMethod === "leasing" || S.isSigma;
+}
+
+function upsellOptionPriceMarkup(total, save = 0) {
+  if (isDirectCreditContext()) {
+    return save > 0
+      ? `<div class="upsell-saving-only"><em>Ahorra ${clp(save)}</em></div>`
+      : "";
+  }
+  return `<div class="upsell-price-row">
+    <strong>${clp(total)}</strong>
+    ${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}
+  </div>`;
+}
+
 function renderCatalog() {
   updateDirectCreditCta();
   const q = (document.getElementById("searchQ")?.value || "")
@@ -2617,10 +2633,7 @@ function showUpsell(id) {
             <h3>${op.title}</h3>
             <p>${op.desc}</p>
             ${op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
-            <div class="upsell-price-row">
-              <strong>${clp(op.total)}</strong>
-              ${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}
-            </div>
+            ${upsellOptionPriceMarkup(op.total, save)}
             ${creditQuoteMarkup(op.total, "upsell-credit-quote")}
           </button>`;
         })
@@ -2852,10 +2865,7 @@ function showComboUpsell(id) {
             <h3>${op.title}</h3>
             <p>${op.desc}</p>
             ${op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
-            <div class="upsell-price-row">
-              <strong>${clp(op.total)}</strong>
-              ${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}
-            </div>
+            ${upsellOptionPriceMarkup(op.total, save)}
             ${creditQuoteMarkup(op.total, "upsell-credit-quote")}
           </button>`;
         })
@@ -2909,7 +2919,7 @@ function showAccessoryUpsell(id) {
                   : upsellPackVisual(op.pack)
               }
               ${op.phoneId ? `<small>${accessory.name} + ${op.phoneName}</small>` : op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
-              <div><strong>${clp(op.total)}</strong>${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}</div>
+              ${upsellOptionPriceMarkup(op.total, save)}
             </button>`;
           })
           .join("")}
