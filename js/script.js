@@ -1140,6 +1140,10 @@ function cuotaForPlazo(monto, plazo) {
   return plazo ? Math.ceil((Number(monto || 0) * (1 + plazo.factor)) / plazo.sem) : 0;
 }
 
+function cuotaForPlazoReal(monto, plazo) {
+  return plazo ? (Number(monto || 0) * (1 + plazo.factor)) / plazo.sem : 0;
+}
+
 function isValidWeeklyPayment(cuota) {
   return cuota >= CUOTA_MINIMA_SEMANAL && cuota <= CUOTA_MAXIMA_SEMANAL;
 }
@@ -1425,6 +1429,15 @@ function clp(n) {
     "US$" +
     Number(n || 0).toLocaleString("en-US", {
       maximumFractionDigits: 0,
+    })
+  );
+}
+function usdMoney(n) {
+  return (
+    "US$" +
+    Number(n || 0).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })
   );
 }
@@ -1983,8 +1996,22 @@ function creditQuoteData(total) {
   };
 }
 
-function creditQuoteMarkup(total, cls = "prod-credit-quote") {
+function boundedCreditQuoteData(total) {
   const quote = creditQuoteData(total);
+  const cuota = Math.min(
+    CUOTA_MAXIMA_SEMANAL,
+    Math.max(CUOTA_MINIMA_SEMANAL, quote.cuota),
+  );
+  return {
+    ...quote,
+    cuota,
+    totalPagar: cuota * quote.plazo.sem,
+    totalContrato: quote.entrada + cuota * quote.plazo.sem,
+  };
+}
+
+function creditQuoteMarkup(total, cls = "prod-credit-quote") {
+  const quote = boundedCreditQuoteData(total);
   const inRange = isValidWeeklyPayment(quote.cuota);
   const warning =
     quote.cuota > CUOTA_MAXIMA_SEMANAL
@@ -2003,6 +2030,31 @@ function catalogCreditQuote(p) {
   return creditQuoteMarkup(p.price, "prod-credit-quote");
 }
 
+function cartCreditQuoteMarkup(item) {
+  if (!isPrimaryCreditProduct(item) || isDirectCreditContext()) return "";
+  const amount = cartItemNetTotal(item);
+  if (!amount) return "";
+  const quote = boundedCreditQuoteData(amount);
+  const inRange = isValidWeeklyPayment(quote.cuota);
+  return `<div class="ci-credit-quote ${inRange ? "" : "is-out-range"}">
+    <span>Cuota aprox.</span>
+    <strong>${usdFixed(quote.cuota)}</strong>
+    <em>/ semana - ${quote.plazo.sem} sem. - entrada ${clp(quote.entrada)}</em>
+  </div>`;
+}
+
+function cartApproxCreditSummary() {
+  if (isDirectCreditContext()) return null;
+  const total = cartTotal();
+  if (!total || !S.cart.some((item) => isLeasingFinancedItem(item))) return null;
+  const quote = boundedCreditQuoteData(total);
+  return {
+    ...quote,
+    totalBase: total,
+    totalFinal: quote.totalPagar,
+  };
+}
+
 function isDirectCreditContext() {
   return S.payMethod === "leasing" || S.isSigma;
 }
@@ -2015,6 +2067,20 @@ function upsellOptionPriceMarkup(total, save = 0) {
   }
   return `<div class="upsell-price-row">
     <strong>${clp(total)}</strong>
+    ${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}
+  </div>`;
+}
+
+function accessoryUpsellPaymentMarkup(op, accessory) {
+  const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
+  if (op.phoneId) {
+    const phone = PRODUCTS.find((p) => p.id === op.phoneId);
+    const phonePrice = Number(op.phonePrice || phone?.price || 0);
+    return creditQuoteMarkup(phonePrice, "upsell-credit-quote");
+  }
+  return `<div class="accessory-cash-payment">
+    <span>Pago en efectivo</span>
+    <strong>${clp(op.total)}</strong>
     ${save > 0 ? `<em>Ahorra ${clp(save)}</em>` : ""}
   </div>`;
 }
@@ -2370,6 +2436,7 @@ function makeUpsellOptions(phone) {
         price: speaker.price + tws.price - 6,
         pvp: speaker.price + tws.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [speaker.name, tws.name],
       },
       total: phone.price + speaker.price + tws.price - 6,
@@ -2389,6 +2456,7 @@ function makeUpsellOptions(phone) {
         price: micas.price + backpack.price + bottle.price - 10,
         pvp: micas.price + backpack.price + bottle.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [micas.name, backpack.name, bottle.name],
       },
       total: phone.price + micas.price + backpack.price + bottle.price - 10,
@@ -2408,6 +2476,7 @@ function makeUpsellOptions(phone) {
         price: gamepad.price + projectorLights.price - 6,
         pvp: gamepad.price + projectorLights.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [gamepad.name, projectorLights.name],
       },
       total: phone.price + gamepad.price + projectorLights.price - 6,
@@ -2448,6 +2517,7 @@ function makeComboUpsellOptions(combo) {
         price: speaker.price + tws.price - 8,
         pvp: speaker.price + tws.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [speaker.name, tws.name],
       },
       total: combo.price + speaker.price + tws.price - 8,
@@ -2467,6 +2537,7 @@ function makeComboUpsellOptions(combo) {
         price: micas.price + bottle.price + keychain.price - 7,
         pvp: micas.price + bottle.price + keychain.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [micas.name, bottle.name, keychain.name],
       },
       total: combo.price + micas.price + bottle.price + keychain.price - 7,
@@ -2486,6 +2557,7 @@ function makeComboUpsellOptions(combo) {
         price: smartwatch.price + drone.price - 15,
         pvp: smartwatch.price + drone.price,
         qty: 1,
+        financedWithDevice: true,
         promoItems: [smartwatch.name, drone.name],
       },
       total: combo.price + smartwatch.price + drone.price - 15,
@@ -2494,17 +2566,76 @@ function makeComboUpsellOptions(combo) {
   ];
 }
 
+function makePromoUpsellOptions(promo) {
+  const micas = upsellAccessory(607);
+  const keychain = upsellAccessory(614);
+  const bottle = upsellAccessory(613);
+  const gamepad = upsellAccessory(616);
+  const options = [
+    {
+      title: "Solo promo",
+      badge: "Seleccion rapida",
+      desc: "Continuar con el precio promocional.",
+      icon: "CEL",
+      pack: null,
+      total: promo.price,
+      kind: "base",
+    },
+    {
+      title: "Promo + proteccion",
+      badge: "Recomendado",
+      offer: "Ahorro",
+      desc: "Complemento de bajo valor para cerrar la venta.",
+      icon: "KIT",
+      pack: promoSingleAccessoryPack(promo, micas, 5),
+      kind: "protection",
+    },
+    {
+      title: "Promo + detalle",
+      badge: "Mejor valor",
+      offer: "Ahorro",
+      desc: "Un accesorio simple sin alejarse del precio base.",
+      icon: "KEY",
+      pack: promoSingleAccessoryPack(promo, keychain, 4),
+      kind: "daily",
+    },
+    {
+      title: "Promo + extra",
+      badge: "Oferta",
+      offer: "Ahorro",
+      desc: "Opcion liviana para mejorar la propuesta.",
+      icon: "ACC",
+      pack: promoSingleAccessoryPack(promo, promo.price >= 250 ? bottle : gamepad, 8),
+      kind: "extra",
+    },
+  ];
+  return options.map((op) => ({
+    ...op,
+    total: promo.price + Number(op.pack?.price || 0),
+  }));
+}
+
+function promoSingleAccessoryPack(promo, accessory, maxDelta = 6) {
+  const price = Math.max(1, Math.min(Number(maxDelta || 6), Number(accessory?.price || 0)));
+  return {
+    id: 940000 + promo.id * 10 + Number(accessory?.id || 0),
+    name: `${promo.name} + ${accessory?.name || "Accesorio"}`,
+    cat: "accesorio",
+    ico: accessory?.ico || "ACC",
+    price,
+    pvp: Number(accessory?.price || price),
+    qty: 1,
+    financedWithDevice: true,
+    promoItems: [accessory?.name || "Accesorio"],
+  };
+}
+
 function makeAccessoryUpsellOptions(accessory) {
   const micas = upsellAccessory(607);
   const tws = upsellAccessory(604);
-  const keychain = upsellAccessory(614);
-  const bottle = upsellAccessory(613);
-  const speaker = upsellAccessory(610);
-  const gamepad = upsellAccessory(616);
   const isAudio = /parlante|audifono|audio|tws/i.test(accessory.name || "");
-  const recommendedPhone = recommendedPhoneForAccessory(accessory);
+  const recommendedPhones = recommendedPhonesForAccessory(accessory);
   const primary = isAudio ? tws : micas;
-  const secondary = isAudio ? speaker : bottle;
   const options = [
     {
       title: "Solo accesorio",
@@ -2517,7 +2648,7 @@ function makeAccessoryUpsellOptions(accessory) {
       title: "Kit util",
       badge: "Recomendado",
       offer: "Pack",
-      desc: "Agrega un complemento practico para subir el ticket.",
+      desc: "",
       pack: {
         id: 990000 + accessory.id,
         name: `Kit util ${accessory.name}`,
@@ -2530,69 +2661,42 @@ function makeAccessoryUpsellOptions(accessory) {
       },
       total: accessory.price + primary.price - 2,
     },
-    {
-      title: "Doble cierre",
-      badge: "Mas valor",
-      offer: "Ahorro",
-      desc: "Combina dos accesorios para entregar una compra mas completa.",
-      pack: {
-        id: 991000 + accessory.id,
-        name: `Doble cierre ${accessory.name}`,
-        cat: "accesorio",
-        ico: "MAX",
-        price: primary.price + secondary.price - 5,
-        pvp: primary.price + secondary.price,
-        qty: 1,
-        promoItems: [primary.name, secondary.name],
-      },
-      total: accessory.price + primary.price + secondary.price - 5,
-    },
-    {
-      title: "Ticket alto",
-      badge: "Oferta",
-      offer: "Top",
-      desc: "Suma un articulo llamativo para aumentar la venta.",
-      pack: {
-        id: 992000 + accessory.id,
-        name: `Ticket alto ${accessory.name}`,
-        cat: "accesorio",
-        ico: "TOP",
-        price: gamepad.price + keychain.price - 4,
-        pvp: gamepad.price + keychain.price,
-        qty: 1,
-        promoItems: [gamepad.name, keychain.name],
-      },
-      total: accessory.price + gamepad.price + keychain.price - 4,
-    },
   ];
-  if (recommendedPhone) {
+  recommendedPhones.forEach((phone, idx) => {
     options.push({
-      title: "Con celular recomendado",
-      badge: "Sube la venta",
+      title: idx === 0 ? "Con celular recomendado" : "Con segundo celular",
+      badge: idx === 0 ? "Sube la venta" : "Credito",
       offer: "CEL",
-      desc: `Este accesorio calza bien con ${recommendedPhone.name}. Puedes comprar todo a este precio.`,
+      desc: "",
       pack: null,
-      phoneId: recommendedPhone.id,
-      phoneName: recommendedPhone.name,
-      phoneImg: recommendedPhone.img,
-      total: accessory.price + recommendedPhone.price,
+      phoneId: phone.id,
+      phoneName: phone.name,
+      phoneImg: phone.img,
+      phonePrice: phone.price,
+      cashTotal: accessory.price,
+      total: accessory.price + phone.price,
     });
-  }
+  });
   return options;
 }
 
 function recommendedPhoneForAccessory(accessory) {
+  return recommendedPhonesForAccessory(accessory)[0] || null;
+}
+
+function recommendedPhonesForAccessory(accessory) {
   const name = String(accessory?.name || "").toLowerCase();
   const preferredName = /gamepad|drone|parlante|audifono|tws/i.test(name)
     ? "Tecno Pova 6"
     : /mochila|tomatodo|llavero|micas|protector/i.test(name)
       ? "Samsung Galaxy A16"
       : "Honor X7c";
-  return (
-    PRODUCTS.find((p) => p.cat === "celular" && p.name === preferredName) ||
-    PRODUCTS.find((p) => p.cat === "celular" && (p.units || []).some((u) => u.st === "disponible")) ||
-    PRODUCTS.find((p) => p.cat === "celular")
-  );
+  const phones = [
+    PRODUCTS.find((p) => p.cat === "celular" && p.name === preferredName),
+    ...PRODUCTS.filter((p) => p.cat === "celular" && (p.units || []).some((u) => u.st === "disponible")),
+    ...PRODUCTS.filter((p) => p.cat === "celular"),
+  ].filter(Boolean);
+  return [...new Map(phones.map((p) => [p.id, p])).values()].slice(0, 2);
 }
 
 function setUpsellColor(btn) {
@@ -2761,7 +2865,8 @@ function addUpsellAccessory(id, sourceEl) {
     const basePrice = Number(
       document.getElementById("upsellCupoBasePrice")?.value || 0,
     );
-    const exceso = leasingCupoExcess(cartTotal() + basePrice);
+    const baseProduct = PRODUCTS.find((p) => String(p.id) === String(document.getElementById("upsellCupoBaseProduct")?.value || ""));
+    const exceso = leasingCupoExcess(cartFinancedTotal() + (isLeasingFinancedItem(baseProduct) ? basePrice : 0));
     if (exceso > 0) {
       toast(`Excediste tu cupo por ${clp(exceso)}. Retira un extra o cambia de equipo.`, "warn");
       return;
@@ -2921,29 +3026,27 @@ function showAccessoryUpsell(id) {
     <div class="accessory-upsell-wrap">
       <div class="accessory-upsell-main">
         <div class="accessory-upsell-visual">${productImageMarkup(accessory)}</div>
-        <div>
-          <span>Maximiza accesorio</span>
-          <strong>${accessory.name}</strong>
-          <p>Cliente vino por un accesorio. Ofrece una salida rapida o un kit de mayor valor.</p>
-        </div>
-        <b>${clp(accessory.price)}</b>
+      <div>
+        <span>Maximiza accesorio</span>
+        <strong>${accessory.name}</strong>
+        <p>Cliente vino por un accesorio. Ofrece una salida rapida o un kit de mayor valor.</p>
       </div>
-      ${renderUpsellCupoPreview(accessory.price, accessory.id)}
+      <b>${clp(accessory.price)}</b>
+    </div>
       <div class="accessory-upsell-options">
         ${options
           .map((op, idx) => {
-            const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
-            return `<button class="accessory-upsell-option ${idx === 1 || op.phoneId ? "featured" : ""}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx}, this)">
+            return `<button class="accessory-upsell-option ${idx === 1 || op.phoneId ? "featured" : ""} ${op.phoneId ? "phone-option" : "cash-option"}" onclick="selectAccessoryUpsellOption(${accessory.id}, ${idx}, this)">
               <span>${op.badge}</span>
               <h3>${op.title}</h3>
-              <p>${op.desc}</p>
+              ${op.desc ? `<p>${op.desc}</p>` : ""}
               ${
                 op.phoneId
                   ? `<div class="accessory-phone-rec">${productImageMarkup(PRODUCTS.find((p) => p.id === op.phoneId))}<strong>${op.phoneName}</strong></div>`
                   : upsellPackVisual(op.pack)
               }
               ${op.phoneId ? `<small>${accessory.name} + ${op.phoneName}</small>` : op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
-              ${upsellOptionPriceMarkup(op.total, save)}
+              ${accessoryUpsellPaymentMarkup(op, accessory)}
             </button>`;
           })
           .join("")}
@@ -2978,6 +3081,7 @@ function selectAccessoryUpsellOption(accessoryId, optionIndex, sourceEl) {
 function showPromoPersonalize(id) {
   const promo = PRODUCTS.find((p) => p.id === id);
   if (!promo) return;
+  const options = makePromoUpsellOptions(promo);
   const sidePanel = document.getElementById("upsellSidePanel");
   if (sidePanel) {
     sidePanel.style.display = "none";
@@ -2990,21 +3094,50 @@ function showPromoPersonalize(id) {
         <strong>${promo.name}</strong>
         <span>${promo.marca || ""} ${promo.modelo || ""} - Precio promocional aplicado</span>
       </div>
-      <button class="upsell-personalize-btn" type="button" onclick="toggleUpsellAccessories(${promo.id})">Personaliza tu equipo</button>
       <div class="upsell-product-price">
         <b>${clp(promo.price)}</b>
         ${creditQuoteMarkup(promo.price, "upsell-credit-quote compact")}
       </div>
     </div>
     ${renderUpsellCupoPreview(promo.price, promo.id)}
-    <div class="promo-only-upsell">
-      <div>
-        <strong>Promo activa</strong>
-        <span>Este equipo ya tiene descuento. Agrega accesorios solo si el cliente quiere completar su compra.</span>
+    <div class="upsell-toolbar">
+      <div class="upsell-deal-strip">
+        <strong>Opciones para ofrecer</strong>
+        <span>Promos con un solo accesorio y diferencia baja frente al precio base.</span>
       </div>
-      <button type="button" onclick="selectPromoBase(${promo.id})">Agregar promo</button>
+    </div>
+    <div class="upsell-options">
+      ${options
+        .map((op, idx) => {
+          const save = op.pack?.pvp ? op.pack.pvp - op.pack.price : 0;
+          return `<button class="upsell-option ${idx === 1 ? "featured" : ""} ${op.offer ? "offer" : ""}" onclick="selectPromoUpsellOption(${promo.id}, ${idx}, this)">
+            <span class="upsell-badge">${op.badge}</span>
+            ${upsellPackVisual(op.pack)}
+            <h3>${op.title}</h3>
+            <p>${op.desc}</p>
+            ${op.pack?.promoItems ? `<small>${op.pack.promoItems.join(" + ")}</small>` : "<small>Sin accesorios adicionales</small>"}
+            ${upsellOptionPriceMarkup(op.total, save)}
+            ${creditQuoteMarkup(op.total, "upsell-credit-quote")}
+          </button>`;
+        })
+        .join("")}
     </div>`;
   document.getElementById("upsellModal").style.display = "flex";
+}
+
+function selectPromoUpsellOption(promoId, optionIndex, sourceEl) {
+  const promo = PRODUCTS.find((p) => p.id === promoId);
+  if (!promo) return;
+  const option = makePromoUpsellOptions(promo)[optionIndex];
+  animateAddToCart(sourceEl, () => {
+    closeUpsell();
+    addCart(promoId, { skipUpsell: true, quiet: true });
+    addPromoPackToCart(option.pack);
+    OP.carrito = true;
+    renderCart();
+    renderCatalog();
+    toast(`${option.title} agregado al carrito`);
+  });
 }
 
 function selectPromoBase(id) {
@@ -3016,6 +3149,46 @@ function selectPromoBase(id) {
   renderCart();
   renderCatalog();
   toast(`${promo.name} agregado al carrito`);
+}
+
+function isPrimaryCreditProduct(item) {
+  return item?.cat === "celular" || item?.cat === "promo" || item?.cat === "combo";
+}
+
+function releaseCartItemImei(it) {
+  if (!it?.autoImei) return;
+  const pp = PRODUCTS.find((x) => x.id === it.id);
+  if (pp) {
+    const u = pp.units.find((x) => x.imei === it.autoImei);
+    if (u && u.st !== "asignado") u.st = "disponible";
+    (it.extraImeis || []).forEach((imei) => {
+      const u2 = pp.units.find((x) => x.imei === imei);
+      if (u2 && u2.st !== "asignado") u2.st = "disponible";
+    });
+  }
+  if (S.autoImei === it.autoImei) {
+    S.autoImei = null;
+    S.assignedProduct = null;
+  }
+}
+
+function enforceSingleDirectCreditDevice(nextProduct) {
+  if (!isDirectCreditContext() || !isPrimaryCreditProduct(nextProduct)) return true;
+  const existingSame = S.cart.find(
+    (it) => isPrimaryCreditProduct(it) && String(it.id) === String(nextProduct.id),
+  );
+  if (existingSame) {
+    toast("Credito directo permite un solo equipo por venta", "warn");
+    return false;
+  }
+  const removed = S.cart.filter((it) => isPrimaryCreditProduct(it) || it.financedWithDevice);
+  removed.forEach(releaseCartItemImei);
+  if (removed.length) {
+    S.cart = S.cart.filter((it) => !isPrimaryCreditProduct(it) && !it.financedWithDevice);
+    S.activeAuthDiscountId = null;
+    toast("Se reemplazo el equipo anterior del credito directo", "warn");
+  }
+  return true;
 }
 
 function addCart(id, opts = {}) {
@@ -3042,6 +3215,7 @@ function addCart(id, opts = {}) {
     toast("Sin stock disponible", "err");
     return;
   }
+  if (!enforceSingleDirectCreditDevice(p)) return;
   const ex = S.cart.find((x) => x.id === id);
   if (ex) {
     if (p.cat === "celular") {
@@ -3099,21 +3273,7 @@ function addCart(id, opts = {}) {
 }
 function removeCart(id) {
   const it = S.cart.find((x) => x.id === id);
-  if (it?.autoImei) {
-    const pp = PRODUCTS.find((x) => x.id === id);
-    if (pp) {
-      const u = pp.units.find((x) => x.imei === it.autoImei);
-      if (u && u.st !== "asignado") u.st = "disponible";
-      (it.extraImeis || []).forEach((imei) => {
-        const u2 = pp.units.find((x) => x.imei === imei);
-        if (u2 && u2.st !== "asignado") u2.st = "disponible";
-      });
-    }
-    if (S.autoImei === it.autoImei) {
-      S.autoImei = null;
-      S.assignedProduct = null;
-    }
-  }
+  releaseCartItemImei(it);
   S.cart = S.cart.filter((x) => x.id !== id);
   if (String(S.activeAuthDiscountId) === String(id)) S.activeAuthDiscountId = null;
   if (!S.cart.length) OP.carrito = false;
@@ -3124,6 +3284,10 @@ function removeCart(id) {
 function qtyCart(id, d) {
   const it = S.cart.find((x) => x.id === id);
   if (!it) return;
+  if (d > 0 && isDirectCreditContext() && isPrimaryCreditProduct(it)) {
+    toast("Credito directo permite un solo equipo por venta", "warn");
+    return;
+  }
   it.qty += d;
   if (it.qty <= 0) removeCart(id);
   else {
@@ -3158,6 +3322,22 @@ function cartTotal() {
     (a, x) => a + Math.max(0, x.price * x.qty - Number(x.authDiscountAmount || 0)),
     0,
   );
+}
+function cartItemNetTotal(x) {
+  return Math.max(0, Number(x?.price || 0) * Number(x?.qty || 1) - Number(x?.authDiscountAmount || 0));
+}
+function isLeasingFinancedItem(x) {
+  return x?.cat === "celular" || x?.cat === "promo" || x?.cat === "combo" || !!x?.financedWithDevice;
+}
+function cartFinancedTotal(items = S.cart) {
+  return (items || [])
+    .filter(isLeasingFinancedItem)
+    .reduce((sum, x) => sum + cartItemNetTotal(x), 0);
+}
+function cartCashOnlyTotal(items = S.cart) {
+  return (items || [])
+    .filter((x) => !isLeasingFinancedItem(x))
+    .reduce((sum, x) => sum + cartItemNetTotal(x), 0);
 }
 function cartGrossTotal() {
   return S.cart.reduce((a, x) => a + x.price * x.qty, 0);
@@ -3273,6 +3453,14 @@ function offerTotal() {
     0,
   );
 }
+function offerFinancedTotal() {
+  const items = offerItems();
+  const financed = cartFinancedTotal(items);
+  return financed || (items.length === 1 && items[0]?.simulated ? offerTotal() : 0);
+}
+function offerCashOnlyTotal() {
+  return cartCashOnlyTotal(offerItems());
+}
 function cartSumm() {
   return (
     S.cart
@@ -3306,12 +3494,14 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
   if (S.payMethod !== "leasing") return "";
   const cupo = currentLeasingCupo();
   const pre = S.precalificacion || getDemoPrecalificacion();
-  const previewTotal = cartTotal() + Number(basePrice || 0);
+  const baseProduct = PRODUCTS.find((p) => String(p.id) === String(baseProductId));
+  const financedBasePrice = isLeasingFinancedItem(baseProduct) ? Number(basePrice || 0) : 0;
+  const previewTotal = cartFinancedTotal() + financedBasePrice;
   const usado = Math.min(previewTotal, cupo);
   const restante = Math.max(0, cupo - previewTotal);
   const exceso = Math.max(0, previewTotal - cupo);
   const pct = Math.min(100, Math.round((previewTotal / Math.max(cupo, 1)) * 100));
-  const promedio = creditQuoteData(previewTotal);
+  const promedio = boundedCreditQuoteData(previewTotal);
   return `
     <div class="upsell-cupo-preview ${exceso ? "over" : ""}" style="--cupo-pct:${pct}%">
       <input type="hidden" id="upsellCupoBasePrice" value="${Number(basePrice || 0)}" />
@@ -3319,7 +3509,7 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
       <div class="upsell-cupo-preview-head">
         <div>
           <strong>Barra de cupo leasing</strong>
-          <span>${S.payMethod === "leasing" ? "Leasing activo" : "Simulacion para credito directo"}</span>
+          <span>${S.payMethod === "leasing" ? "Crédito activo" : "Simulacion para credito directo"}</span>
         </div>
       </div>
       <div class="upsell-cupo-preview-metrics">
@@ -3333,7 +3523,7 @@ function renderUpsellCupoPreview(basePrice = 0, baseProductId = "") {
         <span>${pct}% utilizado</span>
       </div>
       <div class="upsell-cupo-preview-foot">
-        <span>Uso con esta opcion: ${clp(previewTotal)}</span>
+        <span>Uso de cupo con esta opcion: ${clp(previewTotal)}</span>
         <strong>${exceso ? `Excede por ${clp(exceso)}` : `Disponible ${clp(restante)}`}</strong>
       </div>
     </div>`;
@@ -3352,7 +3542,18 @@ function cupoSuggestions(restante) {
 }
 
 function addSuggestedAccessory(id) {
-  addCart(id);
+  const beforeQty = S.cart
+    .filter((x) => String(x.id) === String(id))
+    .reduce((sum, x) => sum + Number(x.qty || 0), 0);
+  addCart(id, { skipUpsell: true, quiet: true });
+  const suggested = S.cart.find((x) => String(x.id) === String(id));
+  if (suggested) {
+    suggested.financedWithDevice = true;
+    if (beforeQty > 0) suggested.qty = Math.max(Number(suggested.qty || 1), beforeQty + 1);
+  }
+  OP.carrito = S.cart.length > 0;
+  renderCart();
+  renderCatalog();
   renderCupoUsage();
 }
 
@@ -3366,6 +3567,7 @@ function renderCupoUsage() {
   }
   const cupo = currentLeasingCupo();
   const usado = cartTotal();
+  const efectivo = cartCashOnlyTotal();
   const pre = S.precalificacion || getDemoPrecalificacion();
   const plazos = S.plazosDisponibles?.length
     ? S.plazosDisponibles
@@ -3373,7 +3575,7 @@ function renderCupoUsage() {
   const entrada = entradaFromPrecal(usado, pre);
   const saldo = Math.max(0, usado - entrada);
   const previewPlazo = preferredLeasingPlazo(plazos, saldo);
-  const cuotaPreview = cuotaForPlazo(saldo, previewPlazo);
+  const cuotaPreview = cuotaForPlazoReal(saldo, previewPlazo);
   const restante = Math.max(0, cupo - usado);
   const exceso = Math.max(0, usado - cupo);
   const pct = Math.min(100, Math.round((usado / Math.max(cupo, 1)) * 100));
@@ -3386,42 +3588,42 @@ function renderCupoUsage() {
           <h3>Uso de tu cupo</h3>
           <p>Aprovecha el cupo disponible al maximo</p>
         </div>
-        <span>${S.precalificacion?.perfil || "Demo"} - ${clp(cupo)}</span>
       </div>
       <div class="cupo-terms">
-        <div><small>Cupo aprobado</small><strong>${clp(cupo)}</strong></div>
-        <div><small>Entrada ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}</small><strong>${clp(entrada)}</strong></div>
+        <div><small>Cupo aprobado</small><strong>${usdMoney(cupo)}</strong></div>
+        <div><small>Entrada ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}</small><strong>${usdMoney(entrada)}</strong></div>
         <div><small>Plazo elegido</small><strong>${previewPlazo?.sem || "-"} sem.</strong></div>
-        <div><small>Cuota estimada</small><strong>${clp(cuotaPreview)}</strong></div>
+        <div><small>Cuota estimada</small><strong>${usdFixed(cuotaPreview)}</strong></div>
       </div>
-      <div class="cupo-plazo-picks">
+      <div class="cupo-plazo-picks ${plazos.length === 2 ? "is-two" : ""}">
         ${plazos
           .map(
             (p, i) => {
-              const cuota = cuotaForPlazo(saldo, p);
+              const cuota = cuotaForPlazoReal(saldo, p);
               const valid = isValidWeeklyPayment(cuota);
               return `<button type="button" class="${previewPlazo?.sem === p.sem ? "on" : ""}" ${valid ? `onclick="selectPlazo(${i})"` : "disabled"}>
               <span>${p.sem} sem.</span>
-              <strong>${clp(cuota)}</strong>
+              <strong>${usdFixed(cuota)}</strong>
             </button>`;
             },
           )
           .join("")}
       </div>
       <div class="cupo-numbers">
-        <div><small>Cupo usado</small><strong>${clp(usado)}</strong></div>
-        <div><small>${exceso ? "Exceso" : "Cupo disponible"}</small><strong>${clp(exceso || restante)}</strong></div>
+        <div><small>Cupo usado carrito</small><strong>${usdMoney(usado)}</strong></div>
+        <div><small>${exceso ? "Exceso" : "Cupo disponible"}</small><strong>${usdMoney(exceso || restante)}</strong></div>
       </div>
+      ${efectivo ? `<div class="cupo-alert">Accesorios en efectivo: ${usdMoney(efectivo)}.</div>` : ""}
       <div class="cupo-meter" aria-label="Uso de cupo">
         <i style="width:${pct}%"></i>
         <b>${pct}% utilizado</b>
       </div>
-      <div class="cupo-scale"><span>$0</span><span>${clp(cupo)}</span></div>
+      <div class="cupo-scale"><span>$0.00</span><span>${usdMoney(cupo)}</span></div>
       ${
         exceso
-          ? `<div class="cupo-alert warn">El carrito supera el cupo por ${clp(exceso)}. Puedes continuar y cubrirlo ajustando la entrada en la oferta.</div>`
+          ? `<div class="cupo-alert warn">El carrito supera el cupo por ${usdMoney(exceso)}. Puedes continuar y cubrirlo ajustando la entrada en la oferta.</div>`
           : restante > 0
-            ? `<div class="cupo-alert">Aprovecha ${clp(restante)} restantes con agregados sugeridos.</div>`
+            ? `<div class="cupo-alert">Aprovecha ${usdMoney(restante)} restantes con agregados sugeridos.</div>`
             : `<div class="cupo-alert ok">Cupo aprovechado al maximo.</div>`
       }
       ${
@@ -3471,6 +3673,7 @@ function renderCart() {
         ${it.color ? `<div class="ci-color">Color: ${it.color}</div>` : ""}
         ${it.autoImei ? `<div class="ci-imei">IMEI: ${it.autoImei}</div>` : ""}
         ${cartItemDetails(it)}
+        ${cartCreditQuoteMarkup(it)}
         ${
           it.cat === "celular"
             ? `<button class="cart-auth-btn" type="button" onclick="openCartAuthDiscount(${it.id})">Solicitar descuento por autorizacion</button>`
@@ -3496,6 +3699,20 @@ function renderCart() {
     cDisc.textContent = "-" + clp(discTotal);
   }
   document.getElementById("cTot").textContent = clp(cartTotal());
+  const approxRow = document.getElementById("cApproxCreditRow");
+  const approxTot = document.getElementById("cApproxCreditTot");
+  const approxDetail = document.getElementById("cApproxCreditDetail");
+  const approx = cartApproxCreditSummary();
+  if (approxRow && approxTot && approxDetail) {
+    approxRow.style.display = approx ? "flex" : "none";
+    if (approx) {
+      approxTot.textContent = usdMoney(approx.totalFinal);
+      approxDetail.textContent = `${usdMoney(approx.totalBase)} - entrada ${usdMoney(approx.entrada)} + recargo promedio = ${approx.plazo.sem} cuotas de ${usdFixed(approx.cuota)}`;
+    } else {
+      approxTot.textContent = "$0";
+      approxDetail.textContent = "";
+    }
+  }
   renderAuthDiscountPanel();
   const iEl = document.getElementById("cImeiInfo");
   if (S.autoImei) {
@@ -3509,7 +3726,7 @@ function renderCart() {
     if (flowNote) {
       flowNote.style.display = "";
       flowNote.innerHTML =
-        '<div class="cart-flow-note"><strong>Leasing activo</strong><span>Producto reservado. Continúa a oferta y luego referencias.</span></div>';
+        '<div class="cart-flow-note"><strong>Crédito activo</strong><span>Producto reservado. Continúa a oferta y luego referencias.</span></div>';
     }
     if (contBtn) contBtn.innerHTML = "Continuar →";
   } else {
@@ -3721,17 +3938,17 @@ function hasLeasingProductSelected() {
 }
 
 function hasLeasingCartValue() {
-  return S.cart.length > 0 && cartTotal() > 0;
+  return S.cart.length > 0 && cartFinancedTotal() > 0;
 }
 
-function leasingCupoExcess(total = cartTotal()) {
+function leasingCupoExcess(total = cartFinancedTotal()) {
   if (S.payMethod !== "leasing") return 0;
   return Math.max(0, Number(total || 0) - currentLeasingCupo());
 }
 
 function continueLeasingFromCatalog() {
   if (!hasLeasingCartValue()) {
-    toast("Para continuar leasing selecciona al menos un producto", "warn");
+    toast("Para continuar credito selecciona al menos un celular", "warn");
     return;
   }
   const exceso = leasingCupoExcess();
@@ -3747,7 +3964,7 @@ function continueLeasingFromCatalog() {
 }
 
 function showOverCupoDecision(exceso) {
-  const total = cartTotal();
+  const total = cartFinancedTotal();
   const pre = S.precalificacion || getDemoPrecalificacion();
   const entradaMinima = entradaFromPrecal(total, pre);
   actionToast({
@@ -4220,7 +4437,9 @@ function initOffer() {
   S.plazosDisponibles = plazosFromPrecal(S.precalificacion);
   renderPrequalCard(productSelected);
   const items = offerItems();
-  const tot = offerTotal();
+  const tot = offerFinancedTotal();
+  const totalCarrito = offerTotal();
+  const efectivo = offerCashOnlyTotal();
   const entMin = entradaFromPrecal(tot, S.precalificacion);
   document.getElementById("lp3_ent").value = entMin;
   document.getElementById("lp3_entMin").textContent = clp(entMin);
@@ -4239,7 +4458,7 @@ function initOffer() {
       items.filter((x) => x.cat === "celular").length > 1 ||
       items.some((x) => x.cat === "accesorio")
     ) {
-      pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito</span><span>${clp(tot)}</span></div>`;
+      pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito</span><span>${clp(totalCarrito)}</span></div>`;
     }
   }
   const pre = S.precalificacion;
@@ -4249,6 +4468,7 @@ function initOffer() {
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Cupo aprobado <br><span class="pb-formula">Perfil ${pre.perfil} - Ticket ${pre.ticket}</span></span><span>${clp(cupoApi)}</span></div>`;
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Cupo disponible<br><span class="pb-formula">Disponible para ${pre.producto}</span></span><span>${clp(cupoDisponibleApi)}</span></div>`;
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada (${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""})<br><span class="pb-formula">Tipo entrada: ${pre.tipoEntrada}</span></span><span>${clp(entMin)}</span></div>`;
+  pbHTML += efectivo ? `<div class="pb-row"><span class="pb-lbl">Accesorios en efectivo<br><span class="pb-formula">No se incluyen en cuotas</span></span><span>${clp(efectivo)}</span></div>` : "";
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${clp(tot)} - ${clp(entMin)} / Plazos: ${pre.plazo}</span></span><span>${clp(saldoFinanciado)}</span></div>`;
   document.getElementById("priceBreakdown").innerHTML = pbHTML;
   if (!S.userSelectedPlazo) {
@@ -4265,7 +4485,7 @@ function toggleRecoveredEntry() {
   const wrap = document.getElementById("lp3EntryInputWrap");
   const input = document.getElementById("lp3_ent");
   const entMin = entradaFromPrecal(
-    offerTotal(),
+    offerFinancedTotal(),
     S.precalificacion || getDemoPrecalificacion(),
   );
   if (wrap) wrap.style.display = active || S.payMethod !== "leasing" ? "" : "none";
@@ -4420,7 +4640,7 @@ function calcOffer() {
     S.totalContrato = 0;
     return;
   }
-  const tot = offerTotal();
+  const tot = offerFinancedTotal();
   const entMin = entradaFromPrecal(tot, S.precalificacion);
   const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const errEl = document.getElementById("entErr");
@@ -4534,14 +4754,18 @@ function calcOffer() {
 }
 function renderOfferSummary(ent, monto, cuota, tc) {
   const items = offerItems();
-  const tot = offerTotal();
+  const tot = offerFinancedTotal();
+  const totalCarrito = offerTotal();
+  const efectivo = offerCashOnlyTotal();
   const pre = S.precalificacion;
   const phone = items.find((x) => x.cat === "celular");
   const accs = items.filter((x) => x.cat === "accesorio");
   updatePriceBreakdown(ent, monto);
   document.getElementById("lp3ofDet").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado </span><span>${clp(pre?.cupo || 0)}</span></div>
-    <div class="sum-row"><span class="sum-lbl">Total productos</span><span>${clp(tot)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Total productos</span><span>${clp(totalCarrito)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Celulares a credito</span><span>${clp(tot)}</span></div>
+    ${efectivo ? `<div class="sum-row"><span class="sum-lbl">Accesorios en efectivo</span><span>${clp(efectivo)}</span></div>` : ""}
     <div class="sum-row"><span class="sum-lbl">Entrada cliente</span><span>${clp(ent)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Saldo a financiar</span><span>${clp(monto)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} semanas</span></div>
@@ -4551,7 +4775,8 @@ function renderOfferSummary(ent, monto, cuota, tc) {
     ${accs.length ? `<div class="sum-row"><span class="sum-lbl">Accesorios</span><span style="font-size:11px">${accs.map((a) => a.name).join(", ")}</span></div>` : ""}`;
   document.getElementById("finSumm").innerHTML = `
     <div class="sum-row"><span class="sum-lbl">Cupo aprobado API</span><span>${clp(pre?.cupo || 0)}</span></div>
-    <div class="sum-row"><span class="sum-lbl">Valor equipo / cupo usado</span><span>${clp(tot)}</span></div>
+    <div class="sum-row"><span class="sum-lbl">Celulares a credito / cupo usado</span><span>${clp(tot)}</span></div>
+    ${efectivo ? `<div class="sum-row"><span class="sum-lbl">Accesorios en efectivo</span><span>${clp(efectivo)}</span></div>` : ""}
     <div class="sum-row"><span class="sum-lbl">Entrada cliente</span><span>${clp(ent)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Saldo a financiar</span><span>${clp(monto)}</span></div>
     <div class="sum-row"><span class="sum-lbl">Plazo</span><span>${S.selectedPlazo.sem} sem.</span></div>
@@ -4564,7 +4789,9 @@ function renderOfferSummary(ent, monto, cuota, tc) {
 }
 function updatePriceBreakdown(ent, monto) {
   const items = offerItems();
-  const tot = offerTotal();
+  const tot = offerFinancedTotal();
+  const totalCarrito = offerTotal();
+  const efectivo = offerCashOnlyTotal();
   const pre = S.precalificacion || getDemoPrecalificacion();
   const cel = items.find((x) => x.cat === "celular");
   const accs = items.filter((x) => x.cat === "accesorio");
@@ -4575,7 +4802,10 @@ function updatePriceBreakdown(ent, monto) {
     pbHTML += `<div class="pb-row"><span class="pb-lbl">${cel.simulated ? "Producto" : "Producto seleccionado"}<br><span class="pb-formula">${cel.simulated ? pre.producto : cel.name}</span></span><span>${clp(cel.price)}</span></div>`;
   }
   if (accs.length || items.filter((x) => x.cat === "celular").length > 1) {
-    pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito<br><span class="pb-formula">${items.length} item(s) seleccionados</span></span><span>${clp(tot)}</span></div>`;
+    pbHTML += `<div class="pb-row"><span class="pb-lbl">Total carrito<br><span class="pb-formula">${items.length} item(s) seleccionados</span></span><span>${clp(totalCarrito)}</span></div>`;
+  }
+  if (efectivo) {
+    pbHTML += `<div class="pb-row"><span class="pb-lbl">Accesorios en efectivo<br><span class="pb-formula">No se incluyen en cuotas</span></span><span>${clp(efectivo)}</span></div>`;
   }
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Cupo aprobado<br><span class="pb-formula">Perfil ${pre.perfil} - Ticket ${pre.ticket}</span></span><span>${clp(pre.cupo || 0)}</span></div>`;
   pbHTML += `<div class="pb-row"><span class="pb-lbl">Entrada cliente<br><span class="pb-formula">${isRecoveredEntryActive() ? "Valor ingresado por vendedor" : `Minima API ${pre.entrada}${pre.tipoEntrada === "PORCENTAJE" ? "%" : ""}`}</span></span><span>${clp(ent)}</span></div>`;
@@ -4616,7 +4846,7 @@ function renderPlazos() {
 }
 function currentFinancingAmount() {
   if (Number(S.monto || 0) > 0) return Number(S.monto);
-  const total = cartTotal();
+  const total = cartFinancedTotal();
   if (!total) return 0;
   const pre = S.precalificacion || getDemoPrecalificacion();
   return Math.max(0, total - entradaFromPrecal(total, pre));
@@ -4642,14 +4872,17 @@ function goInventoryFromOffer() {
 function renderLp4OfferSummary() {
   const el = document.getElementById("lp4OfferSummary");
   if (!el) return;
-  const tot = offerTotal();
+  const tot = offerFinancedTotal();
+  const totalCarrito = offerTotal();
+  const efectivo = offerCashOnlyTotal();
   const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const monto = Math.max(0, tot - ent);
   const plazo = S.selectedPlazo;
   const cuota = cuotaForPlazo(monto, plazo);
   el.innerHTML = `
     <div class="pb-row"><span class="pb-lbl">Cliente<br><span class="pb-formula">${S.nombre || "Sin nombre"}</span></span><span>${S.rut || "CI"}</span></div>
-    <div class="pb-row"><span class="pb-lbl">Total seleccionado<br><span class="pb-formula">${S.cart.length} item(s)</span></span><span>${clp(tot)}</span></div>
+    <div class="pb-row"><span class="pb-lbl">Total seleccionado<br><span class="pb-formula">${S.cart.length} item(s)</span></span><span>${clp(totalCarrito)}</span></div>
+    ${efectivo ? `<div class="pb-row"><span class="pb-lbl">Accesorios en efectivo<br><span class="pb-formula">No se financian</span></span><span>${clp(efectivo)}</span></div>` : ""}
     <div class="pb-row"><span class="pb-lbl">Entrada aprobada<br><span class="pb-formula">Oferta aceptada</span></span><span>${clp(ent)}</span></div>
     <div class="pb-row"><span class="pb-lbl">Saldo a financiar<br><span class="pb-formula">${plazo?.label || "Plazo pendiente"}</span></span><span>${clp(monto)}</span></div>
     <div class="pb-row"><span class="pb-lbl">Cuota estimada<br><span class="pb-formula">Por semana</span></span><span>${clp(cuota)}</span></div>
@@ -4719,7 +4952,7 @@ function runFinalVerificationNext(idx) {
     const checks = {
       ldpd: !!OP.ldpd && !!S.rut && !!S.nombre,
       otp: !!OP.otp,
-      oferta: !!OP.ofertaAceptada && offerTotal() > 0,
+      oferta: !!OP.ofertaAceptada && offerFinancedTotal() > 0,
       refs: finalReferenceCount() >= 2,
     };
     finalVerifyRes[f.id] = !!checks[f.id];
@@ -4767,7 +5000,7 @@ function continueLp3() {
   S.region = document.getElementById("lp3_region")?.value || S.region;
   S.ocupacion = lp3Ocup || S.ocupacion;
   S.actividad = lp3Act || S.actividad;
-  const tot3 = offerTotal();
+  const tot3 = offerFinancedTotal();
   const ent = parseMoneyInput(document.getElementById("lp3_ent")?.value);
   const entMin3 = entradaFromPrecal(tot3, S.precalificacion);
   if (ent < entMin3) {
@@ -5593,7 +5826,7 @@ function renderActivoContable() {
   document.getElementById("activoContent").innerHTML = `
     <div class="activo-row"><span class="activo-lbl">Tipo</span><span class="activo-val">Activo de Crédito</span></div>
     <div class="activo-row"><span class="activo-lbl">IMEI</span><span class="activo-val b">${S.autoImei || "—"}</span></div>
-    <div class="activo-row"><span class="activo-lbl">Valor equipo</span><span class="activo-val">${clp(offerTotal())}</span></div>
+    <div class="activo-row"><span class="activo-lbl">Valor equipo</span><span class="activo-val">${clp(offerFinancedTotal())}</span></div>
     <div class="activo-row"><span class="activo-lbl">Cliente</span><span class="activo-val">${S.nombre}</span></div>
     <div class="activo-row"><span class="activo-lbl">Fecha inicio</span><span class="activo-val">${hoy}</span></div>
     <div class="activo-row"><span class="activo-lbl">Duración</span><span class="activo-val">${plazoMeses} meses</span></div>
@@ -5702,7 +5935,7 @@ function buildExito() {
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Operación: ${S.opId} · ACTIVO en cartera</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Cuota: ${clp(S.cuota)} / ${S.selectedPlazo?.sem} semanas</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Entrada facturada: ${clp(S.entrada)} · DTE emitido</div></div>
-    <div class="chk-item" style="border:none"><div class="chk-dot" style="background:var(--navy)">★</div><div class="chk-txt" style="font-weight:700;color:var(--navy)">Leasing activo · Cuotas sin DTE · Entrada con DTE</div></div>`;
+    <div class="chk-item" style="border:none"><div class="chk-dot" style="background:var(--navy)">★</div><div class="chk-txt" style="font-weight:700;color:var(--navy)">Crédito activo · Cuotas sin DTE · Entrada con DTE</div></div>`;
 }
 
 /* ═══════════════════════════════════════════════════

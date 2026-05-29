@@ -524,14 +524,19 @@
                     <div id="compareBody"></div>
                   </div>
                 </div>
-                <div id="upsellModal" class="upsell-modal" style="display: none">
-                  <div class="upsell-box">
+                <div
+                  id="upsellModal"
+                  class="upsell-modal"
+                  style="display: none"
+                  onclick="if (event.target === this) closeUpsell()"
+                >
+                  <div class="upsell-box" onclick="event.stopPropagation()">
                     <div class="upsell-head">
                       <div>
                         <span>Personaliza tu venta</span>
                         <h2>Elige la mejor opcion para el cliente</h2>
                       </div>
-                      <button type="button" onclick="closeUpsell()">×</button>
+                      <button type="button" onclick="closeUpsell()" aria-label="Cerrar">X</button>
                     </div>
                     <div id="upsellBody"></div>
                   </div>
@@ -539,6 +544,7 @@
                     class="upsell-side-panel"
                     id="upsellSidePanel"
                     style="display: none"
+                    onclick="event.stopPropagation()"
                   ></div>
                 </div>
               </div>
@@ -583,6 +589,17 @@
                       </div>
                       <div class="sum-row">
                         <span>TOTAL</span><span id="cTot">$0</span>
+                      </div>
+                      <div
+                        class="sum-row cart-approx-row"
+                        id="cApproxCreditRow"
+                        style="display: none"
+                      >
+                        <span>
+                          Total aprox. a pagar
+                          <small id="cApproxCreditDetail"></small>
+                        </span>
+                        <span id="cApproxCreditTot">$0</span>
                       </div>
                       <div
                         id="cImeiInfo"
@@ -685,10 +702,9 @@
                       <div class="pay-ico">⚡</div>
                       <div style="flex: 1">
                         <div class="pay-name" style="color: #5a7200">
-                          Leasing HappyChile
+                          Crédito Directo
                         </div>
                         <div class="pay-sub">
-                          Cuotas semanales en USD · Sin compra directa
                         </div>
                       </div>
                       <span class="leas-tag">LEASING</span>
@@ -2492,7 +2508,7 @@
                     <div class="exec-step pend" id="doc1">
                       <div class="es2-ico-wrap">📄</div>
                       <div>
-                        <div class="es2-name">Contrato de Leasing</div>
+                        <div class="es2-name">Contrato de Crédito</div>
                         <div class="es2-sub">No generado</div>
                       </div>
                       <span class="badge b-slate" id="d1b">PEND.</span>
@@ -2853,7 +2869,7 @@
                     <div class="succ-circle" style="background: var(--lime3)">
                       🎉
                     </div>
-                    <div class="done-badge">✅ Leasing Activo</div>
+                    <div class="done-badge">✅ Crédito Activo</div>
                     <div class="succ-title">¡Contrato Activado!</div>
                     <div class="succ-sub">
                       Cuotas semanales activadas en cartera · Sin emisión de DTE
