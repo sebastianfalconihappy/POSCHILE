@@ -2254,39 +2254,35 @@ function renderCategoryShowcase(list) {
   const config = {
     promo: {
       title: "Promos activas",
-      sub: `${list.length} oportunidades para ofrecer una mejor opcion al cliente`,
-      text: "Descuentos - Packs listos - Audio - Proteccion - Accesorios",
+      sub: `${list.length} oportunidades comerciales disponibles`,
+      text: "Promociones vigentes - Descuentos autorizados - Packs recomendados",
     },
     celular: {
       title: "Celulares disponibles",
-      sub: `${list.length} equipos para venta a crédito directo`,
-      text: "Equipos con IMEI - Diferentes Opciones - Descuentos autorizados - Accesorios sugeridos",
+      sub: `${list.length} equipos listos para credito directo`,
+      text: "Celulares con IMEI disponible - Modelos vigentes - Combos recomendados",
     },
     combo: {
-      title: "Combos",
-      sub: `${list.length} paquetes listos para subir el ticket`,
-      text: "Packs listos - Audio - Proteccion - Entretenimiento - Ahorro",
+      title: "Combos disponibles",
+      sub: `${list.length} paquetes listos para ofrecer`,
+      text: "Combos armados - Accesorios incluidos - Oferta lista para el cliente",
     },
     accesorio: {
-      title: "Accesorios sugeridos",
-      sub: `${list.length} agregados para completar la venta`,
-      text: "Audio - Proteccion - Carga - Entretenimiento",
+      title: "Accesorios recomendados",
+      sub: `${list.length} opciones para complementar la compra`,
+      text: "Audio - Proteccion - Carga - Entretenimiento - Venta complementaria",
     },
   };
   const cfg = config[S.catFilter];
   if (!cfg) return "";
-  const savings = list
-    .filter((p) => p.oldPrice)
-    .map((p) => Math.max(0, p.oldPrice - p.price))
-    .reduce((a, b) => a + b, 0);
   return `<div class="promo-showcase">
     <div>
       <strong>${cfg.title}</strong>
       <span>${cfg.sub || ""}</span>
     </div>
     <div class="promo-marquee" aria-hidden="true">
-      <span>${cfg.text} - Ahorro referencial ${clp(savings)}</span>
-      <span>${cfg.text} - Ahorro referencial ${clp(savings)}</span>
+      <span>${cfg.text}</span>
+      <span>${cfg.text}</span>
     </div>
   </div>`;
 }
@@ -4285,7 +4281,7 @@ const EVAL_PIPE = [
   },
   {
     id: "score",
-    lbl: "Score Equifax (crédito)",
+    lbl: "Validacion de cupo",
     ico: "📊",
     costo: "$2.00 USD",
   },
@@ -4314,10 +4310,10 @@ function runEvalNext(idx, birth) {
     OP.apiDatos = true;
     OP.scoreOk = true;
     addLog("API_DATOS", "Consulta buro base — CI: " + S.rut, "OK");
-    addLog("EQUIFAX", "Score 720 — CI: " + S.rut, "OK");
+    addLog("EQUIFAX", "Validacion de cupo — CI: " + S.rut, "OK");
     document.getElementById("evalResult").style.display = "";
     document.getElementById("evalResult").innerHTML =
-      '<div class="alert a-ok">✅ Cliente aprobado para leasing · Score: 720 · Riesgo: BAJO</div>';
+      '<div class="alert a-ok">✅ Cliente aprobado para credito directo</div>';
     setTimeout(() => {
       setProgress(3);
       setTitle("Crédito Directo — Oferta");
@@ -4341,7 +4337,7 @@ function runEvalNext(idx, birth) {
         edad: "El cliente debe ser mayor de 18 años.",
         listas: "El cliente figura en listas de restricción interna.",
         api: "No fue posible validar la información del cliente.",
-        score: "El score crediticio no cumple el mínimo requerido (700).",
+        score: "La validacion de cupo no fue aprobada.",
       };
       addLog(f.id.toUpperCase(), "Evaluación fallida — CI: " + S.rut, "FAIL");
       setTimeout(() => {
@@ -4403,7 +4399,7 @@ function clientMiniCard() {
       <div style="font-size:12px;font-weight:800;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${S.nombre}</div>
       <div style="font-size:10px;color:var(--slate4)">CI: ${S.rut} · ${S.tel}</div>
     </div>
-    <span class="badge b-lime">Score 720</span>
+    <span class="badge b-lime">Oferta lista</span>
     ${S.autoImei ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy2);background:#eff6ff;padding:2px 7px;border-radius:3px">${S.autoImei}</span>` : ""}
   </div>`;
 }
@@ -5928,7 +5924,7 @@ function buildExito() {
   document.getElementById("exitoImei").textContent = S.autoImei;
   document.getElementById("exitoList").innerHTML = `
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">LDPD aceptada · OTP verificado</div></div>
-    <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Score Equifax: 720 · Riesgo BAJO</div></div>
+    <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Validacion crediticia aprobada</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Contratos firmados digitalmente</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">Biometría facial aprobada — CI: ${S.rut}</div></div>
     <div class="chk-item"><div class="chk-dot">✓</div><div class="chk-txt">IMEI: ${S.autoImei} · Candado MDM activo</div></div>
